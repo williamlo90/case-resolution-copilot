@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-SLA-ESCALATION",
+  "version": 1,
+  "title": "SLA Escalation SOP",
+  "case_category": "sla_breach",
+  "plan": "all",
+  "jurisdiction": "ALL",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "2.1", "text": "Cases approaching the response deadline must be routed to the active support lead with an owner and next update time."}]
+}

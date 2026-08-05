@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-SUBSCRIPTION-CANCEL",
+  "version": 1,
+  "title": "Subscription Cancellation Policy",
+  "case_category": "cancellation",
+  "plan": "all",
+  "jurisdiction": "ALL",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "5.1", "text": "A cancellation request must confirm the account, renewal date, and contract term before presenting an effective cancellation date."}]
+}

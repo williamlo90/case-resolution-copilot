@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-BILLING-CONFLICT",
+  "version": 1,
+  "title": "Conflicting Billing Credit Policy Fixture",
+  "case_category": "billing",
+  "plan": "enterprise",
+  "jurisdiction": "ALL",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "4.2-X", "text": "A duplicate support plan charge must not receive a service credit until a separate finance exception is recorded."}]
+}

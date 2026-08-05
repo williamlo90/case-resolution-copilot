@@ -1,0 +1,9 @@
+[
+  {"id":"billing-relevant","query":"verified duplicate support plan charge service credit","case_category":"billing","plan":"enterprise","jurisdiction":"SG","customer_tier":"vip","as_of":"2026-07-12","expected_status":"relevant","relevant_clause":"4.2"},
+  {"id":"access-relevant","query":"identity verification multi-factor account recovery","case_category":"account_access","plan":"enterprise","jurisdiction":"US","customer_tier":"standard","as_of":"2026-07-12","expected_status":"relevant","relevant_clause":"3.1"},
+  {"id":"missing-policy","query":"unsupported hardware replacement","case_category":"hardware","plan":"enterprise","jurisdiction":"SG","customer_tier":"standard","as_of":"2026-07-12","expected_status":"missing"},
+  {"id":"stale-policy","query":"duplicate charge service credit","case_category":"billing","plan":"enterprise","jurisdiction":"SG","customer_tier":"standard","as_of":"2025-12-01","expected_status":"stale"},
+  {"id":"tier-mismatch","query":"senior owner priority response","case_category":"service_complaint","plan":"enterprise","jurisdiction":"SG","customer_tier":"standard","as_of":"2026-07-12","expected_status":"inapplicable"},
+  {"id":"jurisdiction-mismatch","query":"personal data exposure privacy team","case_category":"privacy","plan":"enterprise","jurisdiction":"US","customer_tier":"standard","as_of":"2026-07-12","expected_status":"inapplicable"},
+  {"id":"conflicting-policy","query":"duplicate support plan charge service credit","case_category":"billing","plan":"enterprise","jurisdiction":"SG","customer_tier":"vip","as_of":"2026-07-12","expected_status":"conflicting","setup_policy":"billing-conflict-v1.json"}
+]

@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-VIP-ESCALATION",
+  "version": 1,
+  "title": "VIP Escalation Policy",
+  "case_category": "service_complaint",
+  "plan": "enterprise",
+  "jurisdiction": "ALL",
+  "customer_tier": "vip",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "1.4", "text": "A verified VIP service complaint requires a named senior owner and a documented customer update within the priority response window."}]
+}

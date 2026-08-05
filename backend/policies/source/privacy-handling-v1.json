@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-PRIVACY-HANDLING",
+  "version": 1,
+  "title": "Privacy and Compliance Handling Notes",
+  "case_category": "privacy",
+  "plan": "all",
+  "jurisdiction": "SG",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "6.2", "text": "Suspected personal data exposure must be escalated to the privacy team without reproducing sensitive data in customer-facing drafts."}]
+}

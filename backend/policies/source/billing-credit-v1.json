@@ -1,0 +1,15 @@
+{
+  "source_id": "SUP-BILLING-CREDIT",
+  "version": 1,
+  "title": "Billing Credit Policy",
+  "case_category": "billing",
+  "plan": "enterprise",
+  "jurisdiction": "ALL",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [
+    {"clause": "4.2", "text": "A verified duplicate support plan charge may receive a service credit after invoice and account ownership checks."},
+    {"clause": "4.3", "text": "Credits above the agent authority threshold require supervisor approval before any account change is executed."}
+  ]
+}

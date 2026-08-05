@@ -1,0 +1,12 @@
+{
+  "source_id": "SUP-ACCOUNT-ACCESS",
+  "version": 1,
+  "title": "Account Access Recovery SOP",
+  "case_category": "account_access",
+  "plan": "all",
+  "jurisdiction": "ALL",
+  "customer_tier": "all",
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "clauses": [{"clause": "3.1", "text": "Account access recovery requires identity verification and must never disclose credentials or bypass multi-factor authentication."}]
+}
