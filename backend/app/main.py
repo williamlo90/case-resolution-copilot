@@ -16,10 +16,12 @@ from app.api.middleware import (
     SUPPORT_TIMING_HEADER,
     register_http_middleware,
 )
+from app.api.routes.cases import router as cases_router
 from app.api.routes.decision_briefs import router as decision_briefs_router
 from app.api.routes.health import create_health_router
 from app.api.routes.organizations import router as organizations_router
 from app.api.routes.policies import router as policies_router
+from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
 from app.config import Settings, get_settings
 from app.integrations.clerk_identity import ClerkIdentityGateway
@@ -165,8 +167,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.include_router(session_router)
     application.include_router(organizations_router)
+    application.include_router(cases_router)
     application.include_router(policies_router)
     application.include_router(decision_briefs_router)
+    application.include_router(reviews_router)
     return application
 
 
