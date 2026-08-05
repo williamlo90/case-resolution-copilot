@@ -1,0 +1,49 @@
+{
+  "name": "case-resolution-copilot-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ./scripts/dev-safe.mjs",
+    "check:dev-memory": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-dev-memory.ps1",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --maxWorkers=1 --no-file-parallelism",
+    "test:watch": "node -e \"console.error('BLACKLISTED: test watch mode is disabled for this local workflow. Use pnpm test instead.'); process.exit(1)\"",
+    "test:e2e": "node -e \"console.error('BLACKLISTED: Playwright e2e is disabled for this local workflow. See frontend/E2E_BLACKLIST.md. Use pnpm test, pnpm lint, and pnpm typecheck instead.'); process.exit(1)\""
+  },
+  "dependencies": {
+    "@clerk/nextjs": "7.6.0",
+    "@tanstack/react-table": "^8.21.3",
+    "lucide-react": "^1.23.0",
+    "next": "16.2.11",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.3",
+    "axe-core": "4.12.1",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.11",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
+  },
+  "pnpm": {
+    "overrides": {
+      "brace-expansion@<1.1.16": "1.1.16",
+      "brace-expansion@>=5.0.0 <5.0.8": "5.0.8",
+      "postcss": "8.5.25",
+      "sharp": "0.35.3"
+    }
+  }
+}

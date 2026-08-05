@@ -24,5 +24,13 @@ Case intake -> Evidence review -> Governed policy retrieval -> Decision Brief
             -> Human review -> Controlled action -> Receipt and reconciliation
 ```
 
-This repository is intentionally product-only at milestone 01. Engineering foundations begin in
-the next milestone so technical choices can be evaluated against an explicit contract.
+## Engineering Baseline
+
+- `frontend/`: Next.js and strict TypeScript.
+- `backend/`: FastAPI, Python 3.12, Ruff, Mypy, and Pytest.
+- Locked dependency graphs: `pnpm-lock.yaml` and `uv.lock`.
+- Resource-safe local commands: serial tests, no watch-mode test runner, and no automatic browser.
+- Initial health contract: `GET /api/health/live`.
+
+The architecture begins as a modular monolith. Boundaries may evolve when measured load or team
+ownership justifies the cost; speculative services are not part of the baseline.
