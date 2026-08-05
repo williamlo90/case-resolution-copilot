@@ -1,0 +1,42 @@
+{
+  "event_id": "helpdesk:case-1001",
+  "external_reference": "INV-1001",
+  "category": "billing_dispute",
+  "issue": "Customer reports a duplicate invoice charge",
+  "urgency": "high",
+  "risk": "medium",
+  "due_at": "2026-08-01T12:00:00Z",
+  "impact_amount": "125.00",
+  "impact_currency": "USD",
+  "source_freshness": "current",
+  "source_checked_at": "2026-07-28T12:00:00Z",
+  "request": {
+    "channel": "webhook",
+    "customer_message": "I was charged twice for the same invoice.",
+    "summary": "Possible duplicate charge.",
+    "received_at": "2026-07-28T11:55:00Z"
+  },
+  "customer": {
+    "customer_id": "CUS-1001",
+    "name": "Taylor Morgan",
+    "tier": "standard",
+    "locale": "en-US",
+    "contact": "taylor@example.com"
+  },
+  "business_contexts": [
+    {
+      "type": "invoice",
+      "label": "Invoice INV-1001",
+      "source": "billing",
+      "source_reference": "INV-1001",
+      "status": "paid",
+      "fields": {
+        "amount": "125.00",
+        "currency": "USD"
+      },
+      "captured_at": "2026-07-28T12:00:00Z",
+      "freshness": "current",
+      "checked_at": "2026-07-28T12:00:00Z"
+    }
+  ]
+}

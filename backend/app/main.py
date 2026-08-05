@@ -1,8 +1,10 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.analysis.ai_assisted_decision_engine import OpenAIAssistedDecisionEngine
 from app.analysis.deterministic_decision_engine import (
@@ -17,21 +19,29 @@ from app.api.middleware import (
     register_http_middleware,
 )
 from app.api.routes.actions import router as actions_router
+from app.api.routes.audit import router as audit_router
+from app.api.routes.case_intake import router as case_intake_router
 from app.api.routes.cases import router as cases_router
 from app.api.routes.connections import router as connections_router
 from app.api.routes.decision_briefs import router as decision_briefs_router
 from app.api.routes.health import create_health_router
+from app.api.routes.notifications import router as notifications_router
 from app.api.routes.organizations import router as organizations_router
 from app.api.routes.policies import router as policies_router
 from app.api.routes.quality import router as quality_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
+from app.api.routes.settings import router as settings_router
 from app.config import Settings, get_settings
 from app.integrations.action_gateway import (
     ActionGateway,
     DeterministicActionGateway,
+    RoutingActionGateway,
 )
 from app.integrations.clerk_identity import ClerkIdentityGateway
+from app.integrations.connection_activation import activate_runtime_connections
+from app.integrations.webhook_action_gateway import SignedWebhookActionGateway
+from app.logging import configure_logging
 from app.models.openai_decision import OpenAIDecisionNarrativeGateway
 from app.persistence.database import Database
 from app.retrieval.embeddings import (
@@ -52,17 +62,15 @@ from app.security.authentication import (
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     runtime_settings = settings or get_settings()
-    database = (
-        Database(runtime_settings.database_url)
-        if runtime_settings.database_url
-        else None
-    )
+    configure_logging(runtime_settings)
+    logger = logging.getLogger(__name__)
+    database = Database(runtime_settings.database_url) if runtime_settings.database_url else None
     baseline_decision_engine = DeterministicDecisionEngine()
-    decision_engine: DecisionEngine = baseline_decision_engine
-    embedding_provider: EmbeddingProvider = DEFAULT_EMBEDDING_PROVIDER
     openai_gateway: OpenAIDecisionNarrativeGateway | None = None
     openai_embedding_provider: OpenAIEmbeddingProvider | None = None
-    action_gateway: ActionGateway = DeterministicActionGateway()
+    webhook_action_gateway: SignedWebhookActionGateway | None = None
+    decision_engine: DecisionEngine = baseline_decision_engine
+    embedding_provider: EmbeddingProvider = DEFAULT_EMBEDDING_PROVIDER
     if runtime_settings.model_provider == "openai":
         openai_api_key = runtime_settings.openai_secret()
         assert openai_api_key is not None
@@ -86,11 +94,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             max_retries=runtime_settings.openai_max_retries,
         )
         embedding_provider = openai_embedding_provider
-    invitation_gateway: ClerkIdentityGateway | None = None
     secret_key = runtime_settings.clerk_secret()
     jwt_key = runtime_settings.clerk_public_key()
-
     auth_provider: AuthProvider
+    invitation_gateway: ClerkIdentityGateway | None = None
     if runtime_settings.auth_mode == "deterministic_development":
         auth_provider = DeterministicAuthProvider()
     elif (
@@ -116,12 +123,46 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
     else:
         auth_provider = UnavailableProviderAuth()
+    deterministic_action_gateway = DeterministicActionGateway()
+    action_gateway: ActionGateway = deterministic_action_gateway
+    if runtime_settings.action_target_provider == "signed_webhook":
+        action_webhook_url = runtime_settings.action_webhook_url
+        action_webhook_secret = runtime_settings.action_webhook_secret_value()
+        assert action_webhook_url is not None
+        assert action_webhook_secret is not None
+        webhook_action_gateway = SignedWebhookActionGateway(
+            url=action_webhook_url,
+            secret=action_webhook_secret,
+            timeout_seconds=runtime_settings.action_webhook_timeout_seconds,
+        )
+        action_gateway = RoutingActionGateway(
+            {
+                "deterministic_demo": deterministic_action_gateway,
+                "signed_webhook": webhook_action_gateway,
+            }
+        )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        logger.info("application_started", extra=runtime_settings.safe_log_context())
         try:
+            if database:
+                try:
+                    activated_connections = activate_runtime_connections(
+                        database=database,
+                        settings=runtime_settings,
+                    )
+                    if activated_connections:
+                        logger.info(
+                            "runtime_connections_activated",
+                            extra={"connection_count": len(activated_connections)},
+                        )
+                except SQLAlchemyError:
+                    logger.error("runtime_connection_activation_database_unavailable")
             yield
         finally:
+            if webhook_action_gateway:
+                webhook_action_gateway.close()
             if openai_gateway:
                 openai_gateway.close()
             if openai_embedding_provider:
@@ -130,25 +171,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 invitation_gateway.close()
             if database:
                 database.dispose()
+        logger.info("application_stopped", extra={"service": runtime_settings.service_name})
 
-    application = FastAPI(
+    app = FastAPI(
         title="Case Resolution Copilot API",
-        version="0.3.0",
+        version="1.0.0-pilot",
         lifespan=lifespan,
         docs_url=None if runtime_settings.environment == "production" else "/docs",
         redoc_url=None if runtime_settings.environment == "production" else "/redoc",
-        openapi_url=(
-            None if runtime_settings.environment == "production" else "/openapi.json"
-        ),
+        openapi_url=None if runtime_settings.environment == "production" else "/openapi.json",
     )
     register_http_middleware(
-        application,
+        app,
         production=runtime_settings.environment == "production",
     )
     cors_headers = ["Authorization", "Content-Type", CORRELATION_HEADER]
     if runtime_settings.auth_mode == "deterministic_development":
         cors_headers.extend(["X-Actor-ID", "X-Actor-Role"])
-    application.add_middleware(
+    app.add_middleware(
         CORSMiddleware,
         allow_origins=runtime_settings.allowed_cors_origins(),
         allow_credentials=False,
@@ -160,30 +200,34 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             SUPPORT_TIMING_HEADER,
         ],
     )
-    register_error_handlers(application)
-    application.state.database = database
-    application.state.auth_provider = auth_provider
-    application.state.invitation_gateway = invitation_gateway
-    application.state.settings = runtime_settings
-    application.state.decision_engine = decision_engine
-    application.state.embedding_provider = embedding_provider
-    application.state.action_gateway = action_gateway
-    application.include_router(
+    register_error_handlers(app)
+    app.state.database = database
+    app.state.auth_provider = auth_provider
+    app.state.invitation_gateway = invitation_gateway
+    app.state.settings = runtime_settings
+    app.state.decision_engine = decision_engine
+    app.state.embedding_provider = embedding_provider
+    app.state.action_gateway = action_gateway
+    app.include_router(
         create_health_router(
             runtime_settings.service_name,
             database_check=database.is_ready if database else None,
         )
     )
-    application.include_router(session_router)
-    application.include_router(organizations_router)
-    application.include_router(cases_router)
-    application.include_router(policies_router)
-    application.include_router(decision_briefs_router)
-    application.include_router(reviews_router)
-    application.include_router(actions_router)
-    application.include_router(connections_router)
-    application.include_router(quality_router)
-    return application
+    app.include_router(case_intake_router)
+    app.include_router(cases_router)
+    app.include_router(decision_briefs_router)
+    app.include_router(session_router)
+    app.include_router(organizations_router)
+    app.include_router(policies_router)
+    app.include_router(reviews_router)
+    app.include_router(actions_router)
+    app.include_router(connections_router)
+    app.include_router(quality_router)
+    app.include_router(notifications_router)
+    app.include_router(settings_router)
+    app.include_router(audit_router)
+    return app
 
 
 app = create_app()

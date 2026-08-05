@@ -36,3 +36,13 @@ def test_case_routes_authorize_before_database_readiness() -> None:
     assert write_forbidden.status_code == 403
     assert write_forbidden.json()["error"]["code"] == "case_manage_forbidden"
     assert write_unavailable.status_code == 503
+
+
+def test_case_intake_fails_closed_when_webhook_is_not_configured() -> None:
+    app = create_app(Settings(environment="test", database_url=None, _env_file=None))
+
+    with TestClient(app) as client:
+        response = client.post("/api/intake/cases", content=b"{}")
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "case_intake_not_configured"

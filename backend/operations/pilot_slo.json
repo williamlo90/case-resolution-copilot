@@ -1,0 +1,13 @@
+{
+  "schema_version": "pilot-slo-config-v1",
+  "window_hours": 168,
+  "minimum_requests": 100,
+  "availability_target": 0.995,
+  "latency_p95_target_ms": 1500,
+  "maximum_log_bytes": 52428800,
+  "maximum_request_events": 250000,
+  "excluded_paths": [
+    "/api/health/live",
+    "/api/health/ready"
+  ]
+}

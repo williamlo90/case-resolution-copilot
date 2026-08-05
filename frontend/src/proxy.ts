@@ -1,13 +1,19 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextRequest,
+} from "next/server";
 import {
   assertProviderAuthenticationConfigured,
   providerAuthenticationEnabled,
 } from "@/config/authentication";
+import { CLERK_CSP_DIRECTIVES } from "@/config/security-headers";
 
 const attachClerkContext = clerkMiddleware({
   contentSecurityPolicy: {
     strict: true,
+    directives: CLERK_CSP_DIRECTIVES,
   },
 });
 

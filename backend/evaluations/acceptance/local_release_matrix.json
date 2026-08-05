@@ -1,0 +1,491 @@
+{
+  "schema_version": "local-release-acceptance-v1",
+  "checks": [
+    {
+      "id": "ROLE-001",
+      "area": "role_authority",
+      "behavior": "Specialist permissions are server-owned and exclude review decisions.",
+      "test_file": "tests/unit/test_authentication.py",
+      "test_selector": "test_deterministic_provider_resolves_server_owned_role_and_permissions",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROLE-002",
+      "area": "role_authority",
+      "behavior": "Supervisor and auditor authorities remain distinct.",
+      "test_file": "tests/unit/test_authentication.py",
+      "test_selector": "test_supervisor_and_auditor_authority_are_distinct",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROLE-003",
+      "area": "role_authority",
+      "behavior": "Standard review requires a supervisor while an administrator can satisfy it.",
+      "test_file": "tests/unit/test_review_authority.py",
+      "test_selector": "test_standard_review_requires_supervisor_and_admin_satisfies_rule",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROLE-004",
+      "area": "role_authority",
+      "behavior": "High-impact, conflicting, and sensitive decisions require an administrator.",
+      "test_file": "tests/unit/test_review_authority.py",
+      "test_selector": "test_high_impact_conflict_or_sensitive_risk_requires_admin",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROLE-005",
+      "area": "role_authority",
+      "behavior": "A specialist sees an authority blocker instead of an execute command.",
+      "test_file": "tests/unit/test_action_service.py",
+      "test_selector": "test_read_only_specialist_sees_permission_blocker_not_execute_command",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROLE-006",
+      "area": "role_authority",
+      "behavior": "A supervisor can execute only a ready and unblocked action.",
+      "test_file": "tests/unit/test_action_service.py",
+      "test_selector": "test_supervisor_sees_execute_only_for_a_ready_unblocked_action",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "AUTH-001",
+      "area": "authentication_failure",
+      "behavior": "Subjectless, untrusted-origin, or pending Clerk sessions are rejected.",
+      "test_file": "tests/unit/test_authentication.py",
+      "test_selector": "test_clerk_verifier_rejects_subjectless_or_untrusted_sessions",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "AUTH-002",
+      "area": "authentication_failure",
+      "behavior": "A Clerk provider failure is hidden and fails closed.",
+      "test_file": "tests/unit/test_authentication.py",
+      "test_selector": "test_clerk_verifier_hides_provider_failures",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "AUTH-003",
+      "area": "authentication_failure",
+      "behavior": "A directory outage cannot grant access during invitation provisioning.",
+      "test_file": "tests/unit/test_authentication.py",
+      "test_selector": "test_clerk_provider_reports_directory_outage_without_granting_access",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "MODEL-001",
+      "area": "model_provider_failure",
+      "behavior": "Model timeout details are translated without provider leakage.",
+      "test_file": "tests/unit/test_openai_decision_engine.py",
+      "test_selector": "test_openai_gateway_maps_timeout_without_leaking_provider_details",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "MODEL-002",
+      "area": "model_provider_failure",
+      "behavior": "Model outage retains an audited deterministic decision draft.",
+      "test_file": "tests/unit/test_openai_decision_engine.py",
+      "test_selector": "test_ai_assistance_falls_back_to_audited_deterministic_narrative",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INTAKE-001",
+      "area": "case_intake_security",
+      "behavior": "External case identities map to stable tenant-specific internal IDs.",
+      "test_file": "tests/unit/test_case_webhook.py",
+      "test_selector": "test_case_webhook_maps_external_identity_to_stable_internal_ids",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INTAKE-002",
+      "area": "case_intake_security",
+      "behavior": "A valid recent signature binds the exact webhook body.",
+      "test_file": "tests/unit/test_webhook_security.py",
+      "test_selector": "test_webhook_signature_accepts_an_exact_recent_body",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INTAKE-003",
+      "area": "case_intake_security",
+      "behavior": "Invalid and stale webhook requests are rejected.",
+      "test_file": "tests/unit/test_webhook_security.py",
+      "test_selector": "test_webhook_signature_rejects_invalid_or_stale_requests",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-001",
+      "area": "action_recovery",
+      "behavior": "Successful action execution returns an attributable receipt.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_signed_action_execution_returns_an_attributable_receipt",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-002",
+      "area": "action_recovery",
+      "behavior": "HTTP failures preserve an unknown side-effect state and disable blind retry.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_signed_action_execution_maps_failure_side_effect_state",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-003",
+      "area": "action_recovery",
+      "behavior": "Invalid success confirmation is treated as an unknown outcome.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_invalid_success_response_is_treated_as_an_unknown_outcome",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-004",
+      "area": "action_recovery",
+      "behavior": "Network failure timing preserves whether a side effect may have occurred.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_network_failures_preserve_side_effect_knowledge",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-005",
+      "area": "action_recovery",
+      "behavior": "Reconciliation never sends a second execute operation.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_signed_action_reconciliation_never_issues_another_execute_operation",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ACTION-006",
+      "area": "action_recovery",
+      "behavior": "Safe failure and unknown outcome never share retry semantics.",
+      "test_file": "tests/unit/test_action_service.py",
+      "test_selector": "test_safe_failure_and_unknown_outcome_never_share_retry_semantics",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-001",
+      "area": "route_authority",
+      "behavior": "Case read and write routes enforce server-owned role authority.",
+      "test_file": "tests/contract/test_case_routes.py",
+      "test_selector": "test_case_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-002",
+      "area": "route_authority",
+      "behavior": "Review reserve and decision routes distinguish specialist, supervisor, and auditor authority.",
+      "test_file": "tests/contract/test_review_routes.py",
+      "test_selector": "test_review_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-003",
+      "area": "route_authority",
+      "behavior": "Action execution and reconciliation routes enforce specialist, supervisor, and auditor boundaries.",
+      "test_file": "tests/contract/test_action_routes.py",
+      "test_selector": "test_action_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-004",
+      "area": "route_authority",
+      "behavior": "Policy read and lifecycle commands reject client-supplied role escalation.",
+      "test_file": "tests/contract/test_policy_routes.py",
+      "test_selector": "test_policy_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-005",
+      "area": "route_authority",
+      "behavior": "Decision Brief generation and reads enforce case authority before dependency access.",
+      "test_file": "tests/contract/test_decision_brief_routes.py",
+      "test_selector": "test_decision_brief_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-006",
+      "area": "route_authority",
+      "behavior": "Quality, settings, and audit routes preserve their distinct role boundaries.",
+      "test_file": "tests/contract/test_operational_routes.py",
+      "test_selector": "test_operational_routes_authorize_before_database_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "ROUTE-007",
+      "area": "route_authority",
+      "behavior": "Organization and invitation routes require administrator authority.",
+      "test_file": "tests/contract/test_organization_routes.py",
+      "test_selector": "test_organization_routes_authenticate_before_dependency_readiness",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-001",
+      "area": "operational_readiness",
+      "behavior": "Readiness reports an unconfigured database honestly instead of claiming availability.",
+      "test_file": "tests/contract/test_health.py",
+      "test_selector": "test_readiness_is_honest_about_unconfigured_database",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-002",
+      "area": "operational_readiness",
+      "behavior": "Production disables API documentation and applies a restrictive JSON security policy.",
+      "test_file": "tests/contract/test_health.py",
+      "test_selector": "test_production_disables_api_docs_and_adds_json_csp",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-003",
+      "area": "operational_readiness",
+      "behavior": "Unexpected backend errors are redacted and retain an attributable correlation ID.",
+      "test_file": "tests/contract/test_health.py",
+      "test_selector": "test_unexpected_error_is_redacted_and_correlated",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-004",
+      "area": "operational_readiness",
+      "behavior": "Pilot SLO evaluation aggregates bounded request logs without exporting request paths or correlation IDs.",
+      "test_file": "tests/unit/test_operational_slo.py",
+      "test_selector": "test_slo_evaluator_passes_bounded_window_without_exporting_request_details",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-005",
+      "area": "operational_readiness",
+      "behavior": "Pilot SLO evaluation reports insufficient evidence instead of passing a small sample.",
+      "test_file": "tests/unit/test_operational_slo.py",
+      "test_selector": "test_slo_evaluator_reports_insufficient_data_honestly",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "READY-006",
+      "area": "operational_readiness",
+      "behavior": "Pilot SLO evaluation fails closed when availability and latency objectives are missed.",
+      "test_file": "tests/unit/test_operational_slo.py",
+      "test_selector": "test_slo_evaluator_fails_availability_and_latency_objectives",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DECISION-001",
+      "area": "decision_generation",
+      "behavior": "An identical Decision Brief input reuses its immutable result before model inference.",
+      "test_file": "tests/unit/test_deterministic_decision_engine.py",
+      "test_selector": "test_service_reuses_an_identical_brief_before_running_the_model",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DECISION-002",
+      "area": "decision_generation",
+      "behavior": "A temporary model fallback receives a distinct retry fingerprint.",
+      "test_file": "tests/unit/test_deterministic_decision_engine.py",
+      "test_selector": "test_service_retries_a_temporary_model_fallback_with_a_new_fingerprint",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DECISION-003",
+      "area": "decision_generation",
+      "behavior": "A stale case version is rejected before policy evidence is refreshed.",
+      "test_file": "tests/unit/test_deterministic_decision_engine.py",
+      "test_selector": "test_service_rejects_stale_case_before_policy_refresh",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DECISION-004",
+      "area": "decision_generation",
+      "behavior": "Decision Brief model inference runs after the read transaction and before the write transaction.",
+      "test_file": "tests/unit/test_case_read_performance.py",
+      "test_selector": "test_decision_brief_model_runs_between_two_database_transactions",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DECISION-005",
+      "area": "decision_generation",
+      "behavior": "The production Decision Brief evaluator freezes controls before inference and enforces a two-call provider ceiling.",
+      "test_file": "tests/unit/test_decision_brief_runtime_evaluation.py",
+      "test_selector": "test_decision_brief_runtime_evaluation_freezes_controls_and_bounds_provider_calls",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RETRIEVAL-001",
+      "area": "policy_retrieval",
+      "behavior": "Retrieval records only applicable published governed policy evidence.",
+      "test_file": "tests/unit/test_governed_policy_service.py",
+      "test_selector": "test_retrieval_records_only_applicable_published_evidence",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RETRIEVAL-002",
+      "area": "policy_retrieval",
+      "behavior": "Out-of-window governed policies produce a stale result without a citation.",
+      "test_file": "tests/unit/test_governed_policy_service.py",
+      "test_selector": "test_retrieval_reports_stale_without_recording_evidence",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RETRIEVAL-003",
+      "area": "policy_retrieval",
+      "behavior": "Conflicting governed policies abstain instead of selecting an arbitrary citation.",
+      "test_file": "tests/unit/test_governed_policy_service.py",
+      "test_selector": "test_retrieval_reports_same_scope_conflict_without_citation",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RETRIEVAL-004",
+      "area": "policy_retrieval",
+      "behavior": "Retrieval uses a bounded global candidate set without treating corpus size alone as a conflict.",
+      "test_file": "tests/unit/test_governed_policy_service.py",
+      "test_selector": "test_retrieval_bounds_candidates_without_treating_corpus_size_as_conflict",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RETRIEVAL-005",
+      "area": "policy_retrieval",
+      "behavior": "Governed retrieval is filtered, vector-ranked, and bounded inside PostgreSQL.",
+      "test_file": "tests/unit/test_policy_retrieval_performance.py",
+      "test_selector": "test_governed_retrieval_architecture_remains_filtered_ranked_and_bounded",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-001",
+      "area": "case_pagination",
+      "behavior": "Case cursors preserve their filter context and round-trip a typed keyset position.",
+      "test_file": "tests/unit/test_case_service.py",
+      "test_selector": "test_case_cursor_is_opaque_and_round_trips",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-002",
+      "area": "case_pagination",
+      "behavior": "A case cursor cannot be reused with a different server-side filter.",
+      "test_file": "tests/unit/test_case_service.py",
+      "test_selector": "test_case_cursor_cannot_be_reused_with_different_filters",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-003",
+      "area": "case_pagination",
+      "behavior": "A page beyond the first hundred cases preserves server view, sort, actor, and keyset position.",
+      "test_file": "tests/unit/test_case_service.py",
+      "test_selector": "test_case_list_passes_view_sort_and_keyset_cursor_to_the_store",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-004",
+      "area": "case_pagination",
+      "behavior": "A case cursor cannot be reused with a different server-side view or sort.",
+      "test_file": "tests/unit/test_case_service.py",
+      "test_selector": "test_case_cursor_cannot_be_reused_with_different_view_or_sort",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-005",
+      "area": "case_pagination",
+      "behavior": "A history cursor cannot cross a case or workspace section.",
+      "test_file": "tests/unit/test_case_history_service.py",
+      "test_selector": "test_case_history_cursor_cannot_cross_case_or_section",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "PAGE-006",
+      "area": "case_pagination",
+      "behavior": "Case queue persistence uses bidirectional keyset predicates and never applies database offset pagination.",
+      "test_file": "tests/unit/test_case_read_performance.py",
+      "test_selector": "test_case_queue_uses_keyset_boundaries_instead_of_database_offset",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "WORKSPACE-002",
+      "area": "case_workspace",
+      "behavior": "The primary case workspace bounds business context, conversation, and activity collections.",
+      "test_file": "tests/unit/test_case_read_performance.py",
+      "test_selector": "test_case_workspace_detail_collections_are_bounded",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "WORKSPACE-003",
+      "area": "case_workspace",
+      "behavior": "A truncated business context blocks a final resolution instead of reasoning over a silent partial record.",
+      "test_file": "tests/unit/test_deterministic_decision_engine.py",
+      "test_selector": "test_truncated_business_context_blocks_a_final_resolution",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "LEGACY-001",
+      "area": "legacy_boundary",
+      "behavior": "Legacy task, agent-run, and approval workflow routes are not mounted.",
+      "test_file": "tests/contract/test_compatibility_writes.py",
+      "test_selector": "test_legacy_workflow_routes_are_not_mounted",
+      "resource_class": "contract",
+      "external_dependency": false
+    },
+    {
+      "id": "WORKSPACE-001",
+      "area": "case_workspace",
+      "behavior": "The case workspace query composes validated records and server-owned commands.",
+      "test_file": "tests/unit/test_case_workspace_query.py",
+      "test_selector": "test_workspace_query_uses_valid_models_and_server_owned_commands",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "TRACE-001",
+      "area": "workflow_evidence",
+      "behavior": "Every designed workflow scenario is linked to executable production tests across the active decision and action boundaries.",
+      "test_file": "tests/unit/test_workflow_traceability.py",
+      "test_selector": "test_workflow_traceability_covers_all_scenarios_and_production_stages",
+      "resource_class": "unit",
+      "external_dependency": false
+    }
+  ]
+}

@@ -81,6 +81,19 @@ def test_high_impact_conflict_or_sensitive_risk_requires_admin(
     assert assess_review_rule(brief).required_role is MemberRole.ADMINISTRATOR
 
 
+def test_supervisor_cannot_satisfy_privacy_sensitive_rule() -> None:
+    rule = assess_review_rule(_brief(risk_label="Privacy disclosure"))
+
+    assert not role_satisfies(
+        actor_role=MemberRole.SUPERVISOR,
+        required_role=rule.required_role,
+    )
+    assert role_satisfies(
+        actor_role=MemberRole.ADMINISTRATOR,
+        required_role=rule.required_role,
+    )
+
+
 def test_financial_authority_uses_currency_specific_limits_and_fails_closed() -> None:
     below_idr_limit = assess_review_rule(_brief(impact=Decimal("14000000.00"), currency="IDR"))
     at_idr_limit = assess_review_rule(_brief(impact=Decimal("15000000.00"), currency="IDR"))

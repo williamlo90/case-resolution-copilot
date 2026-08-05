@@ -1,0 +1,149 @@
+{
+  "schema_version": "workflow-traceability-v1",
+  "evidence_scope": "composed-production-test-trace",
+  "scenarios": [
+    {
+      "case_id": "EVAL-001",
+      "claim": "A supported refund decision can move from governed evidence through review into an approved controlled action.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_deterministic_decision_engine.py",
+          "test_selector": "test_refund_case_produces_reviewable_evidence_bound_resolution",
+          "supports": ["decision", "policy"]
+        },
+        {
+          "test_file": "tests/unit/test_review_service.py",
+          "test_selector": "test_submit_builds_server_owned_executable_snapshot",
+          "supports": ["review", "authority"]
+        },
+        {
+          "test_file": "tests/unit/test_review_action_materialization.py",
+          "test_selector": "test_approval_materializes_action_in_the_review_command",
+          "supports": ["review", "authority", "action"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-002",
+      "claim": "Missing or stale account evidence causes abstention, requests information, and cannot create an executable action.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_deterministic_decision_engine.py",
+          "test_selector": "test_stale_account_context_requires_refresh_and_identity_verification",
+          "supports": ["decision"]
+        },
+        {
+          "test_file": "tests/unit/test_deterministic_decision_engine.py",
+          "test_selector": "test_missing_policy_abstains_without_consequential_action",
+          "supports": ["decision", "policy", "action"]
+        },
+        {
+          "test_file": "tests/unit/test_review_service.py",
+          "test_selector": "test_submit_allows_governed_escalation_but_never_marks_it_executable",
+          "supports": ["review", "action"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-003",
+      "claim": "Conflicting governed policies produce no arbitrary citation and make approval unavailable.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_governed_policy_service.py",
+          "test_selector": "test_retrieval_reports_same_scope_conflict_without_citation",
+          "supports": ["policy", "decision"]
+        },
+        {
+          "test_file": "tests/unit/test_review_authority.py",
+          "test_selector": "test_approval_is_only_available_for_safe_supported_snapshot",
+          "supports": ["review", "authority"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-004",
+      "claim": "A risk-sensitive or financially material case requires the configured human approval authority.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_review_authority.py",
+          "test_selector": "test_standard_review_requires_supervisor_and_admin_satisfies_rule",
+          "supports": ["review", "authority"]
+        },
+        {
+          "test_file": "tests/unit/test_review_authority.py",
+          "test_selector": "test_financial_authority_uses_currency_specific_limits_and_fails_closed",
+          "supports": ["authority", "action"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-005",
+      "claim": "Privacy-sensitive or otherwise restricted risk signals require administrator authority before approval.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_review_authority.py",
+          "test_selector": "test_high_impact_conflict_or_sensitive_risk_requires_admin",
+          "supports": ["review", "authority"]
+        },
+        {
+          "test_file": "tests/unit/test_review_authority.py",
+          "test_selector": "test_supervisor_cannot_satisfy_privacy_sensitive_rule",
+          "supports": ["review", "authority"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-006",
+      "claim": "A stale review snapshot remains auditable but loses decision and execution authority.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_review_settings_binding.py",
+          "test_selector": "test_pending_review_becomes_stale_when_approval_settings_change",
+          "supports": ["review", "authority"]
+        },
+        {
+          "test_file": "tests/unit/test_review_service.py",
+          "test_selector": "test_submit_rejects_changed_context_before_persistence",
+          "supports": ["review", "action"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-007",
+      "claim": "Repeated execution with the same idempotency identity returns one attributable logical outcome.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_action_gateway.py",
+          "test_selector": "test_success_is_idempotent_and_returns_the_same_receipt",
+          "supports": ["action", "recovery"]
+        },
+        {
+          "test_file": "tests/unit/test_action_persistence_contract.py",
+          "test_selector": "test_action_binds_exact_approval_and_idempotency_lineage",
+          "supports": ["authority", "action"]
+        }
+      ]
+    },
+    {
+      "case_id": "EVAL-008",
+      "claim": "An uncertain action outcome blocks blind retry and permits only read-only reconciliation.",
+      "proofs": [
+        {
+          "test_file": "tests/unit/test_action_service.py",
+          "test_selector": "test_safe_failure_and_unknown_outcome_never_share_retry_semantics",
+          "supports": ["action", "recovery"]
+        },
+        {
+          "test_file": "tests/unit/test_action_gateway.py",
+          "test_selector": "test_unknown_accepted_outcome_is_resolved_by_read_only_reconciliation",
+          "supports": ["action", "recovery"]
+        },
+        {
+          "test_file": "tests/unit/test_webhook_action_gateway.py",
+          "test_selector": "test_signed_action_reconciliation_never_issues_another_execute_operation",
+          "supports": ["action", "recovery"]
+        }
+      ]
+    }
+  ]
+}
