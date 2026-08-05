@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from hashlib import sha256
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domain.actions import ActionSideEffectState
 from app.domain.connections import ConnectionHealth
@@ -38,9 +38,22 @@ class ActionGatewayReceipt(BaseModel):
 
 
 class ActionLookupResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     found: bool | None
     receipt: ActionGatewayReceipt | None
     detail: str = Field(min_length=1, max_length=1000)
+    absence_is_terminal: bool = False
+
+    @model_validator(mode="after")
+    def validate_lookup_evidence(self) -> "ActionLookupResult":
+        if self.found is True and self.receipt is None:
+            raise ValueError("a confirmed action requires a receipt")
+        if self.found is not True and self.receipt is not None:
+            raise ValueError("an unconfirmed action cannot include a receipt")
+        if self.absence_is_terminal and self.found is not False:
+            raise ValueError("terminal absence evidence requires found=false")
+        return self
 
 
 class ActionGatewayError(RuntimeError):
@@ -243,6 +256,9 @@ class DeterministicActionGateway(ActionGateway):
                 found=False,
                 receipt=None,
                 detail="No matching target change was found.",
+                absence_is_terminal=(
+                    behavior is GatewayBehavior.OUTCOME_UNKNOWN_ABSENT
+                ),
             )
         if (
             external_reference is not None

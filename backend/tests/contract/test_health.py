@@ -1,6 +1,7 @@
 import re
 
-from fastapi import Query
+import pytest
+from fastapi import HTTPException, Query
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -37,6 +38,18 @@ def test_liveness_contract_and_generated_correlation_id() -> None:
     assert response.headers["X-Frame-Options"] == "DENY"
     assert response.headers["X-Robots-Tag"] == "noindex, nofollow, noarchive"
     assert "Content-Security-Policy" not in response.headers
+
+
+def test_health_exposes_the_deployed_source_revision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    revision = "a" * 40
+    monkeypatch.setenv("VERCEL_GIT_COMMIT_SHA", revision)
+
+    with make_client() as client:
+        response = client.get("/api/health/live")
+
+    assert response.headers["X-Source-Revision"] == revision
 
 
 def test_production_disables_api_docs_and_adds_json_csp() -> None:
@@ -143,6 +156,24 @@ def test_unexpected_error_is_redacted_and_correlated() -> None:
         }
     }
     assert "sensitive internal detail" not in response.text
+
+
+def test_server_http_exception_detail_is_redacted() -> None:
+    app = create_app(Settings(environment="test", _env_file=None))
+
+    @app.get("/api/test-only/http-failure")
+    async def fail() -> None:
+        raise HTTPException(status_code=503, detail="private upstream detail")
+
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.get(
+            "/api/test-only/http-failure",
+            headers={"X-Correlation-ID": "corr_http_failure"},
+        )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["message"] == "The request could not be completed."
+    assert "private upstream detail" not in response.text
 
 
 def test_application_error_uses_standard_envelope() -> None:

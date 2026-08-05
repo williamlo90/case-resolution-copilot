@@ -57,6 +57,7 @@ class ActionWebhookLookup(_WebhookResponse):
     found: bool | None
     receipt: ActionWebhookReceipt | None = None
     detail: str = Field(min_length=1, max_length=1000)
+    absence_is_terminal: bool = False
 
     @model_validator(mode="after")
     def require_receipt_for_found_action(self) -> Self:
@@ -64,6 +65,8 @@ class ActionWebhookLookup(_WebhookResponse):
             raise ValueError("a found action requires a receipt")
         if self.found is not True and self.receipt is not None:
             raise ValueError("an unconfirmed action cannot include a receipt")
+        if self.absence_is_terminal and self.found is not False:
+            raise ValueError("terminal absence evidence requires found=false")
         return self
 
 
@@ -179,6 +182,7 @@ class SignedWebhookActionGateway(ActionGateway):
             found=payload.found,
             receipt=receipt,
             detail=payload.detail,
+            absence_is_terminal=payload.absence_is_terminal,
         )
 
     def check_health(

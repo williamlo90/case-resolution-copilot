@@ -7,6 +7,7 @@ FORBIDDEN_PREFIXES = (
     "app.integrations",
     "app.persistence",
     "app.services",
+    "app.tools",
     "fastapi",
     "sqlalchemy",
 )

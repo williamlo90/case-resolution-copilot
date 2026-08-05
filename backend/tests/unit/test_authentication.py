@@ -165,6 +165,8 @@ def test_clerk_verifier_accepts_only_session_tokens_and_returns_subject() -> Non
         {
             "sub": "user_123",
             "azp": "http://localhost:3000",
+            "iss": "https://example.clerk.accounts.dev",
+            "sid": "sess_123",
         }
     )
     verifier = ClerkSessionVerifier(
@@ -193,6 +195,8 @@ def test_clerk_verifier_validates_a_real_rs256_session_token() -> None:
         {
             "sub": "user_123",
             "azp": "https://app.example.com",
+            "iss": "https://example.clerk.accounts.dev",
+            "sid": "sess_123",
             "nbf": now - timedelta(seconds=5),
             "exp": now + timedelta(minutes=1),
         },
@@ -214,8 +218,22 @@ def test_clerk_verifier_validates_a_real_rs256_session_token() -> None:
     "payload",
     [
         {},
-        {"sub": "user_123", "azp": "https://untrusted.example.com"},
-        {"sub": "user_123", "sts": "pending"},
+        {
+            "sub": "user_123",
+            "iss": "https://example.clerk.accounts.dev",
+            "sid": "sess_123",
+            "azp": "https://untrusted.example.com",
+        },
+        {
+            "sub": "user_123",
+            "iss": "https://example.clerk.accounts.dev",
+            "sid": "sess_123",
+            "sts": "pending",
+        },
+        {
+            "sub": "user_123",
+            "iss": "https://example.clerk.accounts.dev",
+        },
     ],
 )
 def test_clerk_verifier_rejects_subjectless_or_untrusted_sessions(
@@ -244,6 +262,24 @@ def test_clerk_verifier_rejects_missing_or_invalid_bearer_tokens() -> None:
         verifier.verify_subject(
             StubRequest(headers={"Authorization": "Bearer invalid-session-token"})
         )
+
+
+def test_clerk_verifier_allows_missing_authorized_party_claim() -> None:
+    verifier = ClerkSessionVerifier(
+        jwt_key="test-public-key",
+        authorized_parties=["https://app.example.com"],
+        decoder=StubTokenDecoder(
+            {
+                "sub": "user_123",
+                "iss": "https://example.clerk.accounts.dev",
+                "sid": "sess_123",
+            }
+        ),
+    )
+
+    assert verifier.verify_subject(
+        StubRequest(headers={"Authorization": "Bearer stub-session-token"})
+    ) == "user_123"
 
 
 def test_clerk_verifier_hides_provider_failures() -> None:

@@ -58,10 +58,10 @@ function CommandPanel({
         <div className="space-y-3 border-t border-border pt-4">
           {commands.includes("record_manual_outcome") ? (
             <label className="grid gap-2 text-xs font-semibold text-primary">
-              Verified outcome
+              Recovery observation
               <select name="outcome" defaultValue="completed" className="h-10 rounded-md border border-border bg-surface px-3 text-sm font-normal">
-                <option value="completed">Completed</option>
-                <option value="not_completed">Not completed</option>
+                <option value="completed">Completed with external evidence</option>
+                <option value="not_completed">No completion evidence yet</option>
               </select>
             </label>
           ) : null}
@@ -69,7 +69,7 @@ function CommandPanel({
             Recovery reason
             <textarea name="reason" minLength={10} className="min-h-24 resize-y rounded-md border border-border bg-surface px-3 py-3 text-sm font-normal" />
           </label>
-          {commands.includes("record_manual_outcome") ? <button type="submit" name="command" value="record_manual_outcome" disabled={!commandAction || pending} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-action text-sm font-semibold text-action disabled:cursor-not-allowed disabled:opacity-50"><ShieldCheck aria-hidden="true" size={16} /> Record verified outcome</button> : null}
+          {commands.includes("record_manual_outcome") ? <><p className="text-xs leading-5 text-secondary">A missing receipt keeps retry blocked. Record the observation, then reconcile again or escalate.</p><button type="submit" name="command" value="record_manual_outcome" disabled={!commandAction || pending} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-action text-sm font-semibold text-action disabled:cursor-not-allowed disabled:opacity-50"><ShieldCheck aria-hidden="true" size={16} /> Record recovery observation</button></> : null}
           {commands.includes("escalate") ? <button type="submit" name="command" value="escalate" disabled={!commandAction || pending} className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border text-sm font-semibold text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50">Escalate recovery</button> : null}
         </div>
       ) : null}

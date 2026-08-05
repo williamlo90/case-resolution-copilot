@@ -78,7 +78,7 @@ An end customer is affected by decisions but is not a direct user of this SaaS w
 ## 4. Core Job To Be Done
 
 When a customer case requires judgment or a consequential action, a support team needs to assemble
-the facts, apply the correct policy, choose an authorized resolution, and prove what happened without
+the facts, retrieve applicable policy evidence, choose an authorized resolution, and prove what happened without
 moving the decision across disconnected tools.
 
 The product must help the team answer five questions:

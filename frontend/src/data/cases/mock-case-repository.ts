@@ -7,6 +7,7 @@ import {
 } from "./case-repository";
 
 const riskWeight = { high: 0, medium: 1, low: 2 } as const;
+const MOCK_CURRENT_OWNER_ID = "USR-AR";
 
 function mockOffset(cursor: string | undefined): number {
   if (!cursor) return 0;
@@ -28,6 +29,7 @@ function sortedCases(
     const matchesView =
       !options.view ||
       options.view === "all" ||
+      (options.view === "mine" && item.owner?.id === MOCK_CURRENT_OWNER_ID) ||
       (options.view === "unassigned" && !item.owner) ||
       (options.view === "review" && item.status === "needs_review") ||
       (options.view === "at_risk" &&
@@ -42,14 +44,21 @@ function sortedCases(
   const sort: CaseQueueSort = options.sort ?? "priority";
   return [...rows].sort((left, right) => {
     if (sort === "sla") {
-      return left.slaMinutesRemaining - right.slaMinutesRemaining;
+      return (
+        left.slaMinutesRemaining - right.slaMinutesRemaining ||
+        left.id.localeCompare(right.id)
+      );
     }
     if (sort === "updated") {
-      return (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "");
+      return (
+        (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "") ||
+        left.id.localeCompare(right.id)
+      );
     }
     return (
       riskWeight[left.risk] - riskWeight[right.risk] ||
-      left.slaMinutesRemaining - right.slaMinutesRemaining
+      left.slaMinutesRemaining - right.slaMinutesRemaining ||
+      left.id.localeCompare(right.id)
     );
   });
 }

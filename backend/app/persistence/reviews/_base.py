@@ -222,9 +222,14 @@ class ReviewRepositoryBase:
             return state
         return DecisionProposalState.INFORMATION_NEEDED
 
-    def _active_member(self, *, organization_id: UUID, actor_id: str) -> MembershipModel:
-        member = self._session.scalar(
-            select(MembershipModel).where(
+    def _active_member(
+        self,
+        *,
+        organization_id: UUID,
+        actor_id: str,
+        for_update: bool = False,
+    ) -> MembershipModel:
+        statement = select(MembershipModel).where(
                 MembershipModel.organization_id == organization_id,
                 MembershipModel.status == "active",
                 or_(
@@ -232,7 +237,9 @@ class ReviewRepositoryBase:
                     MembershipModel.subject_id == actor_id,
                 ),
             )
-        )
+        if for_update:
+            statement = statement.with_for_update()
+        member = self._session.scalar(statement)
         if member is None:
             raise ActorMembershipNotFound(
                 "An active organization membership is required for this review."
@@ -328,13 +335,30 @@ class ReviewRepositoryBase:
         row = self._session.execute(statement).one_or_none()
         return (row[0], row[1]) if row is not None else None
 
-    def _freshness(self, review: CaseReviewModel, *, now: datetime) -> ReviewFreshnessRecord:
+    def _freshness(
+        self,
+        review: CaseReviewModel,
+        *,
+        now: datetime,
+        for_update: bool = False,
+    ) -> ReviewFreshnessRecord:
         snapshot = self._required_snapshot(review)
         if snapshot.approval_rule_id == "APR-LEGACY":
             return _stale(now, "Historical approvals require a new governed review.")
-        case = self._session.get(CaseModel, review.case_id)
-        proposal = self._session.get(CaseProposalModel, review.proposal_id)
-        version = self._session.get(CaseProposalVersionModel, review.proposal_version_id)
+        case_statement = select(CaseModel).where(CaseModel.id == review.case_id)
+        proposal_statement = select(CaseProposalModel).where(
+            CaseProposalModel.id == review.proposal_id
+        )
+        version_statement = select(CaseProposalVersionModel).where(
+            CaseProposalVersionModel.id == review.proposal_version_id
+        )
+        if for_update:
+            case_statement = case_statement.with_for_update()
+            proposal_statement = proposal_statement.with_for_update()
+            version_statement = version_statement.with_for_update()
+        case = self._session.scalar(case_statement)
+        proposal = self._session.scalar(proposal_statement)
+        version = self._session.scalar(version_statement)
         if case is None or proposal is None or version is None:
             return _stale(now, "The reviewed case or resolution snapshot is unavailable.")
         if case.version != snapshot.case_version:
@@ -348,7 +372,7 @@ class ReviewRepositoryBase:
             or version.risk_rule_version != snapshot.risk_rule_version
         ):
             return _stale(now, "The reviewed resolution bindings no longer match.")
-        context_rows = self._session.execute(
+        context_statement = (
             select(
                 ProposalContextBindingModel,
                 BusinessObjectSnapshotModel,
@@ -367,7 +391,10 @@ class ReviewRepositoryBase:
                 ProposalContextBindingModel.case_id == review.case_id,
                 ProposalContextBindingModel.proposal_version_id == review.proposal_version_id,
             )
-        ).all()
+        )
+        if for_update:
+            context_statement = context_statement.with_for_update()
+        context_rows = self._session.execute(context_statement).all()
         if not context_rows:
             return _stale(now, "The reviewed business context is unavailable.")
         current_context_material: list[dict[str, str]] = []
@@ -398,7 +425,7 @@ class ReviewRepositoryBase:
         ):
             return _stale(now, "The reviewed business context binding changed.")
         if review.policy_state == "supported":
-            evidence_rows = self._session.execute(
+            evidence_statement = (
                 select(
                     ProposalEvidenceBindingModel,
                     CasePolicyEvidenceModel,
@@ -435,7 +462,10 @@ class ReviewRepositoryBase:
                     ProposalEvidenceBindingModel.case_id == review.case_id,
                     ProposalEvidenceBindingModel.proposal_version_id == review.proposal_version_id,
                 )
-            ).all()
+            )
+            if for_update:
+                evidence_statement = evidence_statement.with_for_update()
+            evidence_rows = self._session.execute(evidence_statement).all()
             if not evidence_rows:
                 return _stale(now, "The reviewed policy evidence is unavailable.")
             evidence_fingerprints: list[str] = []

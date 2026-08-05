@@ -1,0 +1,101 @@
+name: Quality gate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/quality-gate.yml"
+      - "README.md"
+      - "backend/**"
+      - "!backend/*.md"
+      - "!backend/**/*.md"
+      - "contracts/**"
+      - "frontend/**"
+      - "!frontend/*.md"
+      - "!frontend/**/*.md"
+      - "docs/portfolio/**"
+      - "docs/product/**"
+      - "docs/runbooks/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Serial source and contract gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --frozen --group dev
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Export locked backend production dependencies
+        working-directory: backend
+        run: >-
+          uv export
+          --frozen
+          --no-dev
+          --no-emit-project
+          --no-hashes
+          --output-file "${RUNNER_TEMP}/backend-requirements.txt"
+
+      - name: Audit backend production dependencies
+        run: >-
+          uvx --from pip-audit==2.10.1
+          pip-audit
+          --requirement "${RUNNER_TEMP}/backend-requirements.txt"
+          --strict
+          --progress-spinner off
+
+      - name: Audit frontend production dependencies
+        working-directory: frontend
+        run: pnpm audit --prod --audit-level high
+
+      - name: Run serial release verification
+        working-directory: backend
+        run: .venv/bin/python -m scripts.run_release_verification
+
+      - name: Validate frontend production build
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          SUPPORT_COPILOT_AUTH_MODE: deterministic_development
+          SUPPORT_COPILOT_DATA_MODE: mock
+        run: pnpm build

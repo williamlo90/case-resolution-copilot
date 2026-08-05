@@ -1,0 +1,32 @@
+FROM ghcr.io/astral-sh/uv:0.11.26 AS uv
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy
+
+RUN groupadd --system --gid 10001 supportcopilot \
+    && useradd --system --uid 10001 --gid supportcopilot --create-home supportcopilot
+
+WORKDIR /app
+
+COPY --from=uv /uv /uvx /usr/local/bin/
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --frozen --no-install-project
+
+COPY --chown=supportcopilot:supportcopilot app ./app
+COPY --chown=supportcopilot:supportcopilot migrations ./migrations
+COPY --chown=supportcopilot:supportcopilot scripts ./scripts
+COPY --chown=supportcopilot:supportcopilot policies ./policies
+COPY --chown=supportcopilot:supportcopilot alembic.ini ./
+COPY --chown=supportcopilot:supportcopilot container-entrypoint.sh ./
+RUN chmod +x container-entrypoint.sh \
+    && uv sync --frozen
+
+USER supportcopilot
+
+EXPOSE 8000
+
+ENTRYPOINT ["./container-entrypoint.sh"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

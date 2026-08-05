@@ -73,20 +73,10 @@ immutable version.
 Checkpoints persist only step names, outcomes, safe summaries, and input/output fingerprints. The
 schema has no raw prompt, provider payload, reasoning, or chain-of-thought columns.
 
-## Legacy Compatibility
+## Migration And Verification
 
-`scripts/backfill_legacy_decision_briefs.py` validates by default and writes only with `--apply`.
-Run case and governed-policy backfills first, and run this backfill before generating new generic
-briefs.
-
-Historical proposals retain their source UUID and version but are imported as `information_needed`,
-low confidence, and blocked. The mapper preserves historical output while redacting sensitive or
-complex action parameters. It does not claim exact generic evidence or context bindings that the
-legacy workflow did not record.
-
-## Deferred Evidence
-
-Migration `20260722_0012`, deterministic tests, contract tests, Alembic head, and offline PostgreSQL
-SQL generation are verified. Actual migration execution, database constraints, idempotency under
-PostgreSQL, and representative legacy-data backfill remain deferred until a disposable
-`TEST_DATABASE_URL` is supplied.
+Alembic creates analysis, proposal, context, evidence, risk, and response-draft records directly.
+The reconstructed runtime ships no legacy proposal mapper. Deterministic generation, single-flight,
+stale-output rejection, transaction-boundary, contract, and evaluation tests run in the serial
+release gate. PostgreSQL constraints and concurrent lease behavior must still be rerun through the
+guarded disposable-database suite for this exact revision.

@@ -14,6 +14,8 @@ from app.domain.actions import (
     ActionVersionConflict,
     ManualActionOutcome,
     ReconciliationOutcome,
+    reconciliation_outcome_for_lookup,
+    reconciliation_outcome_for_manual_record,
 )
 from app.integrations.action_gateway import (
     ActionLookupResult,
@@ -157,7 +159,11 @@ class ActionRecoveryRepository(ActionRepositoryBase):
         if attempt is None:
             raise ActionConflict("The action attempt is missing.")
         now = utc_now()
-        if result.found is True:
+        reconciliation_outcome = reconciliation_outcome_for_lookup(
+            found=result.found,
+            absence_is_terminal=result.absence_is_terminal,
+        )
+        if reconciliation_outcome is ReconciliationOutcome.CONFIRMED_COMPLETED:
             if result.receipt is None:
                 raise ActionConflict(
                     "The target reported a change without an attributable receipt."
@@ -173,7 +179,7 @@ class ActionRecoveryRepository(ActionRepositoryBase):
             action.status = ActionStatus.COMPLETED.value
             action.observed_outcome = result.detail
             self._advance_case_after_completion(action, now=now)
-        elif result.found is False:
+        elif reconciliation_outcome is ReconciliationOutcome.CONFIRMED_ABSENT:
             reconciliation.outcome = ReconciliationOutcome.CONFIRMED_ABSENT.value
             action.status = ActionStatus.FAILED_SAFE.value
             action.observed_outcome = result.detail
@@ -235,11 +241,7 @@ class ActionRecoveryRepository(ActionRepositoryBase):
             actor_id=actor_id,
         )
         now = utc_now()
-        reconciliation_outcome = (
-            ReconciliationOutcome.CONFIRMED_COMPLETED
-            if outcome is ManualActionOutcome.COMPLETED
-            else ReconciliationOutcome.CONFIRMED_ABSENT
-        )
+        reconciliation_outcome = reconciliation_outcome_for_manual_record(outcome)
         reconciliation = CaseActionReconciliationModel(
             public_id=_stable_public_id(
                 "RC",
@@ -261,7 +263,7 @@ class ActionRecoveryRepository(ActionRepositoryBase):
         action.status = (
             ActionStatus.COMPLETED.value
             if outcome is ManualActionOutcome.COMPLETED
-            else ActionStatus.FAILED_SAFE.value
+            else ActionStatus.OUTCOME_UNKNOWN.value
         )
         action.observed_outcome = reason
         action.version += 1

@@ -1,11 +1,14 @@
 import os
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import inspect, text
 
 from app.persistence.database import Database
+from app.retrieval.ingest import ingest_policy
 
 
 class _RedactedDatabaseUrl(str):
@@ -45,6 +48,20 @@ def migrated_database(test_database_url: str) -> Iterator[None]:
 @pytest.fixture
 def database(test_database_url: str, migrated_database: None) -> Iterator[Database]:
     database = Database(test_database_url)
+    table_names = sorted(
+        name
+        for name in inspect(database.engine).get_table_names()
+        if name != "alembic_version"
+    )
+    if table_names:
+        preparer = database.engine.dialect.identifier_preparer
+        quoted = ", ".join(preparer.quote(name) for name in table_names)
+        with database.session() as session:
+            session.execute(text(f"TRUNCATE {quoted} RESTART IDENTITY CASCADE"))
+
+    source_root = Path(__file__).resolve().parents[2] / "policies" / "source"
+    for source in sorted(source_root.glob("*.json")):
+        ingest_policy(database, source)
     try:
         yield database
     finally:

@@ -86,7 +86,7 @@ def _decode_session_token(token: str, jwt_key: str) -> Mapping[str, object]:
         token,
         jwt_key,
         algorithms=["RS256"],
-        options={"require": ["exp", "nbf", "sub"]},
+        options={"require": ["exp", "nbf", "iss", "sid", "sub"]},
     )
     if not isinstance(payload, dict):
         raise InvalidTokenError("The session token payload is invalid.")
@@ -134,6 +134,12 @@ class ClerkSessionVerifier:
             raise AuthenticationRequired("The sign-in session came from an untrusted origin.")
         if payload.get("sts") == "pending":
             raise AuthenticationRequired("The sign-in session is not active yet.")
+        issuer = payload.get("iss")
+        session_id = payload.get("sid")
+        if not isinstance(issuer, str) or not issuer.startswith("https://"):
+            raise AuthenticationRequired("The sign-in session has no trusted issuer identity.")
+        if not isinstance(session_id, str) or not session_id.startswith("sess_"):
+            raise AuthenticationRequired("A Clerk session token is required.")
         subject = payload.get("sub")
         if not isinstance(subject, str) or not subject:
             raise AuthenticationRequired("The sign-in session has no user identity.")

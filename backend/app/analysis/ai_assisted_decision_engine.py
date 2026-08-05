@@ -1,4 +1,5 @@
 import json
+import re
 from hashlib import sha256
 
 from app.analysis.deterministic_decision_engine import DecisionEngine
@@ -14,6 +15,19 @@ from app.models.gateway import ModelGatewayError
 from app.models.openai_decision import DecisionNarrativeGateway
 
 AI_DECISION_PROMPT_VERSION = "openai-decision-narrative-v1"
+_COMPLETED_ACTION_CLAIMS = (
+    re.compile(
+        r"\b(?:we|our team|the system)\s+(?:has\s+|have\s+)?(?:already\s+)?"
+        r"(?:approved|completed|executed|issued|processed|sent|applied)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:refund|credit|account change|action)\s+"
+        r"(?:has|have|is|are|was|were)\s+(?:already\s+)?"
+        r"(?:approved|completed|executed|issued|processed|sent|applied)\b",
+        re.IGNORECASE,
+    ),
+)
 
 
 class OpenAIAssistedDecisionEngine:
@@ -63,6 +77,18 @@ class OpenAIAssistedDecisionEngine:
                 summary=(
                     "AI drafting was unavailable. The deterministic decision language "
                     "was retained without changing any control."
+                ),
+            )
+        if any(
+            pattern.search(f"{narrative.response_subject} {narrative.response_body}")
+            for pattern in _COMPLETED_ACTION_CLAIMS
+        ):
+            return self._fallback(
+                baseline,
+                suffix="rejected",
+                summary=(
+                    "AI drafting was rejected because it described a controlled action as "
+                    "already complete. The deterministic safe response was retained."
                 ),
             )
 

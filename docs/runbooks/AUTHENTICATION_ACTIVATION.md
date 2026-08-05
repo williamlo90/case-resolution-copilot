@@ -11,8 +11,8 @@ is implemented in the release candidate but still needs post-deployment evidence
 - Next.js protects application routes only when
   `SUPPORT_COPILOT_AUTH_MODE=provider`.
 - The frontend sends a Clerk session token as `Authorization: Bearer ...`.
-- FastAPI accepts only Clerk session tokens, verifies the PEM key locally, checks authorized
-  parties, and reads only the token subject for identity.
+- FastAPI verifies the Clerk PEM signature, time bounds, issuer shape, session identifier, pending
+  status, and any present authorized-party claim. It reads only the token subject for identity.
 - Provider-mode CORS does not allow the deterministic `X-Actor-ID` or `X-Actor-Role` headers.
 - The token subject is resolved through `memberships.subject_id`. Role and organization claims from
   the browser or Clerk are not authority.
@@ -134,7 +134,9 @@ after deployment.
 - Valid identity reaches only its linked organization.
 - Cross-tenant and role-escalation attempts fail closed.
 - Client role, organization, and `X-Actor-ID` values cannot grant provider-mode authority.
-- Expired, malformed, revoked, wrong-party, and non-session tokens are rejected.
+- Expired, malformed, wrong-party, and non-session tokens are rejected. Networkless verification
+  cannot observe revocation after issuance, so a revoked token remains valid only until its short
+  Clerk expiry unless an online session check is added.
 - Sign-out removes access and provider outage never enables demo fallback.
 - Team invite, acceptance, re-invite, and revocation preserve one internal source of role authority.
 - Logs and audit records contain no token, cookie, private key, or secret value.

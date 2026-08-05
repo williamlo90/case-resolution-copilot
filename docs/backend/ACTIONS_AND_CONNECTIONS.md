@@ -91,8 +91,13 @@ not silently converted to a safe failure.
 Reconciliation is read-only. It uses the recorded action identity and idempotency key:
 
 - a found target change stores the returned receipt and completes the action;
-- confirmed absence moves the action to `failed_safe`, enabling a controlled retry;
-- an unavailable or ambiguous lookup keeps the action `outcome_unknown`.
+- only explicit terminal absence evidence moves the action to `failed_safe`, enabling a controlled
+  retry;
+- an unavailable, ambiguous, or eventually consistent miss keeps the action `outcome_unknown`.
+
+A manual `not_completed` note records the operator's observation but does not prove terminal
+absence and never unlocks retry. Manual completion evidence can close the action; otherwise the
+operator must reconcile again or escalate.
 
 A supervisor or administrator may record a manual outcome with a reason. That creates an
 attributable reconciliation record; it does not fabricate a provider receipt. Escalation assigns
@@ -116,23 +121,10 @@ If an approved action has no matching connection, the system creates a visible
 `not_configured` placeholder and blocks execution instead of dropping the action or guessing a
 provider.
 
-## Legacy Compatibility
+## Migration And Verification
 
-`scripts/backfill_legacy_actions.py` validates and redacts by default. `--apply` is explicit.
-Identity, case, proposal, and review backfills must run first.
-
-The mapper preserves source attempt/receipt UUID lineage, side-effect knowledge, target reference,
-timestamps, error code, and deterministic idempotency identity. It stores fingerprints rather than
-raw provider responses and redacts sensitive request fields. Every imported action has
-`execution_eligible=false`; migration never replays a provider write.
-
-When a legacy actor was not recorded, the attempt says `Legacy actor unavailable` and leaves the
-role empty. It does not invent administrator attribution.
-
-## Deferred Evidence
-
-Migration `20260723_0014`, deterministic gateway tests, contract tests, Alembic head, offline
-PostgreSQL SQL, and OpenAPI generation are verified locally. Actual PostgreSQL migration execution,
-row locking, partial uniqueness, and representative action/backfill flows remain deferred until a
-disposable `TEST_DATABASE_URL` is supplied. Real provider credentials and `.env` activation remain
-after B8 and the explicit post-credential test phase.
+Alembic creates action, attempt, receipt, and connection records directly. The reconstructed runtime
+ships no legacy action mapper and never replays historical provider writes. Gateway, idempotency,
+unknown-outcome, reconciliation, authority, and route tests run in the serial release gate.
+PostgreSQL row locking and uniqueness behavior still requires the guarded disposable-database suite;
+client-owned provider credentials and sandboxes remain external activation gates.

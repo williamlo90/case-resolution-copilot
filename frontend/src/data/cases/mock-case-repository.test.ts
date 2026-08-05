@@ -18,4 +18,20 @@ describe("mockCaseRepository", () => {
     expect(second).toEqual(first);
     expect(second).not.toBe(first);
   });
+
+  it("returns only the deterministic actor's cases for the mine view", async () => {
+    const page = await mockCaseRepository.listCases({ view: "mine", limit: 20 });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((item) => item.owner?.id === "USR-AR")).toBe(true);
+  });
+
+  it("uses a stable case id tie-breaker", async () => {
+    const first = await mockCaseRepository.listCases({ sort: "priority", limit: 20 });
+    const second = await mockCaseRepository.listCases({ sort: "priority", limit: 20 });
+
+    expect(second.items.map((item) => item.id)).toEqual(
+      first.items.map((item) => item.id),
+    );
+  });
 });

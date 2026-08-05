@@ -108,6 +108,7 @@ def test_unknown_absent_outcome_becomes_safe_only_after_reconciliation() -> None
 
     assert result.found is False
     assert result.receipt is None
+    assert result.absence_is_terminal is True
 
 
 def test_unconfigured_adapter_never_attempts_a_write() -> None:

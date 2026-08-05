@@ -1,4 +1,6 @@
 import logging
+import os
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -212,6 +214,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         create_health_router(
             runtime_settings.service_name,
             database_check=database.is_ready if database else None,
+            source_revision=_source_revision(),
         )
     )
     app.include_router(case_intake_router)
@@ -228,6 +231,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(settings_router)
     app.include_router(audit_router)
     return app
+
+
+def _source_revision() -> str | None:
+    value = os.getenv("VERCEL_GIT_COMMIT_SHA", "").strip().lower()
+    return value if re.fullmatch(r"[0-9a-f]{40}", value) else None
 
 
 app = create_app()

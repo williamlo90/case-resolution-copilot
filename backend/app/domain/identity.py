@@ -12,6 +12,12 @@ class MemberRole(StrEnum):
     AUDITOR = "auditor"
 
 
+def role_satisfies(*, actor_role: MemberRole | None, required_role: MemberRole) -> bool:
+    if actor_role is MemberRole.ADMINISTRATOR:
+        return True
+    return actor_role is required_role
+
+
 class MemberStatus(StrEnum):
     ACTIVE = "active"
     INVITED = "invited"

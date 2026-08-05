@@ -232,7 +232,8 @@ Legacy aliases have removal criteria in the migration strategy. They are not pub
 - Provider calls occur outside database locks. Safe failure, confirmed completion, and outcome
   unknown remain distinct durable states.
 - Unknown outcomes cannot be retried blindly. Read-only reconciliation must confirm completion or
-  absence before the action can complete or become safely retryable.
+  provide explicit terminal absence evidence before the action can complete or become safely
+  retryable. A transient lookup miss or manual note is not enough.
 - Connection APIs expose capability, environment, health, and credential status without storing or
   returning secret values.
 - Deterministic demo connections and the action gateway require no credentials. Real adapters and

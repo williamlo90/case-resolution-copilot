@@ -99,23 +99,13 @@ A review becomes stale when:
 - a newer proposal version exists;
 - proposal context, evidence, risk, or rule bindings change;
 - a bound policy is unpublished, not yet effective, expired, or unavailable;
-- a required bound context/evidence row is unavailable;
-- the record came from the legacy approval workflow.
+- a required bound context/evidence row is unavailable.
 
 A stale snapshot remains readable for audit but cannot be reserved or decided.
 
-## Legacy Compatibility
+## Migration And Verification
 
-`scripts/backfill_legacy_reviews.py` validates by default and writes only with `--apply`. Identity,
-case, policy, and proposal backfills must run first.
-
-The mapper preserves reservation and decision UUIDs, reviewer attribution, role, proposal version,
-evidence fingerprint, reason, and timestamps. Every imported snapshot uses `APR-LEGACY`, remains
-stale, and has `execution_eligible=false`. Historical approval is evidence of what happened, never
-current authority.
-
-## Deferred Evidence
-
-Migration `20260723_0013`, deterministic tests, contract tests, Alembic head, offline PostgreSQL SQL,
-and OpenAPI generation are verified. Actual migration execution, database locking, constraints, and
-representative backfill remain deferred until a disposable `TEST_DATABASE_URL` is supplied.
+Alembic creates review snapshots, reservations, and decisions directly. The reconstructed runtime
+ships no legacy approval mapper. Deterministic authority, concurrency, stale-snapshot, contract, and
+traceability tests run in the serial release gate. PostgreSQL locking and constraint behavior still
+requires the guarded disposable-database suite for this exact revision.

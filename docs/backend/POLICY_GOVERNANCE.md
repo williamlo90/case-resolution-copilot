@@ -82,15 +82,10 @@ development behavior, not a claim of production semantic-search quality.
 Mutable commands require both the expected policy root version and expected policy-version record
 version. Stale writes return `409 version_conflict`. Cross-tenant reads return `404`.
 
-## Compatibility And Deferred Activation
+## Migration And Activation
 
-Migration `20260722_0011` adds policy roots, governed versions, parsed clauses, and case evidence. The
-legacy mapper preserves source IDs, content hashes, effective dates, embeddings, provenance, and the
-legacy policy-version UUID. It does not rewrite legacy rows or introduce dual writes.
-
-`scripts/backfill_legacy_policies.py` is dry-run by default; `--apply` requires a configured database.
-`scripts/seed_policies.py` is disabled in production and requires a configured database. Neither is
-part of resource-safe deterministic verification.
-
-PostgreSQL upgrade, constraints, locking, and downgrade refusal remain unverified until the user
-provides a disposable `TEST_DATABASE_URL`. Static SQL generation is evidence of migration shape only.
+Alembic creates policy roots, governed versions, parsed clauses, and case evidence directly. The
+reconstructed runtime has no legacy policy mapper or dual-write path. `scripts/seed_policies.py` is
+disabled in production and requires a configured database. PostgreSQL upgrade, locking, constraints,
+and query plans must be rerun through the guarded disposable-database runner for this exact revision;
+static checks alone are not database evidence.

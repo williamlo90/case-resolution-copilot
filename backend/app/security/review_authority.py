@@ -8,6 +8,7 @@ from app.domain.decision_briefs import (
     RiskOutcome,
 )
 from app.domain.identity import MemberRole
+from app.domain.identity import role_satisfies as role_satisfies
 from app.domain.policies import EvidenceRetrievalStatus
 from app.domain.reviews import (
     ApprovalRuleSnapshot,
@@ -97,12 +98,6 @@ def require_review_submission(brief: DecisionBriefRecord) -> None:
         )
     if not has_review_action and not blocked_policy:
         raise ReviewSubmissionNotAllowed("This resolution does not require a supervisor decision.")
-
-
-def role_satisfies(*, actor_role: MemberRole | None, required_role: MemberRole) -> bool:
-    if actor_role is MemberRole.ADMINISTRATOR:
-        return True
-    return actor_role is required_role
 
 
 def allowed_decisions(

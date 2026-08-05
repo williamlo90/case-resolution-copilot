@@ -5,7 +5,9 @@ from sqlalchemy import select
 
 from app.domain.cases import CaseConcurrencyConflict
 from app.domain.decision_briefs import DecisionProposalState
+from app.domain.identity import MemberRole, role_satisfies
 from app.domain.reviews import (
+    ReviewAuthorityDenied,
     ReviewBundleRecord,
     ReviewConflict,
     ReviewDecision,
@@ -338,11 +340,24 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
         member = self._active_member(
             organization_id=review.organization_id,
             actor_id=actor_id,
+            for_update=True,
         )
         if reservation.reviewer_id != member.id:
             raise ReviewConflict("The review is reserved by another reviewer.")
         if reservation.snapshot_fingerprint != snapshot_fingerprint:
             raise ReviewConflict("The reserved snapshot no longer matches this review.")
+        if not role_satisfies(
+            actor_role=MemberRole(member.role),
+            required_role=MemberRole(snapshot.required_role),
+        ):
+            raise ReviewAuthorityDenied(
+                "Your current role does not have authority to decide this review."
+            )
+        freshness = self._freshness(review, now=now, for_update=True)
+        if freshness.status.value != "current":
+            raise ReviewSnapshotStale(
+                freshness.reason or "The review snapshot is stale and cannot be decided."
+            )
 
         decision_model = CaseReviewDecisionModel(
             public_id=_stable_public_id("RVD", review.public_id, str(review.version)),

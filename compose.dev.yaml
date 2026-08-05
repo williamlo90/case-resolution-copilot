@@ -1,0 +1,90 @@
+name: case-resolution-copilot-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${SUPPORT_COPILOT_POSTGRES_USER:-support_copilot}
+      POSTGRES_PASSWORD: ${SUPPORT_COPILOT_POSTGRES_PASSWORD:-support_copilot}
+      POSTGRES_DB: ${SUPPORT_COPILOT_POSTGRES_DB:-support_copilot}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - case-resolution-copilot-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${SUPPORT_COPILOT_POSTGRES_USER:-support_copilot} -d ${SUPPORT_COPILOT_POSTGRES_DB:-support_copilot}",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    environment:
+      SUPPORT_COPILOT_ENVIRONMENT: development
+      SUPPORT_COPILOT_DATABASE_URL: postgresql+psycopg://${SUPPORT_COPILOT_POSTGRES_USER:-support_copilot}:${SUPPORT_COPILOT_POSTGRES_PASSWORD:-support_copilot}@postgres:5432/${SUPPORT_COPILOT_POSTGRES_DB:-support_copilot}
+      SUPPORT_COPILOT_DEV_MIGRATE: "true"
+      SUPPORT_COPILOT_DEV_SEED: "true"
+    ports:
+      - "127.0.0.1:${SUPPORT_COPILOT_API_PORT:-8000}:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/migrations:/app/migrations
+      - ./backend/scripts:/app/scripts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=2)",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:${SUPPORT_COPILOT_API_PORT:-8000}
+      SUPPORT_COPILOT_API_INTERNAL_URL: http://api:8000
+      SUPPORT_COPILOT_DATA_MODE: api
+      SUPPORT_COPILOT_DEMO_ACTOR_ID: USR-0003
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "127.0.0.1:${SUPPORT_COPILOT_FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/cases').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  case-resolution-copilot-postgres-data:

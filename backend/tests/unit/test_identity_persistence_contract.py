@@ -1,6 +1,6 @@
 from typing import cast
 
-from sqlalchemy import Table, UniqueConstraint
+from sqlalchemy import ForeignKeyConstraint, Table, UniqueConstraint
 
 from app.persistence.models import (
     AuditEventModel,
@@ -31,6 +31,25 @@ def test_identity_tables_define_tenant_scoped_uniqueness() -> None:
         "uq_invitations_org_public",
         "uq_invitations_provider_invitation",
     } <= _unique_constraint_names(cast(Table, InvitationModel.__table__))
+
+
+def test_invitation_inviter_reference_is_tenant_scoped() -> None:
+    table = cast(Table, InvitationModel.__table__)
+    constraint = next(
+        item
+        for item in table.constraints
+        if isinstance(item, ForeignKeyConstraint)
+        and item.name == "fk_invitations_org_inviter_membership"
+    )
+
+    assert [column.name for column in constraint.columns] == [
+        "organization_id",
+        "invited_by_id",
+    ]
+    assert [element.target_fullname for element in constraint.elements] == [
+        "memberships.organization_id",
+        "memberships.id",
+    ]
 
 
 def test_generic_audit_can_be_tenant_scoped_without_a_legacy_task() -> None:

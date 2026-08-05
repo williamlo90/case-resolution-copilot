@@ -317,3 +317,21 @@ def test_ai_assistance_falls_back_to_audited_deterministic_narrative() -> None:
         "Decision brief prepared with the built-in backup draft.",
         "verified_fallback",
     )
+
+
+def test_ai_draft_cannot_claim_a_controlled_action_already_happened() -> None:
+    baseline = _baseline()
+    unsafe = _narrative().model_copy(
+        update={"response_body": "We have issued the refund to your account."}
+    )
+    engine = OpenAIAssistedDecisionEngine(
+        baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
+        narrative_gateway=_NarrativeGateway(result=unsafe),
+    )
+
+    result = _run(engine)
+
+    assert result.response_draft == baseline.response_draft
+    assert result.rationale == baseline.rationale
+    assert result.checkpoints[-1].status is CheckpointStatus.ABSTAINED
+    assert result.model_version == "openai:gpt-5.6-luna:rejected"

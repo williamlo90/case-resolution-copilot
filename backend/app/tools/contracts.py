@@ -4,6 +4,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.domain.tooling import SideEffectState as SideEffectState
+
 
 class StrictToolModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -15,13 +17,6 @@ class ProviderScenario(StrEnum):
     TIMEOUT_BEFORE_SEND = "timeout_before_send"
     TIMEOUT_AFTER_ACCEPTANCE = "timeout_after_acceptance"
     DELAYED_POSTCONDITION = "delayed_postcondition"
-
-
-class SideEffectState(StrEnum):
-    NOT_ATTEMPTED = "not_attempted"
-    NONE = "none"
-    CONFIRMED = "confirmed"
-    POSSIBLE = "possible"
 
 
 class ActionStatus(StrEnum):

@@ -26,12 +26,16 @@ class ReadyResponse(BaseModel):
 
 
 def create_health_router(
-    service_name: str, database_check: Callable[[], bool] | None = None
+    service_name: str,
+    database_check: Callable[[], bool] | None = None,
+    source_revision: str | None = None,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/health", tags=["health"])
 
     @router.get("/live", response_model=LiveResponse)
-    async def live() -> LiveResponse:
+    async def live(response: Response) -> LiveResponse:
+        if source_revision is not None:
+            response.headers["X-Source-Revision"] = source_revision
         return LiveResponse(status="alive", service=service_name)
 
     @router.get(
@@ -40,6 +44,8 @@ def create_health_router(
         responses={status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ReadyResponse}},
     )
     async def ready(response: Response) -> ReadyResponse:
+        if source_revision is not None:
+            response.headers["X-Source-Revision"] = source_revision
         if database_check is None:
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return ReadyResponse(

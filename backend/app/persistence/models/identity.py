@@ -5,6 +5,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     String,
@@ -93,6 +94,12 @@ class InvitationModel(Base):
             "provider_invitation_id",
             name="uq_invitations_provider_invitation",
         ),
+        ForeignKeyConstraint(
+            ["organization_id", "invited_by_id"],
+            ["memberships.organization_id", "memberships.id"],
+            name="fk_invitations_org_inviter_membership",
+            ondelete="RESTRICT",
+        ),
         Index("ix_invitations_org_status", "organization_id", "status"),
     )
 
@@ -106,7 +113,7 @@ class InvitationModel(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     invited_by_id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("memberships.id", ondelete="RESTRICT"), nullable=False
+        PG_UUID(as_uuid=True), nullable=False
     )
     provider_invitation_id: Mapped[str | None] = mapped_column(String(200))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

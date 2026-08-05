@@ -79,29 +79,10 @@ python scripts/seed_cases.py
 
 Neither script runs in production. They perform no external I/O.
 
-## Legacy Backfill
+## Migration Boundary
 
-The compatibility mapper preserves the legacy task UUID, public source ID, request timestamps,
-customer snapshot, source reference, money, and correlation ID. It maps only allowlisted states,
-marks inherited source snapshots `stale`, and refuses incomplete source snapshots or money pairs.
-
-Validation is the default mode:
-
-```powershell
-python scripts/backfill_legacy_cases.py --organization ORG-0001
-```
-
-Writing requires an explicit flag:
-
-```powershell
-python scripts/backfill_legacy_cases.py --organization ORG-0001 --apply
-```
-
-No dual-write is introduced. Legacy task routes remain isolated compatibility reads until the B8
-frontend adapter cutover.
-
-## Deferred Evidence
-
-Migration `20260722_0010` and its static PostgreSQL SQL generation are verified. Empty-database,
-representative-data, conflict, and tenant-isolation execution against PostgreSQL remain deferred to
-Plan C, when the user supplies a disposable `TEST_DATABASE_URL`.
+Alembic creates the current case schema directly. The reconstructed runtime ships no legacy task
+mapper, compatibility read route, or dual-write path. Static migration checks and tenant-scoped
+unit and contract tests are part of the serial release gate. PostgreSQL migration, conflict, and
+tenant-isolation execution must still be rerun through the guarded disposable-database runner for
+this exact revision.

@@ -67,6 +67,26 @@ class ManualActionOutcome(StrEnum):
     NOT_COMPLETED = "not_completed"
 
 
+def reconciliation_outcome_for_lookup(
+    *,
+    found: bool | None,
+    absence_is_terminal: bool,
+) -> ReconciliationOutcome:
+    if found is True:
+        return ReconciliationOutcome.CONFIRMED_COMPLETED
+    if found is False and absence_is_terminal:
+        return ReconciliationOutcome.CONFIRMED_ABSENT
+    return ReconciliationOutcome.STILL_UNKNOWN
+
+
+def reconciliation_outcome_for_manual_record(
+    outcome: ManualActionOutcome,
+) -> ReconciliationOutcome:
+    if outcome is ManualActionOutcome.COMPLETED:
+        return ReconciliationOutcome.CONFIRMED_COMPLETED
+    return ReconciliationOutcome.STILL_UNKNOWN
+
+
 class LegacyActionReceiptImport(BaseModel):
     legacy_external_receipt_id: UUID
     provider: str = Field(min_length=1, max_length=100)

@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -165,6 +166,34 @@ def test_json_formatter_emits_an_event_accepted_by_slo_parser() -> None:
     assert parsed.method == "GET"
     assert parsed.status_code == 200
     assert parsed.duration_ms == 125.5
+
+
+def test_json_formatter_redacts_sensitive_extras_and_unstructured_text() -> None:
+    try:
+        raise RuntimeError("private provider response")
+    except RuntimeError:
+        exc_info = sys.exc_info()
+
+    record = logging.LogRecord(
+        name="app.security",
+        level=logging.ERROR,
+        pathname=__file__,
+        lineno=1,
+        msg="Customer email alice@example.com failed with token abc",
+        args=(),
+        exc_info=exc_info,
+    )
+    record.email = "alice@example.com"
+    record.correlation_id = "corr_safe"
+
+    payload = json.loads(JsonFormatter().format(record))
+
+    assert payload["message"] == "unstructured_log_message_redacted"
+    assert payload["email"] == "[REDACTED]"
+    assert payload["correlation_id"] == "corr_safe"
+    assert payload["exception_type"] == "RuntimeError"
+    assert "alice@example.com" not in json.dumps(payload)
+    assert "private provider response" not in json.dumps(payload)
 
 
 def _config(

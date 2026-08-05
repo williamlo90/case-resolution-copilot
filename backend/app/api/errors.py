@@ -87,7 +87,9 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
 async def http_error_handler(request: Request, exc: HTTPException) -> JSONResponse:
     correlation_id = _correlation_id(request)
     message = (
-        str(exc.detail) if isinstance(exc.detail, str) else "The request could not be completed."
+        str(exc.detail)
+        if exc.status_code < 500 and isinstance(exc.detail, str)
+        else "The request could not be completed."
     )
     return JSONResponse(
         status_code=exc.status_code,
