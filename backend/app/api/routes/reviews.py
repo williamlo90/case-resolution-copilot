@@ -43,12 +43,14 @@ from app.domain.reviews import (
     ReviewVersionConflict,
 )
 from app.domain.settings import SettingsConflict
+from app.persistence.action_repository import ActionRepository
 from app.persistence.case_repository import CaseRepository
 from app.persistence.database import Database
 from app.persistence.decision_brief_repository import DecisionBriefRepository
 from app.persistence.policy_repository import PolicyRepository
 from app.persistence.review_repository import ReviewRepository
 from app.persistence.settings_repository import OrganizationSettingsRepository
+from app.services.action_service import ActionMaterializationService
 from app.services.policy_evidence_service import PolicyEvidenceService
 from app.services.review_service import ReviewService
 
@@ -80,7 +82,7 @@ def _service(request: Request, session: Session) -> ReviewService:
             case_repository,
             embedding_provider,
         ),
-        None,
+        ActionMaterializationService(ActionRepository(session)),
         OrganizationSettingsRepository(session),
     )
 

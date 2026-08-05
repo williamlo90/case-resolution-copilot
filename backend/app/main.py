@@ -16,7 +16,9 @@ from app.api.middleware import (
     SUPPORT_TIMING_HEADER,
     register_http_middleware,
 )
+from app.api.routes.actions import router as actions_router
 from app.api.routes.cases import router as cases_router
+from app.api.routes.connections import router as connections_router
 from app.api.routes.decision_briefs import router as decision_briefs_router
 from app.api.routes.health import create_health_router
 from app.api.routes.organizations import router as organizations_router
@@ -24,6 +26,10 @@ from app.api.routes.policies import router as policies_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
 from app.config import Settings, get_settings
+from app.integrations.action_gateway import (
+    ActionGateway,
+    DeterministicActionGateway,
+)
 from app.integrations.clerk_identity import ClerkIdentityGateway
 from app.models.openai_decision import OpenAIDecisionNarrativeGateway
 from app.persistence.database import Database
@@ -55,6 +61,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     embedding_provider: EmbeddingProvider = DEFAULT_EMBEDDING_PROVIDER
     openai_gateway: OpenAIDecisionNarrativeGateway | None = None
     openai_embedding_provider: OpenAIEmbeddingProvider | None = None
+    action_gateway: ActionGateway = DeterministicActionGateway()
     if runtime_settings.model_provider == "openai":
         openai_api_key = runtime_settings.openai_secret()
         assert openai_api_key is not None
@@ -159,6 +166,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.settings = runtime_settings
     application.state.decision_engine = decision_engine
     application.state.embedding_provider = embedding_provider
+    application.state.action_gateway = action_gateway
     application.include_router(
         create_health_router(
             runtime_settings.service_name,
@@ -171,6 +179,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(policies_router)
     application.include_router(decision_briefs_router)
     application.include_router(reviews_router)
+    application.include_router(actions_router)
+    application.include_router(connections_router)
     return application
 
 
