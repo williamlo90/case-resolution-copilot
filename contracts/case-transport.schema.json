@@ -1,0 +1,2039 @@
+{
+  "models": {
+    "CaseActivityPageResponse": {
+      "$defs": {
+        "CaseActivityResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "actor": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Actor",
+              "type": "string"
+            },
+            "detail": {
+              "minLength": 1,
+              "title": "Detail",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "completed",
+                "current",
+                "waiting",
+                "failed"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "timestamp": {
+              "format": "date-time",
+              "title": "Timestamp",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "label",
+            "detail",
+            "actor",
+            "timestamp",
+            "status"
+          ],
+          "title": "CaseActivityResponse",
+          "type": "object"
+        },
+        "ResponseMeta": {
+          "additionalProperties": false,
+          "properties": {
+            "contract_version": {
+              "const": "2026-07-22",
+              "default": "2026-07-22",
+              "title": "Contract Version",
+              "type": "string"
+            },
+            "data_mode": {
+              "default": "demo",
+              "enum": [
+                "demo",
+                "connected",
+                "degraded"
+              ],
+              "title": "Data Mode",
+              "type": "string"
+            }
+          },
+          "title": "ResponseMeta",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/CaseActivityResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "meta": {
+          "$ref": "#/$defs/ResponseMeta"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor",
+        "total"
+      ],
+      "title": "CaseActivityPageResponse",
+      "type": "object"
+    },
+    "CaseDetailResponse": {
+      "$defs": {
+        "BusinessObjectSnapshotResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "captured_at": {
+              "format": "date-time",
+              "title": "Captured At",
+              "type": "string"
+            },
+            "case_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Case Id",
+              "type": "string"
+            },
+            "fields": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "title": "Fields",
+              "type": "object"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "source": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Source",
+              "type": "string"
+            },
+            "source_freshness": {
+              "$ref": "#/$defs/SourceFreshnessResponse"
+            },
+            "source_reference": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Source Reference",
+              "type": "string"
+            },
+            "status": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Status",
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "invoice",
+                "payment",
+                "subscription",
+                "account",
+                "order",
+                "delivery",
+                "other"
+              ],
+              "title": "Type",
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "case_id",
+            "type",
+            "label",
+            "source",
+            "source_reference",
+            "status",
+            "fields",
+            "captured_at",
+            "source_freshness",
+            "version"
+          ],
+          "title": "BusinessObjectSnapshotResponse",
+          "type": "object"
+        },
+        "CaseActivityResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "actor": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Actor",
+              "type": "string"
+            },
+            "detail": {
+              "minLength": 1,
+              "title": "Detail",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "completed",
+                "current",
+                "waiting",
+                "failed"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "timestamp": {
+              "format": "date-time",
+              "title": "Timestamp",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "label",
+            "detail",
+            "actor",
+            "timestamp",
+            "status"
+          ],
+          "title": "CaseActivityResponse",
+          "type": "object"
+        },
+        "CaseCategory": {
+          "enum": [
+            "billing_dispute",
+            "refund_request",
+            "account_access",
+            "service_exception"
+          ],
+          "title": "CaseCategory",
+          "type": "string"
+        },
+        "CaseCollectionWindowResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "has_more": {
+              "title": "Has More",
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Next Cursor"
+            },
+            "returned": {
+              "minimum": 0,
+              "title": "Returned",
+              "type": "integer"
+            },
+            "total": {
+              "minimum": 0,
+              "title": "Total",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "returned",
+            "total",
+            "has_more",
+            "next_cursor"
+          ],
+          "title": "CaseCollectionWindowResponse",
+          "type": "object"
+        },
+        "CaseCommand": {
+          "enum": [
+            "assign_to_me",
+            "request_information",
+            "resume_investigation",
+            "send_reply",
+            "add_note",
+            "revise_resolution",
+            "save_draft",
+            "submit_for_review",
+            "escalate",
+            "export_audit"
+          ],
+          "type": "string"
+        },
+        "CaseCustomerSummaryResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "is_vip": {
+              "title": "Is Vip",
+              "type": "boolean"
+            },
+            "name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "is_vip"
+          ],
+          "title": "CaseCustomerSummaryResponse",
+          "type": "object"
+        },
+        "CaseOwnerResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "initials": {
+              "maxLength": 3,
+              "minLength": 1,
+              "title": "Initials",
+              "type": "string"
+            },
+            "name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "initials"
+          ],
+          "title": "CaseOwnerResponse",
+          "type": "object"
+        },
+        "CaseRequestResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "channel": {
+              "enum": [
+                "email",
+                "chat",
+                "phone",
+                "webhook"
+              ],
+              "title": "Channel",
+              "type": "string"
+            },
+            "customer_message": {
+              "minLength": 1,
+              "title": "Customer Message",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "received_at": {
+              "format": "date-time",
+              "title": "Received At",
+              "type": "string"
+            },
+            "summary": {
+              "minLength": 1,
+              "title": "Summary",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "received_at",
+            "channel",
+            "customer_message",
+            "summary"
+          ],
+          "title": "CaseRequestResponse",
+          "type": "object"
+        },
+        "CaseRisk": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "CaseRisk",
+          "type": "string"
+        },
+        "CaseStatus": {
+          "enum": [
+            "new",
+            "investigating",
+            "information_needed",
+            "needs_review",
+            "waiting_customer",
+            "in_progress",
+            "completed"
+          ],
+          "title": "CaseStatus",
+          "type": "string"
+        },
+        "CaseSummaryResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/CaseCategory"
+            },
+            "customer": {
+              "$ref": "#/$defs/CaseCustomerSummaryResponse"
+            },
+            "external_reference": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "External Reference",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "impact": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/MoneyResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "issue": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Issue",
+              "type": "string"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "owner": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/CaseOwnerResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "risk": {
+              "$ref": "#/$defs/CaseRisk"
+            },
+            "sla_minutes_remaining": {
+              "minimum": 0,
+              "title": "Sla Minutes Remaining",
+              "type": "integer"
+            },
+            "source_freshness": {
+              "$ref": "#/$defs/SourceFreshnessResponse"
+            },
+            "source_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Source Id",
+              "type": "string"
+            },
+            "status": {
+              "$ref": "#/$defs/CaseStatus"
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated At"
+            },
+            "urgency": {
+              "$ref": "#/$defs/CaseUrgency"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "source_id",
+            "external_reference",
+            "category",
+            "issue",
+            "customer",
+            "status",
+            "owner",
+            "urgency",
+            "risk",
+            "sla_minutes_remaining",
+            "updated_at",
+            "source_freshness",
+            "impact",
+            "version"
+          ],
+          "title": "CaseSummaryResponse",
+          "type": "object"
+        },
+        "CaseUrgency": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "CaseUrgency",
+          "type": "string"
+        },
+        "CaseWorkspaceCollectionsResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "activity": {
+              "$ref": "#/$defs/CaseCollectionWindowResponse"
+            },
+            "business_contexts": {
+              "$ref": "#/$defs/CaseCollectionWindowResponse"
+            },
+            "messages": {
+              "$ref": "#/$defs/CaseCollectionWindowResponse"
+            }
+          },
+          "required": [
+            "business_contexts",
+            "messages",
+            "activity"
+          ],
+          "title": "CaseWorkspaceCollectionsResponse",
+          "type": "object"
+        },
+        "CaseWorkspaceResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "activity": {
+              "items": {
+                "$ref": "#/$defs/CaseActivityResponse"
+              },
+              "title": "Activity",
+              "type": "array"
+            },
+            "available_commands": {
+              "items": {
+                "$ref": "#/$defs/CaseCommand"
+              },
+              "title": "Available Commands",
+              "type": "array"
+            },
+            "business_contexts": {
+              "items": {
+                "$ref": "#/$defs/BusinessObjectSnapshotResponse"
+              },
+              "minItems": 1,
+              "title": "Business Contexts",
+              "type": "array"
+            },
+            "case": {
+              "$ref": "#/$defs/CaseSummaryResponse"
+            },
+            "collections": {
+              "$ref": "#/$defs/CaseWorkspaceCollectionsResponse"
+            },
+            "conversation": {
+              "$ref": "#/$defs/ConversationThreadResponse"
+            },
+            "customer": {
+              "$ref": "#/$defs/CustomerContextResponse"
+            },
+            "evidence": {
+              "items": {
+                "$ref": "#/$defs/PolicyEvidenceResponse"
+              },
+              "title": "Evidence",
+              "type": "array"
+            },
+            "facts": {
+              "items": {
+                "$ref": "#/$defs/VerifiedFactResponse"
+              },
+              "title": "Facts",
+              "type": "array"
+            },
+            "missing_information": {
+              "items": {
+                "$ref": "#/$defs/MissingInformationResponse"
+              },
+              "title": "Missing Information",
+              "type": "array"
+            },
+            "proposal": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ProposalResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "proposed_actions": {
+              "items": {
+                "$ref": "#/$defs/ProposedActionResponse"
+              },
+              "title": "Proposed Actions",
+              "type": "array"
+            },
+            "request": {
+              "$ref": "#/$defs/CaseRequestResponse"
+            },
+            "response_draft": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ResponseDraftResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "risks": {
+              "items": {
+                "$ref": "#/$defs/RiskCheckResponse"
+              },
+              "title": "Risks",
+              "type": "array"
+            }
+          },
+          "required": [
+            "case",
+            "request",
+            "conversation",
+            "customer",
+            "business_contexts",
+            "facts",
+            "missing_information",
+            "evidence",
+            "risks",
+            "proposal",
+            "response_draft",
+            "proposed_actions",
+            "activity",
+            "collections",
+            "available_commands"
+          ],
+          "title": "CaseWorkspaceResponse",
+          "type": "object"
+        },
+        "ConversationMessageResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "author_id": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Author Id"
+            },
+            "author_name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Author Name",
+              "type": "string"
+            },
+            "author_type": {
+              "$ref": "#/$defs/MessageAuthorType"
+            },
+            "body": {
+              "minLength": 1,
+              "title": "Body",
+              "type": "string"
+            },
+            "case_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Case Id",
+              "type": "string"
+            },
+            "channel": {
+              "enum": [
+                "email",
+                "chat",
+                "phone",
+                "webhook",
+                "internal_note"
+              ],
+              "title": "Channel",
+              "type": "string"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "internal": {
+              "title": "Internal",
+              "type": "boolean"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "source_reference": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Source Reference"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "case_id",
+            "author_type",
+            "author_id",
+            "author_name",
+            "channel",
+            "body",
+            "internal",
+            "created_at",
+            "version"
+          ],
+          "title": "ConversationMessageResponse",
+          "type": "object"
+        },
+        "ConversationThreadResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "case_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Case Id",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "messages": {
+              "items": {
+                "$ref": "#/$defs/ConversationMessageResponse"
+              },
+              "title": "Messages",
+              "type": "array"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "title": "Updated At",
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "case_id",
+            "messages",
+            "version",
+            "updated_at"
+          ],
+          "title": "ConversationThreadResponse",
+          "type": "object"
+        },
+        "CustomerContextResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "contact": {
+              "maxLength": 320,
+              "minLength": 1,
+              "title": "Contact",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "locale": {
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "Locale",
+              "type": "string"
+            },
+            "tier": {
+              "enum": [
+                "standard",
+                "vip",
+                "enterprise"
+              ],
+              "title": "Tier",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "tier",
+            "locale",
+            "contact"
+          ],
+          "title": "CustomerContextResponse",
+          "type": "object"
+        },
+        "MessageAuthorType": {
+          "enum": [
+            "customer",
+            "member",
+            "system"
+          ],
+          "title": "MessageAuthorType",
+          "type": "string"
+        },
+        "MissingInformationResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "blocking": {
+              "title": "Blocking",
+              "type": "boolean"
+            },
+            "description": {
+              "minLength": 1,
+              "title": "Description",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "label",
+            "description",
+            "blocking"
+          ],
+          "title": "MissingInformationResponse",
+          "type": "object"
+        },
+        "MoneyResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,16}|(?=[\\d.]{1,19}0*$)\\d{0,16}\\.\\d{0,2}0*$)",
+              "title": "Amount",
+              "type": "string"
+            },
+            "currency": {
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "title": "MoneyResponse",
+          "type": "object"
+        },
+        "PolicyEvidenceResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "applicability": {
+              "minLength": 1,
+              "title": "Applicability",
+              "type": "string"
+            },
+            "citation": {
+              "minLength": 1,
+              "title": "Citation",
+              "type": "string"
+            },
+            "clause_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Clause Id",
+              "type": "string"
+            },
+            "conflict_state": {
+              "enum": [
+                "none",
+                "possible",
+                "confirmed"
+              ],
+              "title": "Conflict State",
+              "type": "string"
+            },
+            "effective_date": {
+              "minLength": 1,
+              "title": "Effective Date",
+              "type": "string"
+            },
+            "excerpt": {
+              "minLength": 1,
+              "title": "Excerpt",
+              "type": "string"
+            },
+            "fingerprint": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Fingerprint",
+              "type": "string"
+            },
+            "freshness": {
+              "enum": [
+                "current",
+                "stale"
+              ],
+              "title": "Freshness",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "policy_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Policy Id",
+              "type": "string"
+            },
+            "policy_version": {
+              "minimum": 1,
+              "title": "Policy Version",
+              "type": "integer"
+            },
+            "policy_version_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Policy Version Id",
+              "type": "string"
+            },
+            "title": {
+              "minLength": 1,
+              "title": "Title",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "policy_id",
+            "policy_version_id",
+            "policy_version",
+            "clause_id",
+            "title",
+            "citation",
+            "excerpt",
+            "applicability",
+            "effective_date",
+            "freshness",
+            "conflict_state",
+            "fingerprint"
+          ],
+          "title": "PolicyEvidenceResponse",
+          "type": "object"
+        },
+        "ProposalResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "case_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Case Id",
+              "type": "string"
+            },
+            "confidence": {
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ],
+              "title": "Confidence",
+              "type": "string"
+            },
+            "context_snapshot_ids": {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Context Snapshot Ids",
+              "type": "array"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "evidence_ids": {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "graph_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Graph Version",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "impact": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/MoneyResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "model_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Model Version",
+              "type": "string"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "outcome": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Outcome",
+              "type": "string"
+            },
+            "prompt_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Prompt Version",
+              "type": "string"
+            },
+            "rationale": {
+              "minLength": 1,
+              "title": "Rationale",
+              "type": "string"
+            },
+            "risk_rule_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Risk Rule Version",
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/$defs/ProposalState"
+            },
+            "uncertainty": {
+              "minLength": 1,
+              "title": "Uncertainty",
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "case_id",
+            "version",
+            "outcome",
+            "impact",
+            "confidence",
+            "uncertainty",
+            "rationale",
+            "state",
+            "evidence_ids",
+            "context_snapshot_ids",
+            "risk_rule_version",
+            "model_version",
+            "prompt_version",
+            "graph_version",
+            "created_at"
+          ],
+          "title": "ProposalResponse",
+          "type": "object"
+        },
+        "ProposalState": {
+          "enum": [
+            "draft",
+            "information_needed",
+            "ready_for_review",
+            "under_review",
+            "approved",
+            "rejected"
+          ],
+          "title": "ProposalState",
+          "type": "string"
+        },
+        "ProposedActionResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_outcome": {
+              "minLength": 1,
+              "title": "Expected Outcome",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "impact": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/MoneyResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            },
+            "review_required": {
+              "title": "Review Required",
+              "type": "boolean"
+            },
+            "type": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "label",
+            "impact",
+            "expected_outcome",
+            "review_required"
+          ],
+          "title": "ProposedActionResponse",
+          "type": "object"
+        },
+        "ResponseDraftResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "minLength": 1,
+              "title": "Body",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "ready",
+                "blocked"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "subject": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Subject",
+              "type": "string"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "title": "Updated At",
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "subject",
+            "body",
+            "status",
+            "updated_at"
+          ],
+          "title": "ResponseDraftResponse",
+          "type": "object"
+        },
+        "ResponseMeta": {
+          "additionalProperties": false,
+          "properties": {
+            "contract_version": {
+              "const": "2026-07-22",
+              "default": "2026-07-22",
+              "title": "Contract Version",
+              "type": "string"
+            },
+            "data_mode": {
+              "default": "demo",
+              "enum": [
+                "demo",
+                "connected",
+                "degraded"
+              ],
+              "title": "Data Mode",
+              "type": "string"
+            }
+          },
+          "title": "ResponseMeta",
+          "type": "object"
+        },
+        "RiskCheckResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "explanation": {
+              "minLength": 1,
+              "title": "Explanation",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "label": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Label",
+              "type": "string"
+            },
+            "outcome": {
+              "enum": [
+                "passed",
+                "requires_review",
+                "information_needed",
+                "blocked"
+              ],
+              "title": "Outcome",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "label",
+            "outcome",
+            "explanation"
+          ],
+          "title": "RiskCheckResponse",
+          "type": "object"
+        },
+        "SourceFreshnessResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "checked_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Checked At"
+            },
+            "status": {
+              "enum": [
+                "current",
+                "stale",
+                "unavailable"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "checked_at"
+          ],
+          "title": "SourceFreshnessResponse",
+          "type": "object"
+        },
+        "VerifiedFactResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "source": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Source",
+              "type": "string"
+            },
+            "statement": {
+              "minLength": 1,
+              "title": "Statement",
+              "type": "string"
+            },
+            "verified_at": {
+              "format": "date-time",
+              "title": "Verified At",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "statement",
+            "source",
+            "verified_at"
+          ],
+          "title": "VerifiedFactResponse",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/CaseWorkspaceResponse"
+        },
+        "meta": {
+          "$ref": "#/$defs/ResponseMeta"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "CaseDetailResponse",
+      "type": "object"
+    },
+    "CaseListResponse": {
+      "$defs": {
+        "CaseCategory": {
+          "enum": [
+            "billing_dispute",
+            "refund_request",
+            "account_access",
+            "service_exception"
+          ],
+          "title": "CaseCategory",
+          "type": "string"
+        },
+        "CaseCustomerSummaryResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "is_vip": {
+              "title": "Is Vip",
+              "type": "boolean"
+            },
+            "name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "is_vip"
+          ],
+          "title": "CaseCustomerSummaryResponse",
+          "type": "object"
+        },
+        "CaseOwnerResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "initials": {
+              "maxLength": 3,
+              "minLength": 1,
+              "title": "Initials",
+              "type": "string"
+            },
+            "name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "initials"
+          ],
+          "title": "CaseOwnerResponse",
+          "type": "object"
+        },
+        "CaseQueueSummaryResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "attention": {
+              "minimum": 0,
+              "title": "Attention",
+              "type": "integer"
+            },
+            "review": {
+              "minimum": 0,
+              "title": "Review",
+              "type": "integer"
+            },
+            "sla_at_risk": {
+              "minimum": 0,
+              "title": "Sla At Risk",
+              "type": "integer"
+            },
+            "total": {
+              "minimum": 0,
+              "title": "Total",
+              "type": "integer"
+            },
+            "unassigned": {
+              "minimum": 0,
+              "title": "Unassigned",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total",
+            "attention",
+            "review",
+            "sla_at_risk",
+            "unassigned"
+          ],
+          "title": "CaseQueueSummaryResponse",
+          "type": "object"
+        },
+        "CaseRisk": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "CaseRisk",
+          "type": "string"
+        },
+        "CaseStatus": {
+          "enum": [
+            "new",
+            "investigating",
+            "information_needed",
+            "needs_review",
+            "waiting_customer",
+            "in_progress",
+            "completed"
+          ],
+          "title": "CaseStatus",
+          "type": "string"
+        },
+        "CaseSummaryResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/CaseCategory"
+            },
+            "customer": {
+              "$ref": "#/$defs/CaseCustomerSummaryResponse"
+            },
+            "external_reference": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "External Reference",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "impact": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/MoneyResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "issue": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Issue",
+              "type": "string"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "owner": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/CaseOwnerResponse"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "risk": {
+              "$ref": "#/$defs/CaseRisk"
+            },
+            "sla_minutes_remaining": {
+              "minimum": 0,
+              "title": "Sla Minutes Remaining",
+              "type": "integer"
+            },
+            "source_freshness": {
+              "$ref": "#/$defs/SourceFreshnessResponse"
+            },
+            "source_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Source Id",
+              "type": "string"
+            },
+            "status": {
+              "$ref": "#/$defs/CaseStatus"
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated At"
+            },
+            "urgency": {
+              "$ref": "#/$defs/CaseUrgency"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "source_id",
+            "external_reference",
+            "category",
+            "issue",
+            "customer",
+            "status",
+            "owner",
+            "urgency",
+            "risk",
+            "sla_minutes_remaining",
+            "updated_at",
+            "source_freshness",
+            "impact",
+            "version"
+          ],
+          "title": "CaseSummaryResponse",
+          "type": "object"
+        },
+        "CaseUrgency": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "CaseUrgency",
+          "type": "string"
+        },
+        "MoneyResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,16}|(?=[\\d.]{1,19}0*$)\\d{0,16}\\.\\d{0,2}0*$)",
+              "title": "Amount",
+              "type": "string"
+            },
+            "currency": {
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "title": "MoneyResponse",
+          "type": "object"
+        },
+        "ResponseMeta": {
+          "additionalProperties": false,
+          "properties": {
+            "contract_version": {
+              "const": "2026-07-22",
+              "default": "2026-07-22",
+              "title": "Contract Version",
+              "type": "string"
+            },
+            "data_mode": {
+              "default": "demo",
+              "enum": [
+                "demo",
+                "connected",
+                "degraded"
+              ],
+              "title": "Data Mode",
+              "type": "string"
+            }
+          },
+          "title": "ResponseMeta",
+          "type": "object"
+        },
+        "SourceFreshnessResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "checked_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Checked At"
+            },
+            "status": {
+              "enum": [
+                "current",
+                "stale",
+                "unavailable"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "checked_at"
+          ],
+          "title": "SourceFreshnessResponse",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/CaseSummaryResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "meta": {
+          "$ref": "#/$defs/ResponseMeta"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        },
+        "offset": {
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "previous_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Previous Cursor"
+        },
+        "summary": {
+          "$ref": "#/$defs/CaseQueueSummaryResponse"
+        },
+        "summary_scope": {
+          "const": "organization",
+          "title": "Summary Scope",
+          "type": "string"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor",
+        "total",
+        "previous_cursor",
+        "offset",
+        "limit",
+        "summary_scope",
+        "summary"
+      ],
+      "title": "CaseListResponse",
+      "type": "object"
+    },
+    "ConversationMessagePageResponse": {
+      "$defs": {
+        "ConversationMessageResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "author_id": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Author Id"
+            },
+            "author_name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Author Name",
+              "type": "string"
+            },
+            "author_type": {
+              "$ref": "#/$defs/MessageAuthorType"
+            },
+            "body": {
+              "minLength": 1,
+              "title": "Body",
+              "type": "string"
+            },
+            "case_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Case Id",
+              "type": "string"
+            },
+            "channel": {
+              "enum": [
+                "email",
+                "chat",
+                "phone",
+                "webhook",
+                "internal_note"
+              ],
+              "title": "Channel",
+              "type": "string"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "internal": {
+              "title": "Internal",
+              "type": "boolean"
+            },
+            "organization_id": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Organization Id",
+              "type": "string"
+            },
+            "source_reference": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Source Reference"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "organization_id",
+            "case_id",
+            "author_type",
+            "author_id",
+            "author_name",
+            "channel",
+            "body",
+            "internal",
+            "created_at",
+            "version"
+          ],
+          "title": "ConversationMessageResponse",
+          "type": "object"
+        },
+        "MessageAuthorType": {
+          "enum": [
+            "customer",
+            "member",
+            "system"
+          ],
+          "title": "MessageAuthorType",
+          "type": "string"
+        },
+        "ResponseMeta": {
+          "additionalProperties": false,
+          "properties": {
+            "contract_version": {
+              "const": "2026-07-22",
+              "default": "2026-07-22",
+              "title": "Contract Version",
+              "type": "string"
+            },
+            "data_mode": {
+              "default": "demo",
+              "enum": [
+                "demo",
+                "connected",
+                "degraded"
+              ],
+              "title": "Data Mode",
+              "type": "string"
+            }
+          },
+          "title": "ResponseMeta",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ConversationMessageResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "meta": {
+          "$ref": "#/$defs/ResponseMeta"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor",
+        "total"
+      ],
+      "title": "ConversationMessagePageResponse",
+      "type": "object"
+    }
+  },
+  "schema_version": "support-copilot-case-transport-v1"
+}

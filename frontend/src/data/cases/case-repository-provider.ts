@@ -1,16 +1,21 @@
+import { configuredDataSource } from "@/data/api/data-mode";
+import { apiCaseRepository } from "./api-case-repository";
 import type { CaseRepository } from "./case-repository";
 import { mockCaseRepository } from "./mock-case-repository";
 
-let repository: CaseRepository = mockCaseRepository;
+let repositoryOverride: CaseRepository | null = null;
 
 export function getCaseRepository(): CaseRepository {
-  return repository;
+  if (repositoryOverride) return repositoryOverride;
+  return configuredDataSource() === "api"
+    ? apiCaseRepository
+    : mockCaseRepository;
 }
 
 export function setCaseRepositoryForTests(next: CaseRepository): () => void {
-  const previous = repository;
-  repository = next;
+  const previous = repositoryOverride;
+  repositoryOverride = next;
   return () => {
-    repository = previous;
+    repositoryOverride = previous;
   };
 }
