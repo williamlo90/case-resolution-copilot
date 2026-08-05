@@ -1,0 +1,172 @@
+# Public Evidence Benchmark Data
+
+This directory defines three independent, bounded public-data suites:
+
+- CFPB complaint narratives and public company-response categories.
+- Financial Ombudsman Service de-identified final decisions.
+- UCI Online Retail II transaction and cancellation records.
+
+The suites are never joined into fictional end-to-end cases. Each suite answers a different
+question and carries its own limitations.
+
+## Local Data Boundary
+
+Raw and prepared records are written to `backend/.benchmark-data/`, which is ignored by Git.
+The repository commits only source contracts, transformation code, validation rules, tests, and
+aggregate evidence. Do not commit raw PDFs, complaint narratives, transaction rows, prepared
+inputs, or answer files.
+
+Prepared data is separated by construction:
+
+```text
+.benchmark-data/
+  raw/
+    cfpb/
+    fos/
+    uci/
+  prepared/
+    cfpb/inputs.jsonl
+    cfpb/labels.jsonl
+    fos/inputs.jsonl
+    fos/labels.jsonl
+    uci/inputs.jsonl
+    uci/labels.jsonl
+  manifest.json
+  runs/
+    deterministic-baseline-v1/
+      predictions.jsonl
+      prediction-manifest.json
+      report.json
+      report.md
+    openai-public-evidence-v1/
+      contract.json
+      progress.json
+      predictions.partial.jsonl
+      predictions.jsonl
+      prediction-manifest.json
+      report.json
+      report.md
+```
+
+Model or application runs may receive only `inputs.jsonl`. Scoring code may read
+`labels.jsonl` only after outputs have been persisted.
+
+## One-Shot Setup
+
+From `backend/`:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.prepare_public_benchmark
+```
+
+The command is serial and bounded. It does not start a server, browser, container, model provider,
+watch process, or benchmark loop. Cached raw files are reused unless `--refresh` is supplied.
+
+FOS PDF extraction uses `pdftotext` from Poppler when available and falls back to `pypdf` when that
+package is already installed. No optional parser is imported by the application runtime.
+
+Validation without network access:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.prepare_public_benchmark --validate-only
+```
+
+## Blind Run
+
+Run both phases:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_public_benchmark --phase all
+```
+
+The phases can also be audited independently:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_public_benchmark --phase predict
+.\.venv\Scripts\python.exe -m scripts.run_public_benchmark --phase score
+```
+
+The prediction phase reads only the three `inputs.jsonl` files and persists an input hash with every
+prediction. Its manifest contains no label path or label hash. The scoring phase verifies frozen
+input and prediction hashes before it opens `labels.jsonl`. Any changed input, prediction, manifest,
+record ID, predictor version, or suite boundary fails closed.
+
+The bundled predictor is a transparent deterministic baseline. It is useful for proving the blind
+pipeline and establishing a reproducible floor; it is not the production Decision Brief model.
+Scores are reported separately because the three suites measure different tasks. No overall score
+is calculated.
+
+Historical baseline from the archived implementation:
+
+| Suite | Records | Accuracy | Macro F1 |
+| --- | ---: | ---: | ---: |
+| CFPB | 36 | 0.500 | 0.417 |
+| FOS | 10 | 0.600 | 0.508 |
+| UCI | 40 | 1.000 | 1.000 |
+
+The UCI result is expected for the baseline because the benchmark and predictor use the same
+documented exact-field relationship. It validates adapter matching, not general reasoning.
+
+These values document the predecessor repository and are not evidence from the current commit.
+Run the preparation and blind-run commands above to create revision-bound evidence for this rebuild.
+
+## Optional Model-Capability Run
+
+The model-capability runner is deliberately separate from the deterministic baseline and from the
+production Decision Brief control engine:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_ai_public_benchmark --phase predict
+.\.venv\Scripts\python.exe -m scripts.run_ai_public_benchmark --phase score
+```
+
+Prediction performs 46 serial provider calls: FOS first, then CFPB. UCI remains deterministic.
+The runner freezes the prompt/configuration contract before the first call, sets SDK retries to
+zero, checkpoints each record, and enforces a hard 46-call ceiling. An interrupted in-flight record
+is converted to a safe abstention rather than retried automatically.
+
+The score phase verifies all hashes before it opens labels. It reports accuracy, macro F1,
+abstention, schema validity, evidence-quote grounding, safety invariants, token usage, and UCI
+matching metrics per suite. It never calculates a cross-suite aggregate.
+
+The archived implementation completed a v1 provider-backed run. This rebuild intentionally does not
+copy that result forward as current evidence. A new result requires fresh credentials, a frozen run
+contract, and revision-bound output generated by the commands above.
+
+## Evidence Semantics
+
+### CFPB
+
+Inputs contain the public, scrubbed consumer narrative and issue taxonomy. Labels contain the
+public company-response category and whether the response was timely. The CFPB warns that
+narratives are consumer accounts, are not independently verified, and are not a representative
+sample of consumer experience.
+
+### Financial Ombudsman Service
+
+Inputs contain the complaint and factual background preceding the ombudsman's analysis. Paragraphs
+that disclose an investigator, provisional, or final outcome are removed. Labels contain the
+published final outcome and final-decision text. The selected decisions are a small, balanced
+engineering sample, not a statistical sample or a statement of law.
+
+### UCI Online Retail II
+
+Inputs contain pairs of real, already anonymized transaction rows. Positive labels are derived by an
+explicit exact-match rule across customer, stock code, absolute quantity, price, and time order.
+Negative examples are deterministic pairings of unrelated real rows. These are adapter and entity
+matching fixtures, not ground-truth customer support cases.
+
+Online Retail II must be attributed to Daqing Chen:
+
+> Chen, D. (2012). Online Retail II [Dataset]. UCI Machine Learning Repository.
+> https://doi.org/10.24432/C5CG6D
+
+## Permitted Claim
+
+After a recorded blind run:
+
+> Evaluated through blind testing on real, de-identified public complaint decisions, public
+> consumer complaint records, and real retail transaction data.
+
+This setup does not support a claim that the product was validated on complete internal business
+case files or in a live client workflow.

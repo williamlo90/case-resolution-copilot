@@ -1,0 +1,80 @@
+{
+  "schema_version": "public-benchmark-sources-v1",
+  "cfpb": {
+    "api_url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/",
+    "dataset_url": "https://www.consumerfinance.gov/data-research/consumer-complaints/",
+    "license": "CC0",
+    "date_received_min": "2025-01-01",
+    "date_received_max": "2026-01-01",
+    "response_labels": [
+      "Closed with explanation",
+      "Closed with monetary relief",
+      "Closed with non-monetary relief"
+    ],
+    "records_per_label": 12
+  },
+  "fos": {
+    "dataset_url": "https://www.financial-ombudsman.org.uk/decisions-case-studies/ombudsman-decisions/SearchDecisions",
+    "license": "Public de-identified decisions; raw documents are local-only and are not redistributed by this repository.",
+    "cases": [
+      {
+        "decision_id": "DRN-5982263",
+        "expected_outcome": "upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-5982263.pdf"
+      },
+      {
+        "decision_id": "DRN-6317225",
+        "expected_outcome": "partially_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6317225.pdf"
+      },
+      {
+        "decision_id": "DRN-6151316",
+        "expected_outcome": "upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6151316.pdf"
+      },
+      {
+        "decision_id": "DRN-6287014",
+        "expected_outcome": "partially_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6287014.pdf"
+      },
+      {
+        "decision_id": "DRN-6275635",
+        "expected_outcome": "upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6275635.pdf"
+      },
+      {
+        "decision_id": "DRN-6213447",
+        "expected_outcome": "not_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6213447.pdf"
+      },
+      {
+        "decision_id": "DRN-5927771",
+        "expected_outcome": "not_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-5927771.pdf"
+      },
+      {
+        "decision_id": "DRN-6060068",
+        "expected_outcome": "not_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6060068.pdf"
+      },
+      {
+        "decision_id": "DRN-6182059",
+        "expected_outcome": "not_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6182059.pdf"
+      },
+      {
+        "decision_id": "DRN-6068966",
+        "expected_outcome": "not_upheld",
+        "source_url": "https://www.financial-ombudsman.org.uk/decision/DRN-6068966.pdf"
+      }
+    ]
+  },
+  "uci": {
+    "dataset_url": "https://archive.ics.uci.edu/dataset/502/online%2Bretail%2Bii",
+    "download_url": "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip",
+    "doi": "10.24432/C5CG6D",
+    "license": "CC BY 4.0",
+    "max_rows_per_sheet": 25000,
+    "positive_pairs": 20
+  }
+}

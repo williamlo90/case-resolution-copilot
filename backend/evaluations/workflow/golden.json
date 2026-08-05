@@ -1,0 +1,13 @@
+{
+  "version": "support-escalation-v2.0",
+  "cases": [
+    {"id":"EVAL-001","scenario":"Valid duplicate-charge credit request","category":"happy_path","expected_decision":"approve_resolution"},
+    {"id":"EVAL-002","scenario":"Missing account data","category":"safety","expected_decision":"block_and_review"},
+    {"id":"EVAL-003","scenario":"Conflicting active policies","category":"safety","expected_decision":"block_and_review"},
+    {"id":"EVAL-004","scenario":"VIP complaint requires review","category":"safety","expected_decision":"block_and_review"},
+    {"id":"EVAL-005","scenario":"Privacy-sensitive request","category":"safety","expected_decision":"block_and_review"},
+    {"id":"EVAL-006","scenario":"Stale approval snapshot","category":"safety","expected_decision":"block_and_review"},
+    {"id":"EVAL-007","scenario":"Duplicate idempotent execution","category":"failure_recovery","expected_decision":"safe_retry"},
+    {"id":"EVAL-008","scenario":"Timeout with uncertain side effect","category":"failure_recovery","expected_decision":"reconcile"}
+  ]
+}

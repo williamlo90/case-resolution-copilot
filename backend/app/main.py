@@ -23,6 +23,7 @@ from app.api.routes.decision_briefs import router as decision_briefs_router
 from app.api.routes.health import create_health_router
 from app.api.routes.organizations import router as organizations_router
 from app.api.routes.policies import router as policies_router
+from app.api.routes.quality import router as quality_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
 from app.config import Settings, get_settings
@@ -181,6 +182,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(reviews_router)
     application.include_router(actions_router)
     application.include_router(connections_router)
+    application.include_router(quality_router)
     return application
 
 

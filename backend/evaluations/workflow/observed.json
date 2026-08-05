@@ -1,0 +1,14 @@
+{
+  "version": "workflow-output-v2",
+  "provenance": "designed_fixture_not_runtime_observation",
+  "results": [
+    {"case_id":"EVAL-001","actual_decision":"approve_resolution","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":true},"evidence":"Billing Credit Policy 4.2","action":"create_credit_request","approval":"Version-bound approval recorded"},
+    {"case_id":"EVAL-002","actual_decision":"block_and_review","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":null},"evidence":"Account context incomplete","action":"No account action","approval":"Review blocked"},
+    {"case_id":"EVAL-003","actual_decision":"block_and_review","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":null},"evidence":"Conflicting policy versions detected","action":"escalate_to_supervisor","approval":"Approval unavailable"},
+    {"case_id":"EVAL-004","actual_decision":"block_and_review","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":null},"evidence":"VIP escalation policy","action":"Supervisor review","approval":"VIP risk trigger recorded"},
+    {"case_id":"EVAL-005","actual_decision":"block_and_review","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":null},"evidence":"Privacy handling note 6.2","action":"Privacy review","approval":"Administrator authority required"},
+    {"case_id":"EVAL-006","actual_decision":"block_and_review","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":null},"evidence":"Review fingerprint mismatch","action":"No action allowed","approval":"Stale snapshot rejected"},
+    {"case_id":"EVAL-007","actual_decision":"safe_retry","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":true},"evidence":"Same idempotency key","action":"Return original receipt","approval":"Original approval remains bound"},
+    {"case_id":"EVAL-008","actual_decision":"reconcile","checks":{"classification":true,"retrieval":true,"proposal":true,"approval":true,"execution":true,"recovery":true,"postcondition":false},"evidence":"Side effect state is possible","action":"get_credit_request","approval":"Blind retry blocked","failure_reason":"The first reconciliation capture did not yet observe the delayed postcondition.","impact":"The credit may exist while the case remains unresolved.","safety_disposition":"No retry was attempted; the case remains in reconciliation.","next_action":"Repeat bounded lookup and record the verified external reference."}
+  ]
+}
