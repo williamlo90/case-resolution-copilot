@@ -1,0 +1,299 @@
+import { primaryCaseWorkspaceFixture } from "@/mocks/fixtures/case-fixtures";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { CaseWorkspace } from "./case-workspace";
+
+describe("CaseWorkspace", () => {
+  it("separates facts, uncertainty, evidence, and human authority", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        submitReviewAction={async () => ({
+          status: "success",
+          message: "Case submitted for review.",
+          correlationId: "COR-TEST",
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Issue summary" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Verified facts" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Information needed" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Reverse duplicate charge" })).toBeVisible();
+    expect(screen.getByText("Supervisor review required")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Submit for review" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "submitted for review",
+    );
+  });
+
+  it("provides functional conversation, evidence, and activity tabs", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        saveDraftAction={async () => ({
+          status: "success",
+          message: "Draft saved.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
+    expect(await screen.findByRole("heading", { name: "Customer conversation" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Response draft" })).toBeVisible();
+    expect(
+      screen.getByText(
+        /I was charged twice for the same monthly subscription/,
+      ),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("tab", { name: "Evidence" }));
+    expect(await screen.findByRole("heading", { name: "Policy guidance" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Risk checks" })).toBeVisible();
+    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    expect(await screen.findByRole("heading", { name: "Case activity" })).toBeVisible();
+    const auditButton = screen.getByRole("button", { name: "Download audit" });
+    expect(auditButton.closest("form")).toHaveAttribute(
+      "action",
+      "/cases/CS-2048/audit",
+    );
+    expect(auditButton.closest("form")).toHaveAttribute("method", "post");
+  });
+
+  it("supports arrow-key navigation for workspace and composer tabs", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        addNoteAction={async () => ({
+          status: "success",
+          message: "The internal note was added.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    const briefTab = screen.getByRole("tab", { name: "Decision brief" });
+    briefTab.focus();
+    fireEvent.keyDown(briefTab, { key: "ArrowRight" });
+
+    const conversationTab = screen.getByRole("tab", { name: "Conversation" });
+    expect(conversationTab).toHaveFocus();
+    expect(conversationTab).toHaveAttribute("aria-selected", "true");
+    const conversationPanel = await screen.findByRole("tabpanel", {
+      name: "Conversation",
+    });
+    expect(conversationPanel).toHaveAttribute(
+      "aria-labelledby",
+      conversationTab.id,
+    );
+
+    const replyTab = screen.getByRole("tab", { name: "Reply" });
+    replyTab.focus();
+    fireEvent.keyDown(replyTab, { key: "ArrowRight" });
+    const noteTab = screen.getByRole("tab", { name: "Internal note" });
+    expect(noteTab).toHaveFocus();
+    expect(noteTab).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("tabpanel", { name: "Internal note" }),
+    ).toBeVisible();
+  });
+
+  it("loads older conversation and activity pages without replacing current items", async () => {
+    const loadConversation = vi.fn(async () => ({
+      status: "success" as const,
+      items: [
+        {
+          ...primaryCaseWorkspaceFixture.conversation.messages[0],
+          id: "MSG-OLDER",
+          body: "Earlier customer context.",
+          createdAt: "2026-07-20T02:46:00.000Z",
+        },
+      ],
+      nextCursor: null,
+      total: 2,
+    }));
+    const loadActivity = vi.fn(async () => ({
+      status: "success" as const,
+      items: [
+        {
+          ...primaryCaseWorkspaceFixture.activity[0],
+          id: "EV-OLDER",
+          label: "Earlier case event",
+          timestamp: "2026-07-20T02:46:00.000Z",
+        },
+      ],
+      nextCursor: null,
+      total: 5,
+    }));
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          collections: {
+            ...primaryCaseWorkspaceFixture.collections,
+            messages: {
+              returned: 1,
+              total: 2,
+              hasMore: true,
+              nextCursor: "conversation-cursor",
+            },
+            activity: {
+              returned: 4,
+              total: 5,
+              hasMore: true,
+              nextCursor: "activity-cursor",
+            },
+          },
+        }}
+        loadConversationHistoryAction={loadConversation}
+        loadActivityHistoryAction={loadActivity}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Load earlier messages" }),
+    );
+    expect(await screen.findByText("Earlier customer context.")).toBeVisible();
+    expect(
+      screen.getByText(/I was charged twice for the same monthly subscription/),
+    ).toBeVisible();
+    expect(loadConversation).toHaveBeenCalledWith("conversation-cursor");
+
+    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Load earlier activity" }),
+    );
+    expect(await screen.findByText("Earlier case event")).toBeVisible();
+    expect(screen.getByText("Ready for supervisor review")).toBeVisible();
+    expect(loadActivity).toHaveBeenCalledWith("activity-cursor");
+  });
+
+  it("records replies and internal notes as separate conversation entries", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        addReplyAction={async () => ({
+          status: "success",
+          message: "The reply was added to the case conversation.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+        addNoteAction={async () => ({
+          status: "success",
+          message: "The internal note was added.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
+    expect(
+      await screen.findByRole("button", { name: "Add reply" }),
+    ).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Add reply" }));
+    expect(
+      await screen.findByText("The reply was added to the case conversation."),
+    ).toBeVisible();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Internal note" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Internal note" }), {
+      target: { value: "Customer identity was verified by phone." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add internal note" }));
+    expect(await screen.findByText("The internal note was added.")).toBeVisible();
+  });
+
+  it("does not show write controls to a read-only case viewer", async () => {
+    render(<CaseWorkspace workspace={primaryCaseWorkspaceFixture} />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
+    expect(
+      await screen.findByText(/your role cannot add replies/i),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("textbox", { name: "Response draft" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses plain language for case progress controls", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        workflowAction={{
+          mode: "request_information",
+          action: async () => ({
+            status: "success",
+            message: "The case is now waiting for more information.",
+            correlationId: null,
+            retryAfterSeconds: null,
+          }),
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Ask for information" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "waiting for more information",
+    );
+  });
+
+  it("hides audit export when the actor is not allowed to export it", async () => {
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          availableCommands:
+            primaryCaseWorkspaceFixture.availableCommands.filter(
+              (command) => command !== "export_audit",
+            ),
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    expect(await screen.findByRole("heading", { name: "Case activity" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Download audit" })).not.toBeInTheDocument();
+  });
+
+  it("lets an operator refresh the decision brief without changing approval controls", async () => {
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        prepareBriefAction={async () => ({
+          status: "success",
+          message:
+            "Decision brief updated. AI drafted the wording; checks and approval rules stayed unchanged.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    expect(screen.getByText("AI-assisted wording")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh brief" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Decision brief updated",
+    );
+    expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled();
+  });
+
+  it("uses a clear prepare label when no decision brief exists", () => {
+    render(
+      <CaseWorkspace
+        workspace={{ ...primaryCaseWorkspaceFixture, proposal: null }}
+        prepareBriefAction={async () => ({
+          status: "success",
+          message: "Decision brief updated.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Prepare brief" })).toBeVisible();
+  });
+});
