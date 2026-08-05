@@ -6,8 +6,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
+from app.api.middleware import CORRELATION_HEADER
+
 logger = logging.getLogger(__name__)
-CORRELATION_HEADER = "X-Correlation-ID"
 
 
 class AppError(Exception):

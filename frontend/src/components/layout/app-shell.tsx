@@ -1,28 +1,38 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
+import { Bell, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useCallback, useRef, useState, type ReactNode } from "react";
 import { useModalDialog } from "@/components/accessibility/use-modal-dialog";
+import { WorkspaceLink as Link } from "@/components/navigation/workspace-link";
 import { PresentationProvider } from "@/components/providers/presentation-provider";
+import type { SessionContext } from "@/domain/administration/administration";
+import type { ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { AppNavigation, type AppPermission } from "./app-navigation";
 
-export type ShellContext = {
-  organizationName: string;
-  actorName: string;
-  actorRole: string;
-  locale: string;
-  timeZone: string;
-  permissions: readonly AppPermission[];
+type AppShellProps = {
+  children: ReactNode;
+  context: SessionContext;
+  providerAuthentication?: boolean;
+};
+
+const permissionMap: Readonly<Record<string, AppPermission>> = {
+  "case:read": "cases:view",
+  "review:read": "reviews:view",
+  "action:read": "actions:view",
+  "policy:read": "policies:view",
+  "quality:read": "quality:view",
+  "connection:read": "connections:manage",
+  "member:read": "team:manage",
+  "settings:manage": "settings:manage",
 };
 
 export function AppShell({
   children,
   context,
-}: {
-  children: ReactNode;
-  context: ShellContext;
-}) {
+  providerAuthentication = false,
+}: AppShellProps) {
   const pathname = usePathname();
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const mobileDialogRef = useRef<HTMLElement>(null);
@@ -32,28 +42,37 @@ export function AppShell({
     setMobileNavigationOpen(false);
     window.setTimeout(() => mobileMenuButtonRef.current?.focus(), 0);
   }, []);
-
   useModalDialog({
     open: mobileNavigationOpen,
     dialogRef: mobileDialogRef,
     initialFocusRef: mobileCloseButtonRef,
     onDismiss: closeMobileNavigation,
   });
-
-  const permissions = new Set(context.permissions);
-  const actorInitials = context.actorName
+  const permissions = useMemo(
+    () =>
+      new Set(
+        context.actor.permissions.flatMap((permission) => {
+          const mapped = permissionMap[permission];
+          return mapped ? [mapped] : [];
+        }),
+      ),
+    [context.actor.permissions],
+  );
+  const workspaceMode =
+    context.actor.authenticationMode === "deterministic_development"
+      ? "Demo"
+      : "Live";
+  const actorInitials = context.actor.name
     .split(" ")
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
   const navigationProps = {
-    pathname,
-    permissions,
-    organizationName: context.organizationName,
-    workspaceMode: "Demo",
-    actorName: context.actorName,
-    actorRole: context.actorRole,
+    organizationName: context.organization.name,
+    workspaceMode,
+    actorName: context.actor.name,
+    actorRole: context.actor.role ?? "service",
   };
 
   return (
@@ -65,8 +84,16 @@ export function AppShell({
         Skip to content
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col bg-[#17232d] lg:flex">
-        <AppNavigation {...navigationProps} />
+      <aside
+        aria-hidden={mobileNavigationOpen ? true : undefined}
+        inert={mobileNavigationOpen ? true : undefined}
+        className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col bg-[#17232d] lg:flex"
+      >
+        <AppNavigation
+          pathname={pathname}
+          permissions={permissions}
+          {...navigationProps}
+        />
       </aside>
 
       {mobileNavigationOpen ? (
@@ -74,6 +101,7 @@ export function AppShell({
           <button
             type="button"
             aria-label="Dismiss navigation"
+            aria-hidden="true"
             tabIndex={-1}
             className="absolute inset-0 bg-black/45"
             onClick={closeMobileNavigation}
@@ -92,38 +120,83 @@ export function AppShell({
               type="button"
               aria-label="Close navigation"
               onClick={closeMobileNavigation}
-              className="absolute right-3 top-3 grid size-10 place-items-center rounded-md text-white/70 hover:bg-white/8 hover:text-white"
+              className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-md text-white/70 hover:bg-white/8 hover:text-white"
             >
               <X aria-hidden="true" size={19} />
             </button>
-            <AppNavigation {...navigationProps} onNavigate={closeMobileNavigation} />
+            <AppNavigation
+              pathname={pathname}
+              permissions={permissions}
+              {...navigationProps}
+              onNavigate={closeMobileNavigation}
+            />
           </aside>
         </div>
       ) : null}
 
-      <div className="lg:pl-[232px]">
-        <header className="sticky top-0 z-30 flex h-[60px] items-center justify-between border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-7">
-          <button
-            ref={mobileMenuButtonRef}
-            type="button"
-            aria-label="Open navigation"
-            aria-controls="mobile-navigation"
-            aria-expanded={mobileNavigationOpen}
-            onClick={() => setMobileNavigationOpen(true)}
-            className="grid size-10 place-items-center rounded-md text-secondary hover:bg-surface-subtle lg:hidden"
-          >
-            <Menu aria-hidden="true" size={19} />
-          </button>
-          <div className="ml-auto flex h-10 items-center gap-2 text-sm font-medium text-primary">
-            <span className="grid size-7 place-items-center rounded-full bg-[#1d2933] text-[11px] font-bold text-white">
-              {actorInitials || "?"}
-            </span>
-            <span className="hidden sm:inline">{context.actorName}</span>
+      <div
+        aria-hidden={mobileNavigationOpen ? true : undefined}
+        inert={mobileNavigationOpen ? true : undefined}
+        className="lg:pl-[232px]"
+      >
+        <header className="sticky top-0 z-30 flex h-[60px] items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-7">
+          <div className="flex items-center gap-3">
+            <button
+              ref={mobileMenuButtonRef}
+              type="button"
+              aria-label="Open navigation"
+              aria-controls="mobile-navigation"
+              aria-expanded={mobileNavigationOpen}
+              onClick={() => setMobileNavigationOpen(true)}
+              className="grid size-10 place-items-center rounded-md text-secondary hover:bg-surface-subtle lg:hidden"
+            >
+              <Menu aria-hidden="true" size={19} />
+            </button>
+            <div className="hidden items-center gap-2 text-xs text-secondary sm:flex">
+              <span className="size-2 rounded-full bg-success" aria-hidden="true" />
+              {workspaceMode === "Demo" ? "Connected simulator" : "Connected workspace"}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2" aria-label="Signed in user">
+            <Link
+              href="/notifications"
+              aria-label="Notifications"
+              title="Notifications"
+              className={`grid size-10 place-items-center rounded-md ${
+                pathname.startsWith("/notifications")
+                  ? "bg-info-bg text-info"
+                  : "text-secondary hover:bg-surface-subtle hover:text-primary"
+              }`}
+            >
+              <Bell aria-hidden="true" size={18} />
+            </Link>
+            <span className="h-6 w-px bg-border" />
+            <div className="flex h-10 items-center gap-2 px-1.5 text-sm font-medium text-primary">
+              {providerAuthentication ? (
+                <UserButton
+                  signInUrl="/sign-in"
+                  appearance={{
+                    elements: {
+                      avatarBox: "size-7",
+                    },
+                  }}
+                />
+              ) : (
+                <span className="grid size-7 place-items-center rounded-full bg-[#1d2933] text-[11px] font-bold text-white">
+                  {actorInitials || "?"}
+                </span>
+              )}
+              <span className="hidden sm:inline">{context.actor.name}</span>
+            </div>
           </div>
         </header>
 
         <main id="main-content" className="min-h-[calc(100vh-60px)]">
-          <PresentationProvider locale={context.locale} timeZone={context.timeZone}>
+          <PresentationProvider
+            locale={context.organization.locale}
+            timeZone={context.organization.timeZone}
+          >
             {children}
           </PresentationProvider>
         </main>

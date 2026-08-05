@@ -1,0 +1,3 @@
+import { FileQuestion } from "lucide-react";
+import Link from "next/link";
+export default function NotFound() { return <main className="grid min-h-screen place-items-center bg-canvas px-4"><section className="w-full max-w-lg border border-border bg-surface px-6 py-7"><FileQuestion size={24} className="text-secondary" /><h1 className="mt-4 text-xl font-semibold text-primary">Page not found</h1><p className="mt-2 text-sm leading-6 text-secondary">The item may have moved, or you may not have access to it.</p><Link href="/cases" className="mt-5 inline-flex h-10 items-center rounded-md bg-action px-4 text-sm font-semibold text-white">Return to cases</Link></section></main>; }

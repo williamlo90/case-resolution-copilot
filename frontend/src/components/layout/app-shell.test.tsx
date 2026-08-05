@@ -1,40 +1,101 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { AppShell, type ShellContext } from "./app-shell";
+import { AppShell } from "./app-shell";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/cases",
 }));
 
-const context: ShellContext = {
-  organizationName: "Northstar Cloud",
-  actorName: "Ari Specialist",
-  actorRole: "specialist",
-  locale: "en-US",
-  timeZone: "UTC",
-  permissions: ["cases:view"],
-};
-
 describe("AppShell", () => {
-  it("provides one main landmark and a skip link", () => {
-    render(<AppShell context={context}>Case content</AppShell>);
-
-    expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
-    expect(screen.getByRole("link", { name: "Skip to content" })).toHaveAttribute(
-      "href",
-      "#main-content",
+  it("exposes the primary landmark and preview boundary", () => {
+    render(
+      <AppShell
+        context={{
+          actor: {
+            id: "USR-0003",
+            organizationId: "ORG-0001",
+            name: "Ari Administrator",
+            role: "administrator",
+            permissions: [
+              "case:read",
+              "review:read",
+              "action:read",
+              "policy:read",
+              "quality:read",
+              "connection:read",
+              "member:read",
+              "settings:manage",
+            ],
+            authenticationMode: "deterministic_development",
+          },
+          organization: {
+            id: "ORG-0001",
+            name: "Northstar Cloud",
+            slug: "northstar-cloud",
+            version: 1,
+            locale: "en-US",
+            timeZone: "Asia/Jakarta",
+          },
+        }}
+      >
+        <h1>Cases</h1>
+      </AppShell>,
     );
-    expect(screen.getAllByRole("link", { name: "Cases" })).not.toHaveLength(0);
-    expect(screen.queryByRole("link", { name: "Reviews" })).not.toBeInTheDocument();
+
+    const primaryNavigation = screen.getByRole("navigation", { name: "Primary navigation" });
+    expect(primaryNavigation).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveTextContent("Cases");
+    expect(primaryNavigation.querySelector('a[href="/cases"]')).toHaveAttribute("aria-current", "page");
+    expect(primaryNavigation.querySelector('a[href="/quality"]')).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Notifications" })).toHaveAttribute(
+      "href",
+      "/notifications",
+    );
+    expect(screen.getAllByText("Northstar Cloud").length).toBeGreaterThan(0);
+    expect(screen.getByText("Connected simulator")).toBeInTheDocument();
   });
 
-  it("opens and closes an accessible mobile navigation dialog", () => {
-    render(<AppShell context={context}>Case content</AppShell>);
+  it("treats mobile navigation as a dismissible modal and restores focus", async () => {
+    render(
+      <AppShell
+        context={{
+          actor: {
+            id: "USR-0003",
+            organizationId: "ORG-0001",
+            name: "Ari Administrator",
+            role: "administrator",
+            permissions: ["case:read", "settings:manage"],
+            authenticationMode: "deterministic_development",
+          },
+          organization: {
+            id: "ORG-0001",
+            name: "Northstar Cloud",
+            slug: "northstar-cloud",
+            version: 1,
+            locale: "en-US",
+            timeZone: "Asia/Jakarta",
+          },
+        }}
+      >
+        <h1>Cases</h1>
+      </AppShell>,
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation" }));
-    expect(screen.getByRole("dialog", { name: "Navigation menu" })).toBeInTheDocument();
+    const opener = screen.getByRole("button", { name: "Open navigation" });
+    fireEvent.click(opener);
 
-    fireEvent.click(screen.getByRole("button", { name: "Close navigation" }));
-    expect(screen.queryByRole("dialog", { name: "Navigation menu" })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Navigation menu" }),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Close navigation" })).toHaveFocus();
+    expect(document.body.style.overflow).toBe("hidden");
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    await waitFor(() => expect(opener).toHaveFocus());
+    expect(
+      screen.queryByRole("dialog", { name: "Navigation menu" }),
+    ).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
   });
 });
