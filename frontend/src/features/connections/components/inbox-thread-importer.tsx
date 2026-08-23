@@ -56,7 +56,10 @@ export function InboxThreadImporter({
   );
 
   return (
-    <section aria-labelledby="inbox-import-heading" className="border-t border-border pt-5">
+    <section
+      aria-labelledby="inbox-import-heading"
+      className="min-w-0 max-w-full border-t border-border pt-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 id="inbox-import-heading" className="text-sm font-semibold text-primary">
@@ -103,13 +106,16 @@ export function InboxThreadImporter({
       ) : null}
 
       {threadState.items.length ? (
-        <form action={importAction} className="mt-4 border border-border">
-          <fieldset className="divide-y divide-border">
+        <form
+          action={importAction}
+          className="mt-4 min-w-0 max-w-full border border-border"
+        >
+          <fieldset className="min-w-0 divide-y divide-border">
             <legend className="sr-only">Choose a conversation</legend>
             {threadState.items.map((thread, index) => (
               <label
                 key={thread.providerThreadId}
-                className="flex cursor-pointer items-start gap-3 px-4 py-3 hover:bg-surface-subtle"
+                className="flex min-w-0 w-full cursor-pointer items-start gap-3 px-4 py-3 hover:bg-surface-subtle"
               >
                 <input
                   type="radio"
@@ -119,8 +125,11 @@ export function InboxThreadImporter({
                   defaultChecked={index === 0}
                   className="mt-1"
                 />
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium text-primary">
+                <span className="min-w-0 flex-1 overflow-hidden">
+                  <span
+                    title={thread.subject}
+                    className="block truncate text-sm font-medium text-primary"
+                  >
                     {thread.subject}
                   </span>
                   <span className="mt-0.5 block text-xs text-muted">
@@ -131,36 +140,36 @@ export function InboxThreadImporter({
             ))}
           </fieldset>
 
-          <div className="grid gap-3 border-t border-border bg-canvas/45 p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="text-xs font-medium text-secondary">
+          <div className="grid min-w-0 gap-3 border-t border-border bg-canvas/45 p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="min-w-0 text-xs font-medium text-secondary">
               Case type
-              <select name="category" defaultValue="service_exception" className="mt-1 h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary">
+              <select name="category" defaultValue="service_exception" className="mt-1 h-10 w-full min-w-0 rounded-md border border-border bg-surface px-3 text-sm text-primary">
                 <option value="service_exception">Service issue</option>
                 <option value="billing_dispute">Billing dispute</option>
                 <option value="refund_request">Refund request</option>
                 <option value="account_access">Account access</option>
               </select>
             </label>
-            <label className="text-xs font-medium text-secondary">
+            <label className="min-w-0 text-xs font-medium text-secondary">
               Urgency
-              <select name="urgency" defaultValue="medium" className="mt-1 h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary">
+              <select name="urgency" defaultValue="medium" className="mt-1 h-10 w-full min-w-0 rounded-md border border-border bg-surface px-3 text-sm text-primary">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
                 <option value="critical">Critical</option>
               </select>
             </label>
-            <label className="text-xs font-medium text-secondary">
+            <label className="min-w-0 text-xs font-medium text-secondary">
               Risk
-              <select name="risk" defaultValue="medium" className="mt-1 h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary">
+              <select name="risk" defaultValue="medium" className="mt-1 h-10 w-full min-w-0 rounded-md border border-border bg-surface px-3 text-sm text-primary">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
             </label>
-            <label className="text-xs font-medium text-secondary">
+            <label className="min-w-0 text-xs font-medium text-secondary">
               Due date
-              <input name="due_at" type="datetime-local" required className="mt-1 h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary" />
+              <input name="due_at" type="datetime-local" required className="mt-1 h-10 w-full min-w-0 rounded-md border border-border bg-surface px-3 text-sm text-primary" />
             </label>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">

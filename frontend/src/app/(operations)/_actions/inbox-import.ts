@@ -87,10 +87,14 @@ export async function importInboxThread(
     );
     revalidatePath("/connections");
     revalidatePath("/cases");
+    const message =
+      result.importedMessages === 0 && result.duplicateMessages > 0
+        ? `No new messages. Existing case ${result.caseId} is unchanged.`
+        : result.importedMessages > 0 && result.duplicateMessages > 0
+          ? `${result.importedMessages} new ${result.importedMessages === 1 ? "message" : "messages"} added to case ${result.caseId}.`
+          : `Case ${result.caseId} created from ${result.importedMessages} messages.`;
     return {
-      ...commandSuccess(
-        `Case ${result.caseId} created from ${result.importedMessages} messages.`,
-      ),
+      ...commandSuccess(message),
       caseId: result.caseId,
     };
   } catch (error) {
