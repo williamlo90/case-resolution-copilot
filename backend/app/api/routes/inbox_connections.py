@@ -69,9 +69,7 @@ def get_inbox_status(
             )
     except INBOX_HANDLED_ERRORS as exc:
         raise inbox_error(exc) from exc
-    return InboxConnectionStatusEnvelope(
-        data=InboxConnectionStatusData.model_validate(result)
-    )
+    return InboxConnectionStatusEnvelope(data=InboxConnectionStatusData.model_validate(result))
 
 
 @router.post("/inbox/authorize", response_model=InboxAuthorizationStartEnvelope)
@@ -183,10 +181,12 @@ def request_inbox_sync(
     actor: Annotated[ActorContext, Depends(current_actor)],
 ) -> InboxSyncJobEnvelope:
     try:
-        job = inbox_runtime(request).sync.request_manual(
+        correlation_id = str(request.state.correlation_id)
+        job, result = inbox_runtime(request).sync.run_manual(
             actor=actor,
             connection_id=connection_id,
-            trigger_key=str(request.state.correlation_id),
+            trigger_key=correlation_id,
+            worker_id=correlation_id,
         )
     except INBOX_HANDLED_ERRORS as exc:
         raise inbox_error(exc) from exc
@@ -195,6 +195,8 @@ def request_inbox_sync(
             id=job.public_id,
             status=job.status,
             attempt_count=job.attempt_count,
+            imported_messages=result.imported_messages,
+            duplicate_messages=result.duplicate_messages,
         )
     )
 

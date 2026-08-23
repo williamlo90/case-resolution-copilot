@@ -97,6 +97,8 @@ class InboxSyncJobData(BaseModel):
     id: str
     status: SyncJobStatus
     attempt_count: int
+    imported_messages: int = Field(default=0, ge=0)
+    duplicate_messages: int = Field(default=0, ge=0)
 
 
 class InboxSyncJobEnvelope(BaseModel):

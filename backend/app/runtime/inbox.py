@@ -101,6 +101,7 @@ def build_inbox_runtime(
             access=access,
             page_limit=5,
             item_limit=settings.inbox_sync_message_limit,
+            manual_item_limit=settings.inbox_initial_item_limit,
         ),
         drafts=InboxDraftDeliveryService(
             unit_of_work=SqlAlchemyInboxDraftUnitOfWorkFactory(database),

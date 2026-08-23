@@ -27,7 +27,11 @@ class InboxSyncJobStore(Protocol):
         limit: int,
         now: datetime,
         lease_seconds: int = 60,
+        organization_public_id: str | None = None,
+        connection_public_id: str | None = None,
     ) -> list[InboxSyncWorkRecord]: ...
+
+    def get(self, *, job_id: UUID) -> InboxSyncJobRecord | None: ...
 
     def complete(
         self,

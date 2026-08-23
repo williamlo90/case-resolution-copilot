@@ -18,6 +18,8 @@ export const InboxSyncJobSchema = z.object({
   id: z.string().min(1),
   status: z.enum(["pending", "running", "completed", "failed", "dead"]),
   attemptCount: z.number().int().nonnegative(),
+  importedMessages: z.number().int().nonnegative(),
+  duplicateMessages: z.number().int().nonnegative(),
 });
 
 export const InboxAuthorizationResultSchema = z.object({

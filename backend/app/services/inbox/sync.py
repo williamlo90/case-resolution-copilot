@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -5,6 +6,7 @@ from app.domain.identity import ActorContext, Permission
 from app.domain.inbox import (
     ExternalConversationRecord,
     InboxAuthorizationError,
+    InboxCredentialUnavailable,
     InboxProviderUnavailable,
     InboxSyncDrainResult,
     InboxSyncJobRecord,
@@ -21,6 +23,8 @@ from app.ports.inbox_sync_persistence import (
 )
 from app.security.authorization import require_permission
 
+logger = logging.getLogger(__name__)
+
 
 class InboxSyncService:
     def __init__(
@@ -31,12 +35,14 @@ class InboxSyncService:
         access: InboxAccessProvider,
         page_limit: int = 5,
         item_limit: int = 50,
+        manual_item_limit: int = 5,
     ) -> None:
         self._unit_of_work = unit_of_work
         self._gateways = gateways
         self._access = access
         self._page_limit = page_limit
         self._item_limit = item_limit
+        self._manual_item_limit = manual_item_limit
 
     def request_manual(
         self,
@@ -53,10 +59,33 @@ class InboxSyncService:
                     connection_public_id=connection_id,
                     trigger=SyncTrigger.MANUAL,
                     trigger_key=trigger_key,
-                    page_budget=self._page_limit,
-                    item_budget=self._item_limit,
+                    page_budget=1,
+                    item_budget=self._manual_item_limit,
                 ),
             )
+
+    def run_manual(
+        self,
+        *,
+        actor: ActorContext,
+        connection_id: str,
+        trigger_key: str,
+        worker_id: str,
+    ) -> tuple[InboxSyncJobRecord, InboxSyncDrainResult]:
+        job = self.request_manual(
+            actor=actor,
+            connection_id=connection_id,
+            trigger_key=trigger_key,
+        )
+        result = self.drain(
+            worker_id=worker_id,
+            limit=1,
+            organization_id=actor.organization_id,
+            connection_id=connection_id,
+        )
+        with self._unit_of_work() as uow:
+            current = uow.jobs.get(job_id=job.id)
+        return current or job, result
 
     def request_scheduled(
         self,
@@ -82,12 +111,16 @@ class InboxSyncService:
         *,
         worker_id: str,
         limit: int,
+        organization_id: str | None = None,
+        connection_id: str | None = None,
     ) -> InboxSyncDrainResult:
         with self._unit_of_work() as uow:
             work_items = uow.jobs.claim(
                 worker_id=worker_id,
                 limit=limit,
                 now=datetime.now(UTC),
+                organization_public_id=organization_id,
+                connection_public_id=connection_id,
             )
         completed = 0
         failed = 0
@@ -114,11 +147,34 @@ class InboxSyncService:
                     reauthorize=True,
                 )
                 failed += 1
+            except InboxCredentialUnavailable:
+                self._fail(
+                    work=work,
+                    worker_id=worker_id,
+                    error_code="credential_unavailable",
+                    reauthorize=True,
+                )
+                failed += 1
             except (InboxProviderUnavailable, LookupError):
                 self._fail(
                     work=work,
                     worker_id=worker_id,
                     error_code="provider_unavailable",
+                    reauthorize=False,
+                )
+                failed += 1
+            except Exception as exc:
+                logger.error(
+                    "Unexpected inbox sync failure",
+                    extra={
+                        "error_type": type(exc).__name__,
+                        "job_id": work.job.public_id,
+                    },
+                )
+                self._fail(
+                    work=work,
+                    worker_id=worker_id,
+                    error_code="sync_failed",
                     reauthorize=False,
                 )
                 failed += 1
@@ -181,9 +237,7 @@ class InboxSyncService:
     ) -> tuple[int, int]:
         imported = 0
         duplicates = 0
-        latest_by_conversation: dict[
-            UUID, tuple[ExternalConversationRecord, ProviderMessage]
-        ] = {}
+        latest_by_conversation: dict[UUID, tuple[ExternalConversationRecord, ProviderMessage]] = {}
         locked_threads: set[str] = set()
         with self._unit_of_work() as uow:
             for message in sorted(

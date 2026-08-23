@@ -93,21 +93,23 @@ def test_connected_inbox_workflow_is_replay_safe_and_retains_imported_evidence(
         assert replay.imported_messages == 0
         assert replay.duplicate_messages == 2
 
-        first_job = runtime.sync.request_manual(
+        first_job, sync_result = runtime.sync.run_manual(
             actor=admin,
             connection_id=connected.connection_public_id,
             trigger_key="phase7-manual-sync",
+            worker_id="phase7-worker",
         )
-        replayed_job = runtime.sync.request_manual(
+        replayed_job, replay_result = runtime.sync.run_manual(
             actor=admin,
             connection_id=connected.connection_public_id,
             trigger_key="phase7-manual-sync",
+            worker_id="phase7-worker-replay",
         )
         assert replayed_job.id == first_job.id
-        sync_result = runtime.sync.drain(worker_id="phase7-worker", limit=1)
         assert sync_result.claimed_jobs == 1
         assert sync_result.completed_jobs == 1
         assert sync_result.failed_jobs == 0
+        assert replay_result.claimed_jobs == 0
 
         runtime.controls.pause(
             actor=admin,

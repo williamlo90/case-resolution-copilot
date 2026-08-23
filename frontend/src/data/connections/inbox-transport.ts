@@ -67,6 +67,8 @@ export const inboxSyncEnvelopeSchema = z.object({
     id: z.string().min(1),
     status: z.enum(["pending", "running", "completed", "failed", "dead"]),
     attempt_count: z.number().int().nonnegative(),
+    imported_messages: z.number().int().nonnegative().default(0),
+    duplicate_messages: z.number().int().nonnegative().default(0),
   }),
 });
 
@@ -155,6 +157,8 @@ export function mapSyncJob(
     id: value.id,
     status: value.status,
     attemptCount: value.attempt_count,
+    importedMessages: value.imported_messages,
+    duplicateMessages: value.duplicate_messages,
   });
 }
 

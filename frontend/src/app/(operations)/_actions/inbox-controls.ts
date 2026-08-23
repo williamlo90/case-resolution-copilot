@@ -13,10 +13,11 @@ async function runControl(
 ): Promise<InboxControlState> {
   try {
     if (operation === "sync") {
-      await apiConnectedInboxRepository.requestSync(connectionId);
+      const result = await apiConnectedInboxRepository.requestSync(connectionId);
       revalidatePath("/connections");
+      const message = syncResultMessage(result);
       return {
-        ...commandSuccess("Inbox update requested."),
+        ...commandSuccess(message),
         connectionState: "unchanged",
       };
     }
@@ -33,6 +34,27 @@ async function runControl(
   } catch (error) {
     return { ...commandFailure(error), connectionState: "unchanged" };
   }
+}
+
+function syncResultMessage(
+  result: Awaited<
+    ReturnType<typeof apiConnectedInboxRepository.requestSync>
+  >,
+): string {
+  if (result.status === "completed" && result.importedMessages > 0) {
+    const suffix = result.importedMessages === 1 ? "" : "s";
+    return `Inbox updated with ${result.importedMessages} new message${suffix}.`;
+  }
+  if (result.status === "completed") {
+    return "Inbox is up to date. No new messages found.";
+  }
+  if (result.status === "failed") {
+    return "Inbox update was delayed and can be retried.";
+  }
+  if (result.status === "dead") {
+    return "Inbox update needs attention. Sign in again if prompted.";
+  }
+  return "Inbox update is still in progress.";
 }
 
 export async function syncInbox(
