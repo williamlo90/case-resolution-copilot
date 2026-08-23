@@ -493,8 +493,14 @@ class FixedCaseStore:
 
 
 class EvidencePolicyStore:
-    def __init__(self, candidates: list[PolicyCandidateRecord]) -> None:
+    def __init__(
+        self,
+        candidates: list[PolicyCandidateRecord],
+        *,
+        retrieval_score: float = 0.9,
+    ) -> None:
         self.candidates = candidates
+        self.retrieval_score = retrieval_score
         self.bindings: list[PolicyEvidenceBinding] = []
         self.searches: list[dict[str, object]] = []
 
@@ -550,7 +556,7 @@ class EvidencePolicyStore:
             candidates=[
                 RankedPolicyCandidateRecord(
                     candidate=item,
-                    retrieval_score=0.9,
+                    retrieval_score=self.retrieval_score,
                 )
                 for item in active[:candidate_limit]
             ],
@@ -597,8 +603,13 @@ class EvidencePolicyStore:
 
 def _evidence_service(
     candidates: list[PolicyCandidateRecord],
+    *,
+    retrieval_score: float = 0.9,
 ) -> tuple[PolicyEvidenceService, EvidencePolicyStore]:
-    policy_store = EvidencePolicyStore(candidates)
+    policy_store = EvidencePolicyStore(
+        candidates,
+        retrieval_score=retrieval_score,
+    )
     service = PolicyEvidenceService(
         cast(PolicyEvidenceStore, policy_store),
         cast(CaseEvidenceStore, FixedCaseStore(_case_workspace())),
@@ -625,6 +636,25 @@ def test_retrieval_records_only_applicable_published_evidence() -> None:
     assert result.status is EvidenceRetrievalStatus.RELEVANT
     assert len(result.evidence) == 1
     assert len(store.bindings) == 1
+
+
+def test_retrieval_uses_bounded_lexical_fallback_when_vector_score_is_low() -> None:
+    service, store = _evidence_service(
+        [_candidate("POL-BILLING")],
+        retrieval_score=0.01,
+    )
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    result = service.refresh_for_case(
+        actor=actor,
+        case_id="CS-2048",
+        correlation_id="corr-test",
+        as_of=NOW,
+    )
+
+    assert result.status is EvidenceRetrievalStatus.RELEVANT
+    assert len(store.bindings) == 1
+    assert store.bindings[0].retrieval_score > 0.01
 
 
 def test_retrieval_reports_stale_without_recording_evidence() -> None:

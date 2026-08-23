@@ -16,6 +16,7 @@ from app.retrieval.policy_context import (
     case_context,
     context_label,
 )
+from app.retrieval.scoring import lexical_relevance
 
 RETRIEVAL_CANDIDATE_LIMIT = 64
 RETRIEVAL_SCORE_THRESHOLD = 0.15
@@ -58,6 +59,7 @@ class V1PolicyRetrieval:
     ) -> RetrievalResolution:
         del correlation_id
         context = case_context(workspace)
+        query_text = f"{workspace.case.issue} {workspace.request.summary}"
         search = self._store.search_retrieval_candidates(
             organization_public_id=actor.organization_id,
             case_category=context["category"],
@@ -66,16 +68,14 @@ class V1PolicyRetrieval:
             channel=context["channel"],
             customer_tier=context["tier"],
             as_of=as_of,
-            query_embedding=self._embedding_provider.embed(
-                f"{workspace.case.issue} {workspace.request.summary}"
-            ),
+            query_embedding=self._embedding_provider.embed(query_text),
             embedding_version=self._embedding_provider.version,
             candidate_limit=RETRIEVAL_CANDIDATE_LIMIT,
         )
         guarded = _guard_search(search)
         if guarded is not None:
             return guarded
-        bindings = _bindings(workspace, context, search)
+        bindings = _bindings(workspace, context, search, query_text=query_text)
         if not bindings:
             return RetrievalResolution(
                 EvidenceRetrievalStatus.MISSING,
@@ -127,13 +127,21 @@ def _bindings(
     workspace: CaseWorkspaceRecord,
     context: CaseRetrievalContext,
     search: PolicyRetrievalCandidatePage,
+    *,
+    query_text: str,
 ) -> list[PolicyEvidenceBinding]:
     bindings: list[PolicyEvidenceBinding] = []
     for ranked in search.candidates:
         candidate = ranked.candidate
-        if not candidate.clauses or ranked.retrieval_score < RETRIEVAL_SCORE_THRESHOLD:
+        if not candidate.clauses:
             continue
         clause = candidate.clauses[0]
+        retrieval_score = max(
+            ranked.retrieval_score,
+            lexical_relevance(query_text, clause.text),
+        )
+        if retrieval_score < RETRIEVAL_SCORE_THRESHOLD:
+            continue
         applicability = context_label(context, candidate.version.decision_scope)
         fingerprint = sha256(
             "|".join(
@@ -152,10 +160,16 @@ def _bindings(
                 policy=candidate.policy,
                 version=candidate.version,
                 clause=clause,
-                retrieval_score=ranked.retrieval_score,
+                retrieval_score=retrieval_score,
                 applicability=applicability,
                 fingerprint=fingerprint,
             )
         )
-    return bindings
-
+    return sorted(
+        bindings,
+        key=lambda binding: (
+            -binding.retrieval_score,
+            binding.policy.public_id,
+            binding.clause.sequence,
+        ),
+    )
