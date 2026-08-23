@@ -1,0 +1,23 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "scenarios": [
+    {
+      "id": "SAFETY-STALE-REVIEW",
+      "expected_result": "A pending review loses current authority when bound approval settings change.",
+      "test_file": "tests/unit/test_review_settings_binding.py",
+      "test_selector": "test_pending_review_becomes_stale_when_approval_settings_change"
+    },
+    {
+      "id": "SAFETY-UNKNOWN-OUTCOME",
+      "expected_result": "An uncertain side effect remains outcome_unknown and cannot use safe-failure retry semantics.",
+      "test_file": "tests/unit/test_action_service.py",
+      "test_selector": "test_safe_failure_and_unknown_outcome_never_share_retry_semantics"
+    },
+    {
+      "id": "SAFETY-RECONCILE-RECEIPT",
+      "expected_result": "Read-only reconciliation can recover a receipt without issuing a second execute operation.",
+      "test_file": "tests/unit/test_webhook_action_gateway.py",
+      "test_selector": "test_signed_action_reconciliation_never_issues_another_execute_operation"
+    }
+  ]
+}

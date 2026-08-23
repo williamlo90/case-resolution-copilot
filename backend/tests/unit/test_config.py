@@ -22,6 +22,16 @@ def test_settings_use_safe_local_defaults() -> None:
         "api_port": 8000,
         "case_source_provider": "disabled",
         "action_target_provider": "deterministic",
+        "inbox_connections_enabled": False,
+        "gmail_adapter_enabled": False,
+        "inbox_scheduled_sync_enabled": False,
+        "gmail_push_enabled": False,
+        "inbox_draft_writeback_enabled": False,
+        "inbox_ai_data_transfer_enabled": False,
+        "policy_retrieval_mode": "v1",
+        "policy_v2_embedding_provider": "deterministic",
+        "policy_v2_profile_key": "deterministic-hash-v2-d512",
+        "policy_indexing_enabled": False,
     }
 
 
@@ -208,5 +218,133 @@ def test_production_rejects_insecure_action_webhook_url() -> None:
             integration_organization_id="ORG-0001",
             action_webhook_url="http://actions.example.com/hooks",
             action_webhook_secret="action-secret-with-at-least-32-characters",
+            _env_file=None,
+        )
+
+
+def test_gmail_adapter_requires_database_oauth_and_vault_configuration() -> None:
+    with pytest.raises(ValidationError):
+        Settings(gmail_adapter_enabled=True, _env_file=None)
+
+    with pytest.raises(ValidationError):
+        Settings(
+            inbox_connections_enabled=True,
+            gmail_adapter_enabled=True,
+            database_url="postgresql+psycopg://example.invalid/support_copilot",
+            google_oauth_client_id="client-id",
+            google_oauth_client_secret="client-secret",
+            google_oauth_redirect_uri="https://app.example.com/api/callback",
+            credential_vault_key="not-a-32-byte-key",
+            _env_file=None,
+        )
+
+    settings = Settings(
+        inbox_connections_enabled=True,
+        gmail_adapter_enabled=True,
+        database_url="postgresql+psycopg://example.invalid/support_copilot",
+        google_oauth_client_id="client-id",
+        google_oauth_client_secret="client-secret",
+        google_oauth_redirect_uri="https://app.example.com/api/callback",
+        credential_vault_key="MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY",
+        _env_file=None,
+    )
+
+    assert settings.gmail_oauth_configured()
+    assert settings.credential_vault_key_bytes() == b"0123456789abcdef0123456789abcdef"
+    assert "google_oauth_client_secret" not in settings.safe_log_context()
+    assert "credential_vault_key" not in settings.safe_log_context()
+
+
+def test_production_rejects_the_deterministic_inbox_adapter() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            environment="production",
+            auth_mode="provider",
+            database_url="postgresql+psycopg://example.invalid/support_copilot",
+            clerk_secret_key="sk_placeholder",
+            clerk_jwt_key=(
+                "-----BEGIN PUBLIC KEY-----\\nplaceholder\\n-----END PUBLIC KEY-----"
+            ),
+            clerk_authorized_parties="https://app.example.com",
+            inbox_connections_enabled=True,
+            _env_file=None,
+        )
+
+
+def test_inbox_subfeatures_fail_closed_without_parent_capability() -> None:
+    with pytest.raises(ValidationError):
+        Settings(inbox_draft_writeback_enabled=True, _env_file=None)
+    with pytest.raises(ValidationError):
+        Settings(
+            inbox_scheduled_sync_enabled=True,
+            inbox_scheduler_secret="scheduler-secret-with-at-least-32-characters",
+            _env_file=None,
+        )
+    with pytest.raises(ValidationError):
+        Settings(inbox_ai_data_transfer_enabled=True, _env_file=None)
+
+
+def test_policy_indexing_requires_database_and_scheduler_secret() -> None:
+    with pytest.raises(ValidationError):
+        Settings(policy_indexing_enabled=True, _env_file=None)
+    with pytest.raises(ValidationError):
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/support_copilot",
+            policy_indexing_enabled=True,
+            _env_file=None,
+        )
+
+    settings = Settings(
+        database_url="postgresql+psycopg://example.invalid/support_copilot",
+        policy_retrieval_mode="v2",
+        policy_indexing_enabled=True,
+        policy_index_scheduler_secret="policy-index-secret-with-at-least-32-characters",
+        _env_file=None,
+    )
+
+    assert settings.policy_retrieval_mode == "v2"
+    assert settings.policy_index_scheduler_secret_value() is not None
+    assert "policy_index_scheduler_secret" not in settings.safe_log_context()
+
+
+def test_openai_policy_profile_fails_closed_before_live_query_activation() -> None:
+    base = {
+        "database_url": "postgresql+psycopg://example.invalid/support_copilot",
+        "openai_api_key": "sk-test-placeholder",
+        "policy_v2_embedding_provider": "openai",
+        "policy_v2_profile_key": "openai-text-embedding-3-small-v2-d512",
+        "policy_indexing_enabled": True,
+        "policy_index_scheduler_secret": (
+            "policy-index-secret-with-at-least-32-characters"
+        ),
+    }
+    settings = Settings(_env_file=None, **base)  # type: ignore[arg-type]
+    assert settings.policy_retrieval_mode == "v1"
+
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            policy_retrieval_mode="v2_shadow",
+            **base,  # type: ignore[arg-type]
+        )
+
+
+def test_openai_policy_profile_rejects_a_different_embedding_model() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/support_copilot",
+            openai_api_key="sk-test-placeholder",
+            openai_embedding_model="text-embedding-3-large",
+            policy_v2_embedding_provider="openai",
+            policy_v2_profile_key="openai-text-embedding-3-small-v2-d512",
+            _env_file=None,
+        )
+
+
+def test_policy_embedding_provider_must_match_the_profile_key() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/support_copilot",
+            policy_v2_profile_key="openai-text-embedding-3-small-v2-d512",
             _env_file=None,
         )

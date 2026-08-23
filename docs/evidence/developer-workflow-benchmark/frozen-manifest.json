@@ -1,0 +1,22 @@
+{
+  "schema_version": "developer-workflow-benchmark-freeze.v1",
+  "frozen_at": "2026-08-23T10:39:28.5915401Z",
+  "base_revision": "d6c7de72c5636208d34e028744ac3460afc3e0fa",
+  "hash_algorithm": "sha256",
+  "public_files": {
+    "pair-manifest.json": "eccbf9a29c40e20b5e3939fd2f64fa9b2313ffd340689873867cf7b505f229fb",
+    "manual-workspace/assets/policy-library.json": "7159df50b6cb4d513c6b5ffc012c04e1af676b2ecdf53f0de8f5edc1bf9bf914",
+    "manual-workspace/cases/account-a.json": "eb6c40c6bedc9bfd5330abc7772e80942b40c7b317af74aeb96f1ba707583bea",
+    "manual-workspace/cases/billing-a.json": "bcab8c0b7831a77b89a591adb2b5848d35840a9ed0c8cad74065f6b97a308341",
+    "manual-workspace/cases/refund-a.json": "f8833bc25b62fbf3741ac008dbd1c97552fa8c3d008878bc0113bdfa959d60ae",
+    "product-fixtures/account-b.json": "23823ebe3e3b237618dfc860d6c3a567f59c67fb4ea6056238a754fb5a0e8926",
+    "product-fixtures/billing-b.json": "7e90dfddab4f93dd0eab2dcc80b4fef0de1c0b75ad241cdfb52d590b7083957a",
+    "product-fixtures/refund-b.json": "146d9028062eeaad277f85a7a4aa0947e9ab3c7ee01fe3e78a4d6aef8d2b7349"
+  },
+  "withheld_answer_key": {
+    "path": "withheld/answer-key.json",
+    "sha256_commitment": "b9d63cd5a8937a148a9be4f48869a5129afe152a93c95c5dfa155f022eaf9922",
+    "repository_policy": "ignored"
+  },
+  "claim_boundary": "Matched synthetic single-operator benchmark; not real-client or population-level impact evidence."
+}

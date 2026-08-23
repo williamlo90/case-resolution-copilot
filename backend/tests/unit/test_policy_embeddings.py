@@ -5,6 +5,7 @@ from app.retrieval.embeddings import (
     OpenAIEmbeddingProvider,
     embed,
 )
+from app.retrieval.v2.embeddings import openai_policy_embedding_provider
 
 
 class _EmbeddingDatum:
@@ -101,3 +102,13 @@ def test_openai_embedding_provider_rejects_invalid_vectors() -> None:
 
     with pytest.raises(RuntimeError, match="invalid vector"):
         provider.embed("A disputed invoice needs review.")
+
+
+def test_openai_policy_profile_rejects_model_identity_drift() -> None:
+    with pytest.raises(ValueError, match="requires text-embedding-3-small"):
+        openai_policy_embedding_provider(
+            api_key="not-used",
+            model="text-embedding-3-large",
+            timeout_seconds=5,
+            max_retries=0,
+        )

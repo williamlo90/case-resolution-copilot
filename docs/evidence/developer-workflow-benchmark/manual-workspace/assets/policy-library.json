@@ -1,0 +1,75 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "policies": [
+    {
+      "policy_id": "POL-1008",
+      "title": "Billing adjustments",
+      "version": 1,
+      "status": "published",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "case_categories": ["billing_dispute", "refund_request"],
+      "clauses": [
+        {
+          "clause_id": "POL-1008-DUPLICATE",
+          "heading": "Duplicate charges",
+          "text": "A verified duplicate invoice charge may be reversed or credited after the invoice and payment references are confirmed. Multiple payment attempts are not evidence of multiple settled charges."
+        },
+        {
+          "clause_id": "POL-1008-REFUND",
+          "heading": "Refund eligibility",
+          "text": "An unused service order may be refunded when delivery has not started and no non-refundable commitment is recorded. A consequential refund proposal requires human review before execution."
+        }
+      ]
+    },
+    {
+      "policy_id": "POL-1007",
+      "title": "Account recovery",
+      "version": 1,
+      "status": "published",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "case_categories": ["account_access"],
+      "clauses": [
+        {
+          "clause_id": "POL-1007-IDENTITY",
+          "heading": "Identity verification",
+          "text": "Account recovery requires a verified ownership check and account context refreshed within the last 24 hours before a recovery channel or multi-factor setting is changed."
+        },
+        {
+          "clause_id": "POL-1007-STOP",
+          "heading": "Unsafe recovery",
+          "text": "Recovery must stop when ownership evidence is missing, pending, or conflicts with the current account record."
+        }
+      ]
+    },
+    {
+      "policy_id": "POL-1006",
+      "title": "Service exceptions",
+      "version": 1,
+      "status": "published",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "case_categories": ["service_exception"],
+      "clauses": [
+        {
+          "clause_id": "POL-1006-SERVICE",
+          "heading": "Service failure",
+          "text": "A service exception may be resolved only after the order or delivery record confirms the failed outcome and customer impact."
+        }
+      ]
+    },
+    {
+      "policy_id": "POL-1005",
+      "title": "Customer data handling",
+      "version": 1,
+      "status": "published",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "case_categories": ["all"],
+      "clauses": [
+        {
+          "clause_id": "POL-1005-MINIMUM",
+          "heading": "Minimum necessary data",
+          "text": "Case evidence and audit records must contain only the customer data required to explain and authorize the support decision."
+        }
+      ]
+    }
+  ]
+}

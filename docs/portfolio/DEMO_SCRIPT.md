@@ -2,79 +2,77 @@
 
 ## Preparation
 
-- Use the deployed Administrator account for the broad product tour.
-- Keep `CS-2048` and `CS-2047` available as the two case examples.
-- Do not execute an external action during a portfolio demonstration.
-- If Reviews or Actions are empty, state that the live consequential path is intentionally not
-  fabricated and is covered by deterministic authority tests.
-- Use the [production walkthrough](../evidence/production-demo/README.md) as a fallback when a live
-  session is unavailable. Its screenshots were captured with the read-only Auditor identity.
+- Use the recorded synthetic `CS-2050` sequence in the
+  [hosted acceptance record](../evidence/hosted-e2e-acceptance/2026-08-05/README.md).
+- Open the linked screenshots in sequence when a suitable live state is unavailable. Do not create
+  or imply a new demo environment.
+- Describe the sequence as predecessor hosted evidence. External case sources and action targets
+  were simulated, and the screenshots are not proof that the current reconstructed commit is live.
 
-## 0:00-0:25 - Problem
+## 0:00-0:20 - The Decision Problem
 
-Say:
-
-> Ordinary support tools help agents reply to tickets. This product focuses on complex cases where
-> facts are incomplete, policies matter, financial or customer impact exists, and a supervisor must
-> approve the next action.
-
-Show the Cases queue. Point out priority, SLA, risk, owner, and the ability to triage without
-opening several systems.
-
-## 0:25-1:20 - Decision Workspace
-
-Open `CS-2048`.
-
-Show:
-
-- Issue summary.
-- Verified facts and their sources.
-- Information still needed.
-- Applicable policy evidence.
-- Suggested resolution, uncertainty, impact, and approval requirement.
+Show the [Specialist Decision Brief](../evidence/hosted-e2e-acceptance/2026-08-05/01-specialist-decision-brief.png).
 
 Say:
 
-> The AI assists with synthesis and wording. Facts, policies, risk checks, and authority remain
-> deterministic and auditable.
+> Ordinary support tools optimize ticket handling. This workspace is for cases where evidence,
+> policy, risk, and approval authority must be resolved before a consequential action.
 
-## 1:20-1:55 - Evidence And Communication
+Point out the verified facts, policy evidence, suggested resolution, and approval requirement for
+synthetic case `CS-2050`.
 
-Open the Conversation and Evidence tabs.
+## 0:20-0:55 - Specialist Submission
 
-Explain that the operator can compare customer communication, business records, and policy
-evidence in one workspace. Open Activity and show the audit history.
-
-Say:
-
-> The auditor can inspect and export this record but cannot reply, edit a draft, approve a review,
-> or run an action.
-
-## 1:55-2:30 - Governance
-
-Open Policies and show published versions, effective dates, and policy health. Briefly show Team to
-explain that Clerk authenticates identity while backend memberships own roles and permissions.
+Show the [review-ready state](../evidence/hosted-e2e-acceptance/2026-08-05/02-supervisor-review-ready.png).
 
 Say:
 
-> Approval is bound to one proposal and evidence version. A later policy change does not rewrite
-> the historical decision.
+> The Specialist prepares a source-backed proposal but cannot approve it. Submission freezes the
+> proposal and evidence version that the Supervisor will review.
 
-## 2:30-2:50 - Safe Actions
+## 0:55-1:25 - Supervisor Decision
 
-Open Actions.
+Show the [approved review](../evidence/hosted-e2e-acceptance/2026-08-05/03-supervisor-review-approved.png).
 
-Explain:
+Say:
 
-> A timeout is not automatically retried. If the provider may have received the command, the
-> system records an unknown outcome and reconciles the receipt before another action is allowed.
+> The Supervisor reserves the review and records an attributable decision against that exact
+> snapshot. AI confidence cannot grant this authority.
 
-Do not claim that a client-owned action provider is active.
+## 1:25-2:05 - Controlled Action And Receipt
 
-## 2:50-3:00 - Evidence And Boundary
+Show the [completed connected-system receipt](../evidence/hosted-e2e-acceptance/2026-08-05/05-action-completed-receipt.png).
+
+Say:
+
+> The approved action executes once through a deterministic demo adapter. The application stores
+> the attempt, durable receipt, and external reference so the result can be audited.
+
+Do not describe the adapter as a client-owned or production action provider.
+
+## 2:05-2:30 - Duplicate Protection
+
+Show the [duplicate blocker](../evidence/hosted-e2e-acceptance/2026-08-05/06-duplicate-protection.png).
+
+Say:
+
+> A second execution is unavailable. The attempt count remains one, and the action records a
+> duplicate blocker instead of repeating a consequential side effect.
+
+## 2:30-2:50 - Auditor Inspection
+
+Show the [Auditor read-only receipt](../evidence/hosted-e2e-acceptance/2026-08-05/08-auditor-read-only-action.png).
+
+Say:
+
+> The Auditor can inspect the case, review lineage, attempt, receipt, and system reference, but no
+> reserve, approve, execute, retry, or reconciliation controls are available.
+
+## 2:50-3:00 - Evidence Boundary
 
 Close with:
 
-> The current source passes its serial release gate, while historical hosted evidence records four
-> Clerk roles and a bounded workflow. A separate public-data evaluation lane contains 86 records.
-> This is a controlled-pilot candidate, not a claim of enterprise-wide production readiness.
+> The reconstructed source has focused static and regression verification. Baseline artifacts cover
+> 54 controls through 71 variants and trace 19 proofs across eight scenarios. The full release and
+> guarded PostgreSQL reruns remain pending, external providers are simulated, and no customer-impact
+> claim is being made.

@@ -1,0 +1,35 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "pairs": [
+    {
+      "pair_id": "billing",
+      "manual_fixture": "BILL-A",
+      "product_fixture": "BILL-B",
+      "category": "billing_dispute",
+      "conversation_entries": 8,
+      "business_records": 4,
+      "policy_entries": 4,
+      "capability": "Distinguish payment attempts from a second settled charge"
+    },
+    {
+      "pair_id": "refund",
+      "manual_fixture": "REF-A",
+      "product_fixture": "REF-B",
+      "category": "refund_request",
+      "conversation_entries": 8,
+      "business_records": 4,
+      "policy_entries": 4,
+      "capability": "Apply unused-service eligibility and preserve human approval"
+    },
+    {
+      "pair_id": "account_recovery",
+      "manual_fixture": "ACC-A",
+      "product_fixture": "ACC-B",
+      "category": "account_access",
+      "conversation_entries": 8,
+      "business_records": 4,
+      "policy_entries": 4,
+      "capability": "Block recovery on stale context and pending identity verification"
+    }
+  ]
+}

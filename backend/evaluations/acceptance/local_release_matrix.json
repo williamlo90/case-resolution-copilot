@@ -461,6 +461,96 @@
       "external_dependency": false
     },
     {
+      "id": "INBOX-001",
+      "area": "case_intake_security",
+      "behavior": "Gmail authorization uses PKCE, offline consent, and the configured incremental scope boundary.",
+      "test_file": "tests/unit/test_gmail_adapter_contract.py",
+      "test_selector": "test_gmail_authorization_uses_pkce_and_incremental_offline_consent",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INBOX-002",
+      "area": "case_intake_security",
+      "behavior": "Connected Inbox exposes import and draft capabilities without any email-send route.",
+      "test_file": "tests/unit/test_inbox_api_contract.py",
+      "test_selector": "test_connected_inbox_routes_are_registered_without_a_send_route",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INBOX-003",
+      "area": "case_intake_security",
+      "behavior": "Every Connected Inbox child record uses a composite tenant-scoped foreign key.",
+      "test_file": "tests/unit/test_inbox_persistence_contract.py",
+      "test_selector": "test_connected_inbox_children_use_tenant_scoped_foreign_keys",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "INBOX-004",
+      "area": "operational_readiness",
+      "behavior": "Sync claims serialize each connection, skip active leases, and remain safe under concurrent workers.",
+      "test_file": "tests/unit/test_inbox_persistence_contract.py",
+      "test_selector": "test_sync_claim_serializes_each_connection_and_skips_active_leases",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DRAFT-001",
+      "area": "action_recovery",
+      "behavior": "Replaying an approved draft delivery creates exactly one provider draft.",
+      "test_file": "tests/unit/test_phase5_decision_draft_workflow.py",
+      "test_selector": "test_approved_draft_replay_creates_exactly_one_provider_draft",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "DRAFT-002",
+      "area": "action_recovery",
+      "behavior": "An unknown provider outcome is reconciled without replaying the draft write.",
+      "test_file": "tests/unit/test_phase5_decision_draft_workflow.py",
+      "test_selector": "test_unknown_provider_outcome_reconciles_without_replaying_the_write",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RAG-001",
+      "area": "policy_retrieval",
+      "behavior": "Policy embedding calls run outside the database unit of work.",
+      "test_file": "tests/unit/test_policy_indexing_service.py",
+      "test_selector": "test_index_provider_runs_outside_the_database_unit_of_work",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RAG-002",
+      "area": "policy_retrieval",
+      "behavior": "Dense and lexical candidate sources enforce explicit relevance floors.",
+      "test_file": "tests/unit/test_governed_retrieval_v2.py",
+      "test_selector": "test_v2_candidate_sources_have_explicit_relevance_floors",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "RAG-003",
+      "area": "policy_retrieval",
+      "behavior": "The frozen RAG V2 benchmark remains answer-separated and hash locked.",
+      "test_file": "tests/unit/test_retrieval_v2_benchmark.py",
+      "test_selector": "test_frozen_retrieval_v2_dataset_is_hash_locked_and_answer_separated",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
+      "id": "MODEL-003",
+      "area": "operational_readiness",
+      "behavior": "The OpenAI gateway minimizes context and records input, cache, output, and reasoning token usage.",
+      "test_file": "tests/unit/test_openai_decision_engine.py",
+      "test_selector": "test_openai_gateway_uses_structured_responses_with_minimized_context",
+      "resource_class": "unit",
+      "external_dependency": false
+    },
+    {
       "id": "LEGACY-001",
       "area": "legacy_boundary",
       "behavior": "Legacy task, agent-run, and approval workflow routes are not mounted.",

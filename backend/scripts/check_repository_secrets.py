@@ -79,9 +79,16 @@ def _safe_database_reference(value: str) -> bool:
     )
 
 
-def tracked_files(project_root: Path = PROJECT_ROOT) -> tuple[Path, ...]:
+def repository_files(project_root: Path = PROJECT_ROOT) -> tuple[Path, ...]:
     completed = subprocess.run(
-        ["git", "ls-files", "-z"],
+        [
+            "git",
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+        ],
         cwd=project_root,
         check=True,
         capture_output=True,
@@ -97,7 +104,7 @@ def scan_repository(
     project_root: Path = PROJECT_ROOT,
 ) -> tuple[SecretFinding, ...]:
     findings: list[SecretFinding] = []
-    for path in tracked_files(project_root):
+    for path in repository_files(project_root):
         relative_path = path.relative_to(project_root).as_posix()
         if relative_path in EXCLUDED_PATHS or path.stat().st_size > MAX_TEXT_FILE_BYTES:
             continue

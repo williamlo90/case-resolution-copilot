@@ -1,0 +1,96 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "fixture_id": "REF-B",
+  "pair_id": "refund",
+  "condition": "copilot",
+  "synthetic_notice": "All people, identifiers, and records in this fixture are synthetic.",
+  "case": {
+    "public_id": "CS-BENCH-REF-B",
+    "source_id": "benchmark-product:ref-b",
+    "external_reference": "ORDER-B-5812",
+    "category": "refund_request",
+    "issue": "Enterprise customer cancelled an unused analytics setup",
+    "status": "investigating",
+    "urgency": "high",
+    "risk": "medium",
+    "due_at": "2026-08-07T14:00:00Z",
+    "impact_amount": "1120.00",
+    "impact_currency": "USD",
+    "source_freshness": "current",
+    "source_checked_at": "2026-08-06T11:00:00Z",
+    "request": {
+      "channel": "chat",
+      "customer_message": "Our analytics setup on ORDER-B-5812 was cancelled before activation. Can the unused order be refunded?",
+      "summary": "Refund request for a cancelled and unused setup order.",
+      "received_at": "2026-08-06T10:03:00Z"
+    },
+    "customer": {
+      "customer_id": "CUS-REF-B-29",
+      "name": "Blue Harbor Labs",
+      "tier": "enterprise",
+      "locale": "en-SG",
+      "contact": "finance@blue-harbor.example.invalid"
+    },
+    "business_contexts": [
+      {
+        "public_id": "CTX-REF-B-QUOTE",
+        "type": "other",
+        "label": "Expired training quote Q-B-14",
+        "source": "sales-benchmark",
+        "source_reference": "Q-B-14",
+        "status": "expired",
+        "fields": {"amount": "3100.00", "currency": "USD", "related_order": "none"},
+        "captured_at": "2026-08-06T10:44:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-B-DELIVERY",
+        "type": "delivery",
+        "label": "Activation plan DEL-B-63",
+        "source": "delivery-benchmark",
+        "source_reference": "DEL-B-63",
+        "status": "not_started",
+        "fields": {"activation_at": "not_scheduled", "assigned_engineer": "none"},
+        "captured_at": "2026-08-06T10:50:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-B-ORDER",
+        "type": "order",
+        "label": "Service order ORDER-B-5812",
+        "source": "orders-benchmark",
+        "source_reference": "ORDER-B-5812",
+        "status": "unused",
+        "fields": {"amount": "1120.00", "currency": "USD", "delivery_state": "not_started", "commitment": "refundable"},
+        "captured_at": "2026-08-06T10:58:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-B-PAYMENT",
+        "type": "payment",
+        "label": "Payment PAY-REF-B-27",
+        "source": "payments-benchmark",
+        "source_reference": "PAY-REF-B-27",
+        "status": "settled",
+        "fields": {"amount": "1120.00", "currency": "USD", "settled_at": "2026-08-02T12:10:00Z"},
+        "captured_at": "2026-08-06T10:55:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:00:00Z"
+      }
+    ]
+  },
+  "conversation": [
+    {"public_id": "MSG-CS-BENCH-REF-B-001", "author_type": "customer", "author_id": "CUS-REF-B-29", "author_name": "Blue Harbor Labs", "channel": "chat", "body": "Our analytics setup on ORDER-B-5812 was cancelled before activation. Can the unused order be refunded?", "internal": false, "source_reference": "ORDER-B-5812", "created_at": "2026-08-06T10:03:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-002", "author_type": "member", "author_id": "USR-BENCH-04", "author_name": "Support Desk", "channel": "chat", "body": "I will verify usage, delivery, payment, and the current refund policy.", "internal": false, "source_reference": null, "created_at": "2026-08-06T10:10:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-003", "author_type": "customer", "author_id": "CUS-REF-B-29", "author_name": "Blue Harbor Labs", "channel": "chat", "body": "No engineer contacted us and the workspace was never activated.", "internal": false, "source_reference": null, "created_at": "2026-08-06T10:17:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-004", "author_type": "system", "author_id": null, "author_name": "Delivery Sync", "channel": "webhook", "body": "Activation plan DEL-B-63 remains not_started with no assigned engineer.", "internal": false, "source_reference": "DEL-B-63", "created_at": "2026-08-06T10:26:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-005", "author_type": "member", "author_id": "USR-BENCH-04", "author_name": "Support Desk", "channel": "internal_note", "body": "The order meets the unused and not-started signals. Financial action still requires review.", "internal": true, "source_reference": "ORDER-B-5812", "created_at": "2026-08-06T10:34:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-006", "author_type": "customer", "author_id": "CUS-REF-B-29", "author_name": "Blue Harbor Labs", "channel": "chat", "body": "Please send a proposal to finance. We understand the refund is not complete yet.", "internal": false, "source_reference": null, "created_at": "2026-08-06T10:41:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-007", "author_type": "system", "author_id": null, "author_name": "Orders Sync", "channel": "webhook", "body": "Order ORDER-B-5812 and payment PAY-REF-B-27 refreshed successfully.", "internal": false, "source_reference": "ORDER-B-5812", "created_at": "2026-08-06T10:52:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-B-008", "author_type": "member", "author_id": "USR-BENCH-04", "author_name": "Support Desk", "channel": "chat", "body": "The source records are current. We will prepare the exact proposal for authorized review.", "internal": false, "source_reference": null, "created_at": "2026-08-06T10:59:00Z"}
+  ],
+  "policy_ids": ["POL-1008", "POL-1007", "POL-1006", "POL-1005"]
+}

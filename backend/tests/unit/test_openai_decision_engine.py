@@ -5,6 +5,7 @@ from typing import Any, cast
 import pytest
 from httpx import Request
 from openai import APITimeoutError
+from pydantic import ValidationError
 
 from app.analysis.ai_assisted_decision_engine import OpenAIAssistedDecisionEngine
 from app.analysis.deterministic_decision_engine import DecisionEngine
@@ -26,6 +27,8 @@ from app.domain.decision_briefs import (
 from app.domain.policies import EvidenceRetrievalResult, EvidenceRetrievalStatus
 from app.models.gateway import ModelGatewayTimeout, ModelGatewayUnavailable
 from app.models.openai_decision import (
+    OPENAI_DECISION_MAX_INPUT_CHARS,
+    OPENAI_DECISION_MAX_OUTPUT_TOKENS,
     DecisionNarrative,
     OpenAIDecisionNarrativeGateway,
 )
@@ -99,8 +102,44 @@ def _baseline() -> DecisionAnalysis:
 
 
 class _ParsedResponse:
-    def __init__(self, output: DecisionNarrative | None) -> None:
+    def __init__(
+        self,
+        output: DecisionNarrative | None,
+        usage: "_Usage | None" = None,
+    ) -> None:
         self.output_parsed = output
+        self.usage = usage
+
+
+class _InputTokenDetails:
+    def __init__(self, *, cached_tokens: int, cache_write_tokens: int) -> None:
+        self.cached_tokens = cached_tokens
+        self.cache_write_tokens = cache_write_tokens
+
+
+class _OutputTokenDetails:
+    def __init__(self, *, reasoning_tokens: int) -> None:
+        self.reasoning_tokens = reasoning_tokens
+
+
+class _Usage:
+    def __init__(
+        self,
+        *,
+        input_tokens: int,
+        cached_tokens: int,
+        cache_write_tokens: int,
+        output_tokens: int,
+        reasoning_tokens: int,
+    ) -> None:
+        self.input_tokens = input_tokens
+        self.input_tokens_details = _InputTokenDetails(
+            cached_tokens=cached_tokens,
+            cache_write_tokens=cache_write_tokens,
+        )
+        self.output_tokens = output_tokens
+        self.output_tokens_details = _OutputTokenDetails(reasoning_tokens=reasoning_tokens)
+        self.total_tokens = input_tokens + output_tokens
 
 
 class _ResponsesResource:
@@ -108,16 +147,18 @@ class _ResponsesResource:
         self,
         output: DecisionNarrative | None = None,
         error: Exception | None = None,
+        usage: _Usage | None = None,
     ) -> None:
         self.output = output
         self.error = error
+        self.usage = usage
         self.arguments: dict[str, Any] | None = None
 
     def parse(self, **kwargs: Any) -> _ParsedResponse:
         self.arguments = kwargs
         if self.error is not None:
             raise self.error
-        return _ParsedResponse(self.output)
+        return _ParsedResponse(self.output, self.usage)
 
 
 class _OpenAIClient:
@@ -142,7 +183,16 @@ def _narrative() -> DecisionNarrative:
 
 
 def test_openai_gateway_uses_structured_responses_with_minimized_context() -> None:
-    resource = _ResponsesResource(output=_narrative())
+    resource = _ResponsesResource(
+        output=_narrative(),
+        usage=_Usage(
+            input_tokens=100,
+            cached_tokens=20,
+            cache_write_tokens=10,
+            output_tokens=40,
+            reasoning_tokens=8,
+        ),
+    )
     client = _OpenAIClient(resource)
     gateway = OpenAIDecisionNarrativeGateway(
         api_key="unused-test-key",
@@ -159,19 +209,26 @@ def test_openai_gateway_uses_structured_responses_with_minimized_context() -> No
     assert resource.arguments["model"] == "gpt-5.6-luna"
     assert resource.arguments["text_format"] is DecisionNarrative
     assert resource.arguments["store"] is False
+    assert resource.arguments["max_output_tokens"] == OPENAI_DECISION_MAX_OUTPUT_TOKENS
     serialized_input = str(resource.arguments["input"])
+    assert len(serialized_input) <= OPENAI_DECISION_MAX_INPUT_CHARS
     assert "Payment status is recorded as settled." in serialized_input
     assert "CS-SECRET" not in serialized_input
     assert "PRIVATE-REFERENCE" not in serialized_input
+    assert len(gateway.usage_records) == 1
+    assert gateway.usage_records[0].input_tokens == 100
+    assert gateway.usage_records[0].cached_input_tokens == 20
+    assert gateway.usage_records[0].cache_write_input_tokens == 10
+    assert gateway.usage_records[0].output_tokens == 40
+    assert gateway.usage_records[0].reasoning_output_tokens == 8
+    assert gateway.usage_records[0].total_tokens == 140
 
     gateway.close()
     assert client.closed is True
 
 
 def test_openai_gateway_maps_timeout_without_leaking_provider_details() -> None:
-    timeout = APITimeoutError(
-        request=Request("POST", "https://api.openai.com/v1/responses")
-    )
+    timeout = APITimeoutError(request=Request("POST", "https://api.openai.com/v1/responses"))
     gateway = OpenAIDecisionNarrativeGateway(
         api_key="unused-test-key",
         model="gpt-5.6-luna",
@@ -195,6 +252,56 @@ def test_openai_gateway_rejects_a_missing_structured_result() -> None:
 
     with pytest.raises(ModelGatewayUnavailable, match="structured result"):
         gateway.refine(_baseline())
+
+
+def test_openai_gateway_maps_invalid_structured_output_to_safe_failure() -> None:
+    try:
+        DecisionNarrative.model_validate({"rationale": "Incomplete output"})
+    except ValidationError as validation_error:
+        error = validation_error
+    else:  # pragma: no cover - protects the test fixture from a weakened schema
+        raise AssertionError("The incomplete narrative fixture unexpectedly validated.")
+    gateway = OpenAIDecisionNarrativeGateway(
+        api_key="unused-test-key",
+        model="gpt-5.6-luna",
+        timeout_seconds=12,
+        max_retries=1,
+        client=_OpenAIClient(_ResponsesResource(error=error)),
+    )
+
+    with pytest.raises(ModelGatewayUnavailable, match="invalid structured result"):
+        gateway.refine(_baseline())
+
+
+def test_openai_gateway_rejects_oversized_input_before_provider_access() -> None:
+    resource = _ResponsesResource(output=_narrative())
+    baseline = _baseline()
+    source_fact = baseline.facts[0]
+    oversized = baseline.model_copy(
+        update={
+            "facts": [
+                source_fact.model_copy(
+                    update={
+                        "id": f"FCT-LARGE-{index}",
+                        "statement": "x" * 1000,
+                    }
+                )
+                for index in range(30)
+            ]
+        }
+    )
+    gateway = OpenAIDecisionNarrativeGateway(
+        api_key="unused-test-key",
+        model="gpt-5.6-luna",
+        timeout_seconds=12,
+        max_retries=1,
+        client=_OpenAIClient(resource),
+    )
+
+    with pytest.raises(ModelGatewayUnavailable, match="safety limit"):
+        gateway.refine(oversized)
+
+    assert resource.arguments is None
 
 
 def test_openai_client_is_initialized_only_on_first_ai_request() -> None:
@@ -299,9 +406,7 @@ def test_ai_assistance_falls_back_to_audited_deterministic_narrative() -> None:
     baseline = _baseline()
     engine = OpenAIAssistedDecisionEngine(
         baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
-        narrative_gateway=_NarrativeGateway(
-            error=ModelGatewayUnavailable("provider unavailable")
-        ),
+        narrative_gateway=_NarrativeGateway(error=ModelGatewayUnavailable("provider unavailable")),
     )
 
     result = _run(engine)
@@ -319,11 +424,21 @@ def test_ai_assistance_falls_back_to_audited_deterministic_narrative() -> None:
     )
 
 
-def test_ai_draft_cannot_claim_a_controlled_action_already_happened() -> None:
+@pytest.mark.parametrize(
+    ("field", "unsafe_claim"),
+    [
+        ("rationale", "We refunded the customer account."),
+        ("uncertainty", "The credit has been applied."),
+        ("response_subject", "Your refund has been processed"),
+        ("response_body", "We've issued the refund to your account."),
+    ],
+)
+def test_ai_narrative_cannot_claim_a_controlled_action_already_happened(
+    field: str,
+    unsafe_claim: str,
+) -> None:
     baseline = _baseline()
-    unsafe = _narrative().model_copy(
-        update={"response_body": "We have issued the refund to your account."}
-    )
+    unsafe = _narrative().model_copy(update={field: unsafe_claim})
     engine = OpenAIAssistedDecisionEngine(
         baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
         narrative_gateway=_NarrativeGateway(result=unsafe),
@@ -335,3 +450,23 @@ def test_ai_draft_cannot_claim_a_controlled_action_already_happened() -> None:
     assert result.rationale == baseline.rationale
     assert result.checkpoints[-1].status is CheckpointStatus.ABSTAINED
     assert result.model_version == "openai:gpt-5.6-luna:rejected"
+
+
+def test_ai_narrative_allows_explicitly_pending_action_language() -> None:
+    baseline = _baseline()
+    pending = _narrative().model_copy(
+        update={
+            "response_body": (
+                "We have not issued a refund. The proposed refund remains pending approval."
+            )
+        }
+    )
+    engine = OpenAIAssistedDecisionEngine(
+        baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
+        narrative_gateway=_NarrativeGateway(result=pending),
+    )
+
+    result = _run(engine)
+
+    assert result.response_draft.body == pending.response_body
+    assert result.checkpoints[-1].status is CheckpointStatus.COMPLETED

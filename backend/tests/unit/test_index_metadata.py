@@ -5,6 +5,7 @@ from app.persistence.models.policies import (
     GovernedPolicyClauseModel,
     GovernedPolicyVersionModel,
 )
+from app.persistence.models.policy_retrieval_v2 import PolicyEmbeddingProfileModel
 
 
 def _indexes(model: type[object]) -> dict[str, Index]:
@@ -53,3 +54,12 @@ def test_policy_retrieval_indexes_are_declared_in_metadata() -> None:
         clause_indexes["ix_policy_clauses_embedding_hnsw"].dialect_options["postgresql"]["using"]
         == "hnsw"
     )
+
+
+def test_policy_v2_active_profile_index_is_declared_in_metadata() -> None:
+    active_profile = _indexes(PolicyEmbeddingProfileModel)[
+        "uq_policy_embedding_profiles_active_environment"
+    ]
+
+    assert active_profile.unique
+    assert str(active_profile.dialect_options["postgresql"]["where"]) == "status = 'active'"

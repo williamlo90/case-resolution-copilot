@@ -15,6 +15,17 @@ It is not designed to let an LLM make consequential decisions by itself.
 
 ![Production Cases queue](../evidence/production-demo/01-cases-queue.png)
 
+## Governed Coverage At A Glance
+
+| Metric | What it demonstrates | Evidence |
+| ---: | --- | --- |
+| **4** | Governed roles: Specialist, Supervisor, Administrator, and Auditor | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
+| **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
+| **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](../../backend/evaluations/workflow/traceability.json) |
+
+These figures describe governed workflow coverage and traceability. They are not usage, accuracy,
+or business-impact metrics.
+
 ## Users And Workflow
 
 | Role | Primary responsibility |
@@ -94,22 +105,34 @@ policy does not silently rewrite historical reasoning.
 Public complaint, ombudsman, and transaction datasets remain separate. The project does not combine
 unrelated records into fictional complete business cases or report a misleading aggregate score.
 
-## Verification Evidence
+## How This Was Verified
 
 ### Current reconstructed source
 
 | Evidence | Result |
 | --- | ---: |
-| Reconstruction baseline | 12/12 serial release checks passed before final audit corrections |
-| Release-hardening static checks | Ruff, Mypy over 195 application files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 73 focused backend tests and 4 focused frontend tests passed |
-| Baseline local acceptance | 54 controls / 71 test variants passed |
-| Baseline workflow traceability | 8 scenarios / 19 proofs / 21 variants passed |
+| Release-hardening static checks | Ruff, Mypy over 290 backend application files, TypeScript, and ESLint passed |
+| Release-hardening regressions | 389 backend unit/contract tests and 160 frontend tests passed serially |
 
-The guarded PostgreSQL integration suite has not been rerun for the reconstructed revision. The
-following benchmark and hosted observations were produced by the predecessor implementation and
-are retained as historical product evidence, not counted as current source verification. A full
-release rerun remains a promotion gate after the audit corrections.
+The full release verifier and guarded PostgreSQL integration suite have not been rerun for the
+reconstructed revision.
+
+### Baseline matrices
+
+- The [acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) records
+  54 controls and 71 acceptance variants.
+- The [workflow traceability map](../../backend/evaluations/workflow/traceability.json) records 8
+  scenarios, 19 traceable proofs, and 21 workflow variants.
+
+These are committed baseline coverage artifacts, not a fresh full-release or database rerun.
+
+### Historical hosted evidence
+
+The [deterministic hosted acceptance](../evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+records Specialist submission, Supervisor approval, a completed controlled action with a durable
+receipt, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It was
+captured from the predecessor hosted deployment and is not evidence that the reconstructed commit
+is currently deployed.
 
 ### Historical benchmark evidence
 
@@ -157,16 +180,26 @@ end-to-end product score.
 - A screenshot-backed production walkthrough records the queue, Decision Brief, conversation,
   evidence, activity, policies, quality, actions, and role-denial states.
 
+### Defects found during hosted acceptance
+
+**Blocked connection state was hidden.** The action detail contract initially rejected the valid
+`not_configured` state while the queue discarded its execution blocker. The reconstructed source
+accepts the state and surfaces `Connection unavailable` instead of hiding why execution is blocked.
+
+**An approved terminal review appeared undecided.** After action execution changed the case, stale
+case messaging took precedence over the review's terminal `approved` state. The UI now keeps the
+approval visibly complete and explains that later case changes do not rewrite the recorded review;
+a focused regression covers this state.
+
 ## Current Verdict
 
 The project is a **controlled-pilot release candidate** and a production-oriented portfolio
 project. It is not valid to claim general production readiness or validation on complete internal
 business cases.
 
-The remaining pilot gates require client-owned case and action sandboxes, session/provider outage
-drills, centralized production alerting, monitored restore cutover, a moderated usability and
-assistive-technology assessment, penetration evidence, and bounded load evidence on isolated
-infrastructure.
+The remaining evidence boundaries are concise: the reconstructed full release and guarded
+PostgreSQL suite still require reruns, external case and action providers remain simulated, and no
+customer-impact claim has been established.
 
 ## Resume Summary
 

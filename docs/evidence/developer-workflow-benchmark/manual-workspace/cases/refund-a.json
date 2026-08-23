@@ -1,0 +1,96 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "fixture_id": "REF-A",
+  "pair_id": "refund",
+  "condition": "manual",
+  "synthetic_notice": "All people, identifiers, and records in this fixture are synthetic.",
+  "case": {
+    "public_id": "CS-BENCH-REF-A",
+    "source_id": "benchmark-manual:ref-a",
+    "external_reference": "ORDER-A-4408",
+    "category": "refund_request",
+    "issue": "Enterprise customer requests refund for an unused onboarding package",
+    "status": "investigating",
+    "urgency": "high",
+    "risk": "medium",
+    "due_at": "2026-08-07T13:00:00Z",
+    "impact_amount": "980.00",
+    "impact_currency": "USD",
+    "source_freshness": "current",
+    "source_checked_at": "2026-08-06T10:00:00Z",
+    "request": {
+      "channel": "email",
+      "customer_message": "We cancelled onboarding before kickoff and never used the package on ORDER-A-4408. Please confirm the refund.",
+      "summary": "Refund request for an unused service order.",
+      "received_at": "2026-08-06T09:02:00Z"
+    },
+    "customer": {
+      "customer_id": "CUS-REF-A-18",
+      "name": "Northwind Studio",
+      "tier": "enterprise",
+      "locale": "en-SG",
+      "contact": "ops@northwind-studio.example.invalid"
+    },
+    "business_contexts": [
+      {
+        "public_id": "CTX-REF-A-ORDER",
+        "type": "order",
+        "label": "Service order ORDER-A-4408",
+        "source": "orders-benchmark",
+        "source_reference": "ORDER-A-4408",
+        "status": "unused",
+        "fields": {"amount": "980.00", "currency": "USD", "delivery_state": "not_started", "commitment": "refundable"},
+        "captured_at": "2026-08-06T09:58:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T10:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-A-PAYMENT",
+        "type": "payment",
+        "label": "Payment PAY-REF-A-19",
+        "source": "payments-benchmark",
+        "source_reference": "PAY-REF-A-19",
+        "status": "settled",
+        "fields": {"amount": "980.00", "currency": "USD", "settled_at": "2026-08-01T11:20:00Z"},
+        "captured_at": "2026-08-06T09:55:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T10:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-A-DELIVERY",
+        "type": "delivery",
+        "label": "Delivery plan DEL-A-52",
+        "source": "delivery-benchmark",
+        "source_reference": "DEL-A-52",
+        "status": "not_started",
+        "fields": {"kickoff_at": "not_scheduled", "assigned_consultant": "none"},
+        "captured_at": "2026-08-06T09:52:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T10:00:00Z"
+      },
+      {
+        "public_id": "CTX-REF-A-QUOTE",
+        "type": "other",
+        "label": "Expired expansion quote Q-A-07",
+        "source": "sales-benchmark",
+        "source_reference": "Q-A-07",
+        "status": "expired",
+        "fields": {"amount": "2400.00", "currency": "USD", "related_order": "none"},
+        "captured_at": "2026-08-06T09:45:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T10:00:00Z"
+      }
+    ]
+  },
+  "conversation": [
+    {"public_id": "MSG-CS-BENCH-REF-A-001", "author_type": "customer", "author_id": "CUS-REF-A-18", "author_name": "Northwind Studio", "channel": "email", "body": "We cancelled onboarding before kickoff and never used the package on ORDER-A-4408. Please confirm the refund.", "internal": false, "source_reference": "ORDER-A-4408", "created_at": "2026-08-06T09:02:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-002", "author_type": "member", "author_id": "USR-BENCH-03", "author_name": "Support Desk", "channel": "email", "body": "We are checking payment, usage, and delivery records before preparing a resolution.", "internal": false, "source_reference": null, "created_at": "2026-08-06T09:11:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-003", "author_type": "customer", "author_id": "CUS-REF-A-18", "author_name": "Northwind Studio", "channel": "email", "body": "No consultant was assigned and no kickoff meeting occurred.", "internal": false, "source_reference": null, "created_at": "2026-08-06T09:19:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-004", "author_type": "system", "author_id": null, "author_name": "Orders Sync", "channel": "webhook", "body": "Order ORDER-A-4408 is unused and its delivery state is not_started.", "internal": false, "source_reference": "ORDER-A-4408", "created_at": "2026-08-06T09:28:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-005", "author_type": "member", "author_id": "USR-BENCH-03", "author_name": "Support Desk", "channel": "internal_note", "body": "Payment is settled. Any refund remains a proposal until an authorized reviewer approves it.", "internal": true, "source_reference": "PAY-REF-A-19", "created_at": "2026-08-06T09:36:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-006", "author_type": "customer", "author_id": "CUS-REF-A-18", "author_name": "Northwind Studio", "channel": "email", "body": "Please send the decision to our finance contact, but do not claim payment has already been returned.", "internal": false, "source_reference": null, "created_at": "2026-08-06T09:42:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-007", "author_type": "system", "author_id": null, "author_name": "Delivery Sync", "channel": "webhook", "body": "Delivery plan DEL-A-52 has no kickoff or assigned consultant.", "internal": false, "source_reference": "DEL-A-52", "created_at": "2026-08-06T09:50:00Z"},
+    {"public_id": "MSG-CS-BENCH-REF-A-008", "author_type": "member", "author_id": "USR-BENCH-03", "author_name": "Support Desk", "channel": "email", "body": "The current records are complete. We will prepare the proposal for the required review.", "internal": false, "source_reference": null, "created_at": "2026-08-06T09:57:00Z"}
+  ],
+  "policy_ids": ["POL-1008", "POL-1007", "POL-1006", "POL-1005"]
+}

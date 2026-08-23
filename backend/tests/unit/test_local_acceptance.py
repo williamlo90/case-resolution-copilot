@@ -18,17 +18,17 @@ def test_local_acceptance_matrix_covers_required_failure_and_authority_areas() -
         validated_at=NOW,
     )
 
-    assert result.checks == 54
+    assert result.checks == 64
     assert result.areas == {
         "role_authority": 6,
         "authentication_failure": 3,
         "model_provider_failure": 2,
-        "case_intake_security": 3,
-        "action_recovery": 6,
+        "case_intake_security": 6,
+        "action_recovery": 8,
         "route_authority": 7,
-        "operational_readiness": 6,
+        "operational_readiness": 8,
         "decision_generation": 5,
-        "policy_retrieval": 5,
+        "policy_retrieval": 8,
         "case_pagination": 6,
         "legacy_boundary": 1,
         "case_workspace": 3,

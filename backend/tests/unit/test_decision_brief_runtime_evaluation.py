@@ -12,8 +12,10 @@ from app.evaluation.decision_brief_runtime import (
     build_evaluation_workspace,
     run_decision_brief_evaluation,
 )
+from app.evaluation.provider_cost import ProviderTokenPricing
 from app.models.gateway import ModelGatewayUnavailable
 from app.models.openai_decision import DecisionNarrative
+from app.models.provider_usage import ProviderTokenUsage
 
 NOW = datetime(2026, 7, 30, 12, 0, tzinfo=UTC)
 
@@ -24,9 +26,20 @@ class _SuccessfulNarrativeGateway:
 
     def __init__(self, contract_path: Path) -> None:
         self._contract_path = contract_path
+        self._usage_records: list[ProviderTokenUsage] = []
 
     def refine(self, analysis: DecisionAnalysis) -> DecisionNarrative:
         assert self._contract_path.is_file()
+        self._usage_records.append(
+            ProviderTokenUsage(
+                input_tokens=100,
+                cached_input_tokens=20,
+                cache_write_input_tokens=10,
+                output_tokens=40,
+                reasoning_output_tokens=8,
+                total_tokens=140,
+            )
+        )
         action_pending = any(action.review_required for action in analysis.proposed_actions)
         return DecisionNarrative(
             rationale="The verified records support the server-owned proposed outcome.",
@@ -38,6 +51,10 @@ class _SuccessfulNarrativeGateway:
                 else "We need the listed information before confirming an outcome."
             ),
         )
+
+    @property
+    def usage_records(self) -> tuple[ProviderTokenUsage, ...]:
+        return tuple(self._usage_records)
 
 
 class _UnavailableNarrativeGateway:
@@ -67,6 +84,15 @@ def test_decision_brief_runtime_evaluation_freezes_controls_and_bounds_provider_
         execution_mode="provider",
         run_id=run_id,
         provider_counter=bounded_gateway,
+        pricing=ProviderTokenPricing(
+            model="evaluation-test-model",
+            checked_on=NOW.date(),
+            source_url="https://example.invalid/pricing",
+            input_usd_per_million=0.20,
+            cached_input_usd_per_million=0.02,
+            cache_write_input_usd_per_million=0.25,
+            output_usd_per_million=1.20,
+        ),
         clock=lambda: NOW,
     )
 
@@ -75,6 +101,11 @@ def test_decision_brief_runtime_evaluation_freezes_controls_and_bounds_provider_
     assert report.safety_passed == 3
     assert report.provider_calls_expected == 2
     assert report.provider_calls == 2
+    assert report.provider_cost.usage_complete
+    assert report.provider_cost.token_usage.total_tokens == 280
+    assert report.provider_cost.total_cost_usd == pytest.approx(0.0001298)
+    assert report.provider_cost.cost_per_evaluated_case_usd == pytest.approx(0.000043266667)
+    assert report.provider_cost.cost_per_provider_call_usd == pytest.approx(0.0000649)
     assert report.control_preservation_rate == 1
     assert [item.model_mode for item in report.cases] == [
         "ai_assisted",

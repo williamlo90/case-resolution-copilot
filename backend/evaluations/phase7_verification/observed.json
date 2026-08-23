@@ -1,0 +1,106 @@
+{
+  "schema_version": "phase7-verification-v1",
+  "observed_on": "2026-08-19",
+  "base_commit": "d6c7de72c5636208d34e028744ac3460afc3e0fa",
+  "worktree_dirty": true,
+  "resource_profile": "serial-lightweight-no-browser",
+  "network_free": {
+    "unit_tests": 331,
+    "contract_tests": 58,
+    "passed": true
+  },
+  "frontend": {
+    "test_files": 50,
+    "tests": 160,
+    "typecheck_passed": true,
+    "lint_passed": true
+  },
+  "postgresql": {
+    "server_version": "18.4",
+    "migration_round_trip": "base_to_head",
+    "integration_tests": 34,
+    "pgvector_active": true,
+    "disposable_branch": true,
+    "passed": true
+  },
+  "retrieval_v2": {
+    "frozen_cases": 15,
+    "inputs_sha256": "a7849e0da848b9c02832c734df8a497ca4637ed4a242dff3e41ff5e8a1e4fe2b",
+    "labels_sha256": "9177a7249a175bcfc4da2992232ee2dbcc00f3c8f843c6b1858d2394fe0f2653",
+    "recall_at_3_gate": 0.9,
+    "wrong_version_count": 0,
+    "unsupported_citation_count": 0,
+    "cross_tenant_result_count": 0,
+    "failure_state_accuracy": 1.0,
+    "passed": true
+  },
+  "decision_brief": {
+    "deterministic": {
+      "cases": 3,
+      "passed": 3,
+      "safety_passed": 3,
+      "control_preservation": 1.0,
+      "contract_sha256": "8e05137cafd7c267c636e0a8ade9b8b1e94bff579684c47c89fcc881ffd2c3a3"
+    },
+    "provider": {
+      "model": "gpt-5.6-luna",
+      "cases": 3,
+      "passed": 3,
+      "safety_passed": 3,
+      "control_preservation": 1.0,
+      "provider_calls": 2,
+      "provider_call_limit": 2,
+      "contract_sha256": "70fbb6468d7c2f480bd13cbe2b9fe7180c1bfda3e4111fa80d0956d1af4b09d7",
+      "usage": {
+        "input_tokens": 1017,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 278,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 1295
+      },
+      "pricing_usd_per_million": {
+        "checked_on": "2026-08-18",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+        "input": 0.2,
+        "cached_input": 0.02,
+        "cache_write_input": 0.25,
+        "output": 1.2
+      },
+      "total_cost_usd": 0.000537,
+      "cost_per_evaluated_case_usd": 0.000179,
+      "cost_per_provider_call_usd": 0.0002685
+    }
+  },
+  "acceptance": {
+    "matrix_checks": 64,
+    "areas": 13,
+    "selected_tests": 82,
+    "passed": true
+  },
+  "workflow_trace": {
+    "scenarios": 8,
+    "proofs": 19,
+    "selected_tests": 21,
+    "passed": true
+  },
+  "static_safety": {
+    "ruff_passed": true,
+    "mypy_files": 429,
+    "migration_revisions": 24,
+    "migration_head": "20260813_0024",
+    "secret_scan_findings": 0
+  },
+  "calibration": {
+    "matched_fixtures": 6,
+    "fixture_tests": 9,
+    "timed_operator_benchmark_run": false,
+    "productivity_claim_supported": false
+  },
+  "deferred_to_phase8": [
+    "hosted_gmail_connect_import_replay",
+    "hosted_role_journeys",
+    "warm_authenticated_ui_lcp",
+    "timed_operator_calibration"
+  ]
+}

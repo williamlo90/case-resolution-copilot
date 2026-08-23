@@ -62,6 +62,18 @@ def test_migration_creates_only_approved_core_tables(database: Database) -> None
         "notification_outbox",
         "case_data_governance",
         "case_quality_projections",
+        "inbox_connection_profiles",
+        "connection_credential_envelopes",
+        "inbox_oauth_sessions",
+        "external_conversations",
+        "external_messages",
+        "external_attachments",
+        "inbox_sync_checkpoints",
+        "inbox_sync_jobs",
+        "inbox_draft_deliveries",
+        "policy_embedding_profiles",
+        "governed_policy_clause_embeddings_v2",
+        "policy_index_jobs",
     } <= tables
     assert "bookings" not in tables
     assert "customers" not in tables
@@ -69,12 +81,8 @@ def test_migration_creates_only_approved_core_tables(database: Database) -> None
     policy_columns = {
         column["name"]: column for column in inspector.get_columns("policy_document_versions")
     }
-    invitation_columns = {
-        column["name"]: column for column in inspector.get_columns("invitations")
-    }
-    connection_columns = {
-        column["name"]: column for column in inspector.get_columns("connections")
-    }
+    invitation_columns = {column["name"]: column for column in inspector.get_columns("invitations")}
+    connection_columns = {column["name"]: column for column in inspector.get_columns("connections")}
     invitation_uniques = {
         constraint["name"] for constraint in inspector.get_unique_constraints("invitations")
     }
@@ -94,8 +102,12 @@ def test_migration_creates_only_approved_core_tables(database: Database) -> None
     policy_version_indexes = {
         index["name"] for index in inspector.get_indexes("governed_policy_versions")
     }
-    clause_indexes = {
-        index["name"] for index in inspector.get_indexes("governed_policy_clauses")
+    clause_indexes = {index["name"] for index in inspector.get_indexes("governed_policy_clauses")}
+    clause_v2_indexes = {
+        index["name"] for index in inspector.get_indexes("governed_policy_clause_embeddings_v2")
+    }
+    policy_index_job_indexes = {
+        index["name"] for index in inspector.get_indexes("policy_index_jobs")
     }
     assert {
         "ix_cases_org_due_public",
@@ -113,7 +125,13 @@ def test_migration_creates_only_approved_core_tables(database: Database) -> None
         "ix_policy_versions_customer_tiers_gin",
     } <= policy_version_indexes
     assert "ix_policy_clauses_embedding_hnsw" in clause_indexes
+    assert "ix_governed_policy_clauses_search_vector_gin" in clause_indexes
+    assert "ix_policy_clause_embeddings_v2_hnsw" in clause_v2_indexes
+    assert "ix_policy_index_jobs_claim" in policy_index_job_indexes
     with database.engine.connect() as connection:
+        assert connection.scalar(
+            text("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')")
+        )
         assert connection.scalar(
             text("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm')")
         )

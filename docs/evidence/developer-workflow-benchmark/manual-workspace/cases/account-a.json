@@ -1,0 +1,96 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "fixture_id": "ACC-A",
+  "pair_id": "account_recovery",
+  "condition": "manual",
+  "synthetic_notice": "All people, identifiers, and records in this fixture are synthetic.",
+  "case": {
+    "public_id": "CS-BENCH-ACC-A",
+    "source_id": "benchmark-manual:acc-a",
+    "external_reference": "ACCOUNT-A-3017",
+    "category": "account_access",
+    "issue": "Customer requests recovery after losing an old phone number",
+    "status": "investigating",
+    "urgency": "high",
+    "risk": "high",
+    "due_at": "2026-08-07T16:00:00Z",
+    "impact_amount": null,
+    "impact_currency": null,
+    "source_freshness": "stale",
+    "source_checked_at": "2026-08-04T07:30:00Z",
+    "request": {
+      "channel": "email",
+      "customer_message": "My recovery code still goes to my old phone. I need access to ACCOUNT-A-3017 before payroll closes.",
+      "summary": "Urgent account recovery request involving an outdated phone number.",
+      "received_at": "2026-08-06T11:01:00Z"
+    },
+    "customer": {
+      "customer_id": "CUS-ACC-A-55",
+      "name": "Maya Kusuma",
+      "tier": "standard",
+      "locale": "id-ID",
+      "contact": "maya.kusuma@example.invalid"
+    },
+    "business_contexts": [
+      {
+        "public_id": "CTX-ACC-A-ACCOUNT",
+        "type": "account",
+        "label": "Account ACCOUNT-A-3017",
+        "source": "identity-benchmark",
+        "source_reference": "ACCOUNT-A-3017",
+        "status": "recovery_blocked",
+        "fields": {"mfa_state": "enabled", "recovery_channel": "old_phone", "identity_check": "pending", "last_login_region": "ID"},
+        "captured_at": "2026-08-04T07:30:00Z",
+        "freshness": "stale",
+        "checked_at": "2026-08-04T07:30:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-A-SUBSCRIPTION",
+        "type": "subscription",
+        "label": "Workspace subscription SUB-ACC-A-4",
+        "source": "subscriptions-benchmark",
+        "source_reference": "SUB-ACC-A-4",
+        "status": "active",
+        "fields": {"plan": "business", "seats": "12"},
+        "captured_at": "2026-08-06T11:40:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:45:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-A-INVOICE",
+        "type": "invoice",
+        "label": "Invoice INV-ACC-A-77",
+        "source": "billing-benchmark",
+        "source_reference": "INV-ACC-A-77",
+        "status": "paid",
+        "fields": {"amount": "450.00", "currency": "USD", "billing_period": "2026-08"},
+        "captured_at": "2026-08-06T11:38:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:45:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-A-SECURITY",
+        "type": "other",
+        "label": "Security newsletter preference PREF-A-11",
+        "source": "communications-benchmark",
+        "source_reference": "PREF-A-11",
+        "status": "subscribed",
+        "fields": {"topic": "security_updates", "language": "id"},
+        "captured_at": "2026-08-06T11:35:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T11:45:00Z"
+      }
+    ]
+  },
+  "conversation": [
+    {"public_id": "MSG-CS-BENCH-ACC-A-001", "author_type": "customer", "author_id": "CUS-ACC-A-55", "author_name": "Maya Kusuma", "channel": "email", "body": "My recovery code still goes to my old phone. I need access to ACCOUNT-A-3017 before payroll closes.", "internal": false, "source_reference": "ACCOUNT-A-3017", "created_at": "2026-08-06T11:01:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-002", "author_type": "member", "author_id": "USR-BENCH-05", "author_name": "Support Desk", "channel": "email", "body": "We can help after checking the current account record and completing ownership verification.", "internal": false, "source_reference": null, "created_at": "2026-08-06T11:08:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-003", "author_type": "customer", "author_id": "CUS-ACC-A-55", "author_name": "Maya Kusuma", "channel": "email", "body": "I can provide my company email now. Please disable MFA temporarily if that is faster.", "internal": false, "source_reference": null, "created_at": "2026-08-06T11:16:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-004", "author_type": "system", "author_id": null, "author_name": "Identity Sync", "channel": "webhook", "body": "The available account snapshot was last checked on 2026-08-04 at 07:30 UTC.", "internal": false, "source_reference": "ACCOUNT-A-3017", "created_at": "2026-08-06T11:24:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-005", "author_type": "member", "author_id": "USR-BENCH-05", "author_name": "Support Desk", "channel": "internal_note", "body": "Identity check is pending. Do not alter MFA or the recovery channel from the stale snapshot.", "internal": true, "source_reference": "ACCOUNT-A-3017", "created_at": "2026-08-06T11:31:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-006", "author_type": "customer", "author_id": "CUS-ACC-A-55", "author_name": "Maya Kusuma", "channel": "email", "body": "The old number ended in 4471, but I no longer control it and cannot receive a code.", "internal": false, "source_reference": null, "created_at": "2026-08-06T11:37:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-007", "author_type": "system", "author_id": null, "author_name": "Verification Service", "channel": "webhook", "body": "Ownership verification session VER-A-901 remains pending.", "internal": false, "source_reference": "VER-A-901", "created_at": "2026-08-06T11:42:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-A-008", "author_type": "member", "author_id": "USR-BENCH-05", "author_name": "Support Desk", "channel": "email", "body": "We will request a fresh account snapshot and complete verification before any recovery change.", "internal": false, "source_reference": null, "created_at": "2026-08-06T11:47:00Z"}
+  ],
+  "policy_ids": ["POL-1008", "POL-1007", "POL-1006", "POL-1005"]
+}

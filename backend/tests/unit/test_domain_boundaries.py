@@ -27,9 +27,9 @@ def imported_modules(path: Path) -> set[str]:
 def test_domain_does_not_depend_on_framework_or_outer_layers() -> None:
     violations: list[str] = []
 
-    for path in sorted(DOMAIN_ROOT.glob("*.py")):
+    for path in sorted(DOMAIN_ROOT.rglob("*.py")):
         for module in sorted(imported_modules(path)):
             if module.startswith(FORBIDDEN_PREFIXES):
-                violations.append(f"{path.name}: {module}")
+                violations.append(f"{path.relative_to(DOMAIN_ROOT)}: {module}")
 
     assert violations == []

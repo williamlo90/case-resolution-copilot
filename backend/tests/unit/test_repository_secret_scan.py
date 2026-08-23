@@ -1,4 +1,9 @@
-from scripts.check_repository_secrets import scan_text
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from scripts.check_repository_secrets import repository_files, scan_text
 
 
 def test_secret_scan_reports_rule_and_path_without_secret_value() -> None:
@@ -40,3 +45,38 @@ def test_secret_scan_distinguishes_remote_database_password_from_local_fixture()
         ("settings.txt", "database_url_with_password")
     ]
     assert local == ()
+
+
+def test_secret_scan_includes_untracked_nonignored_repository_files(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    observed_command: list[str] = []
+
+    def fake_run(
+        command: list[str],
+        *,
+        cwd: Path,
+        check: bool,
+        capture_output: bool,
+    ) -> subprocess.CompletedProcess[bytes]:
+        observed_command.extend(command)
+        assert cwd == tmp_path
+        assert check is True
+        assert capture_output is True
+        return subprocess.CompletedProcess(command, 0, stdout=b"tracked.py\0new.py\0")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert repository_files(tmp_path) == (
+        tmp_path / "tracked.py",
+        tmp_path / "new.py",
+    )
+    assert observed_command == [
+        "git",
+        "ls-files",
+        "-z",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+    ]

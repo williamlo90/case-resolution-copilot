@@ -1,0 +1,96 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "fixture_id": "ACC-B",
+  "pair_id": "account_recovery",
+  "condition": "copilot",
+  "synthetic_notice": "All people, identifiers, and records in this fixture are synthetic.",
+  "case": {
+    "public_id": "CS-BENCH-ACC-B",
+    "source_id": "benchmark-product:acc-b",
+    "external_reference": "ACCOUNT-B-4826",
+    "category": "account_access",
+    "issue": "Customer requests urgent recovery after replacing a phone",
+    "status": "investigating",
+    "urgency": "high",
+    "risk": "high",
+    "due_at": "2026-08-07T17:00:00Z",
+    "impact_amount": null,
+    "impact_currency": null,
+    "source_freshness": "stale",
+    "source_checked_at": "2026-08-04T08:15:00Z",
+    "request": {
+      "channel": "chat",
+      "customer_message": "I replaced my phone and cannot receive the recovery code for ACCOUNT-B-4826. Please reset MFA before our client demo.",
+      "summary": "Urgent recovery request after loss of the registered phone.",
+      "received_at": "2026-08-06T12:02:00Z"
+    },
+    "customer": {
+      "customer_id": "CUS-ACC-B-68",
+      "name": "Arif Wibowo",
+      "tier": "standard",
+      "locale": "id-ID",
+      "contact": "arif.wibowo@example.invalid"
+    },
+    "business_contexts": [
+      {
+        "public_id": "CTX-ACC-B-SECURITY",
+        "type": "other",
+        "label": "Product newsletter preference PREF-B-22",
+        "source": "communications-benchmark",
+        "source_reference": "PREF-B-22",
+        "status": "subscribed",
+        "fields": {"topic": "product_updates", "language": "id"},
+        "captured_at": "2026-08-06T12:34:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T12:45:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-B-ACCOUNT",
+        "type": "account",
+        "label": "Account ACCOUNT-B-4826",
+        "source": "identity-benchmark",
+        "source_reference": "ACCOUNT-B-4826",
+        "status": "recovery_blocked",
+        "fields": {"mfa_state": "enabled", "recovery_channel": "old_phone", "identity_check": "pending", "last_login_region": "ID"},
+        "captured_at": "2026-08-04T08:15:00Z",
+        "freshness": "stale",
+        "checked_at": "2026-08-04T08:15:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-B-INVOICE",
+        "type": "invoice",
+        "label": "Invoice INV-ACC-B-88",
+        "source": "billing-benchmark",
+        "source_reference": "INV-ACC-B-88",
+        "status": "paid",
+        "fields": {"amount": "520.00", "currency": "USD", "billing_period": "2026-08"},
+        "captured_at": "2026-08-06T12:39:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T12:45:00Z"
+      },
+      {
+        "public_id": "CTX-ACC-B-SUBSCRIPTION",
+        "type": "subscription",
+        "label": "Workspace subscription SUB-ACC-B-9",
+        "source": "subscriptions-benchmark",
+        "source_reference": "SUB-ACC-B-9",
+        "status": "active",
+        "fields": {"plan": "business", "seats": "15"},
+        "captured_at": "2026-08-06T12:41:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T12:45:00Z"
+      }
+    ]
+  },
+  "conversation": [
+    {"public_id": "MSG-CS-BENCH-ACC-B-001", "author_type": "customer", "author_id": "CUS-ACC-B-68", "author_name": "Arif Wibowo", "channel": "chat", "body": "I replaced my phone and cannot receive the recovery code for ACCOUNT-B-4826. Please reset MFA before our client demo.", "internal": false, "source_reference": "ACCOUNT-B-4826", "created_at": "2026-08-06T12:02:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-002", "author_type": "member", "author_id": "USR-BENCH-06", "author_name": "Support Desk", "channel": "chat", "body": "We must verify ownership and refresh the account context before changing recovery settings.", "internal": false, "source_reference": null, "created_at": "2026-08-06T12:09:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-003", "author_type": "customer", "author_id": "CUS-ACC-B-68", "author_name": "Arif Wibowo", "channel": "chat", "body": "I can answer account questions, but I cannot access the registered device.", "internal": false, "source_reference": null, "created_at": "2026-08-06T12:16:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-004", "author_type": "system", "author_id": null, "author_name": "Verification Service", "channel": "webhook", "body": "Ownership verification session VER-B-118 remains pending.", "internal": false, "source_reference": "VER-B-118", "created_at": "2026-08-06T12:23:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-005", "author_type": "member", "author_id": "USR-BENCH-06", "author_name": "Support Desk", "channel": "internal_note", "body": "The identity snapshot is over 48 hours old. Do not reset MFA from this record.", "internal": true, "source_reference": "ACCOUNT-B-4826", "created_at": "2026-08-06T12:29:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-006", "author_type": "customer", "author_id": "CUS-ACC-B-68", "author_name": "Arif Wibowo", "channel": "chat", "body": "The old number ended in 9032 and is no longer under my control.", "internal": false, "source_reference": null, "created_at": "2026-08-06T12:35:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-007", "author_type": "system", "author_id": null, "author_name": "Identity Sync", "channel": "webhook", "body": "No current account snapshot was returned; the last successful check was 2026-08-04 at 08:15 UTC.", "internal": false, "source_reference": "ACCOUNT-B-4826", "created_at": "2026-08-06T12:40:00Z"},
+    {"public_id": "MSG-CS-BENCH-ACC-B-008", "author_type": "member", "author_id": "USR-BENCH-06", "author_name": "Support Desk", "channel": "chat", "body": "We will request fresh account context and complete verification before any recovery action.", "internal": false, "source_reference": null, "created_at": "2026-08-06T12:47:00Z"}
+  ],
+  "policy_ids": ["POL-1008", "POL-1007", "POL-1006", "POL-1005"]
+}

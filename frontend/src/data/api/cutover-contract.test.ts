@@ -85,4 +85,29 @@ describe("frontend generic cutover", () => {
     );
     expect(configuration.regions).toEqual(["sin1"]);
   });
+
+  it("keeps connected-inbox draft commands behind case management permission", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/app/(operations)/cases/[caseId]/page.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain('permissions.includes("case:manage")');
+    expect(source).toContain(
+      "connected && canManageCase && inboxCase && workspace.responseDraft",
+    );
+    expect(source).toContain(
+      "initialDraftDelivery={canManageCase ? latestDraftDelivery : null}",
+    );
+  });
+
+  it("preserves an unresolved Gmail draft outcome when a status request fails", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/app/(operations)/_actions/inbox-drafts.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain("delivery: _previousState.delivery");
+    expect(source).not.toContain("delivery: null");
+  });
 });

@@ -1,0 +1,96 @@
+{
+  "schema_version": "developer-workflow-benchmark.v1",
+  "fixture_id": "BILL-A",
+  "pair_id": "billing",
+  "condition": "manual",
+  "synthetic_notice": "All people, identifiers, and records in this fixture are synthetic.",
+  "case": {
+    "public_id": "CS-BENCH-BILL-A",
+    "source_id": "benchmark-manual:bill-a",
+    "external_reference": "INV-A-6201",
+    "category": "billing_dispute",
+    "issue": "Customer reports two debit notifications for one invoice",
+    "status": "investigating",
+    "urgency": "high",
+    "risk": "high",
+    "due_at": "2026-08-07T10:00:00Z",
+    "impact_amount": "620000.00",
+    "impact_currency": "IDR",
+    "source_freshness": "current",
+    "source_checked_at": "2026-08-06T08:00:00Z",
+    "request": {
+      "channel": "email",
+      "customer_message": "My banking app showed two debit notifications for invoice INV-A-6201. Please reverse the duplicate before my next billing date.",
+      "summary": "Possible duplicate debit for a single invoice.",
+      "received_at": "2026-08-06T07:10:00Z"
+    },
+    "customer": {
+      "customer_id": "CUS-BILL-A-41",
+      "name": "Rina Hartono",
+      "tier": "vip",
+      "locale": "id-ID",
+      "contact": "rina.hartono@example.invalid"
+    },
+    "business_contexts": [
+      {
+        "public_id": "CTX-BILL-A-INVOICE",
+        "type": "invoice",
+        "label": "Invoice INV-A-6201",
+        "source": "billing-benchmark",
+        "source_reference": "INV-A-6201",
+        "status": "paid",
+        "fields": {"amount": "620000.00", "currency": "IDR", "billing_period": "2026-08"},
+        "captured_at": "2026-08-06T08:00:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T08:00:00Z"
+      },
+      {
+        "public_id": "CTX-BILL-A-PAYMENT",
+        "type": "payment",
+        "label": "Payment PAY-A-7701",
+        "source": "payments-benchmark",
+        "source_reference": "PAY-A-7701",
+        "status": "captured",
+        "fields": {"amount": "620000.00", "currency": "IDR", "attempt_count": "2", "settlement_reference": "SET-A-8811"},
+        "captured_at": "2026-08-06T07:58:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T08:00:00Z"
+      },
+      {
+        "public_id": "CTX-BILL-A-SUBSCRIPTION",
+        "type": "subscription",
+        "label": "Subscription SUB-A-204",
+        "source": "subscriptions-benchmark",
+        "source_reference": "SUB-A-204",
+        "status": "active",
+        "fields": {"plan": "annual", "renewal_date": "2027-08-01"},
+        "captured_at": "2026-08-06T07:55:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T08:00:00Z"
+      },
+      {
+        "public_id": "CTX-BILL-A-CREDIT",
+        "type": "other",
+        "label": "Promotional credit CR-A-17",
+        "source": "credits-benchmark",
+        "source_reference": "CR-A-17",
+        "status": "available",
+        "fields": {"amount": "50000.00", "currency": "IDR", "expires_at": "2026-12-31"},
+        "captured_at": "2026-08-06T07:50:00Z",
+        "freshness": "current",
+        "checked_at": "2026-08-06T08:00:00Z"
+      }
+    ]
+  },
+  "conversation": [
+    {"public_id": "MSG-CS-BENCH-BILL-A-001", "author_type": "customer", "author_id": "CUS-BILL-A-41", "author_name": "Rina Hartono", "channel": "email", "body": "My banking app showed two debit notifications for invoice INV-A-6201. Please reverse the duplicate before my next billing date.", "internal": false, "source_reference": "INV-A-6201", "created_at": "2026-08-06T07:10:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-002", "author_type": "member", "author_id": "USR-BENCH-01", "author_name": "Support Desk", "channel": "email", "body": "We are checking the invoice and payment ledger. Please share both bank transaction references if available.", "internal": false, "source_reference": null, "created_at": "2026-08-06T07:18:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-003", "author_type": "customer", "author_id": "CUS-BILL-A-41", "author_name": "Rina Hartono", "channel": "email", "body": "I only see two push notifications. The app view does not show transaction IDs yet.", "internal": false, "source_reference": null, "created_at": "2026-08-06T07:25:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-004", "author_type": "system", "author_id": null, "author_name": "Billing Sync", "channel": "webhook", "body": "Invoice INV-A-6201 and payment PAY-A-7701 were attached to the case.", "internal": false, "source_reference": "PAY-A-7701", "created_at": "2026-08-06T07:32:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-005", "author_type": "member", "author_id": "USR-BENCH-01", "author_name": "Support Desk", "channel": "internal_note", "body": "Payment record shows two attempts but only one captured payment reference.", "internal": true, "source_reference": "PAY-A-7701", "created_at": "2026-08-06T07:38:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-006", "author_type": "customer", "author_id": "CUS-BILL-A-41", "author_name": "Rina Hartono", "channel": "email", "body": "I uploaded the notification screenshot. It lists the same merchant and amount twice but no settlement reference.", "internal": false, "source_reference": "ATT-A-91", "created_at": "2026-08-06T07:44:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-007", "author_type": "member", "author_id": "USR-BENCH-01", "author_name": "Support Desk", "channel": "email", "body": "Thank you. We will compare the settled transaction details before proposing an adjustment.", "internal": false, "source_reference": null, "created_at": "2026-08-06T07:49:00Z"},
+    {"public_id": "MSG-CS-BENCH-BILL-A-008", "author_type": "system", "author_id": null, "author_name": "Payments Sync", "channel": "webhook", "body": "Latest provider synchronization completed at 08:00 UTC.", "internal": false, "source_reference": "SYNC-A-0800", "created_at": "2026-08-06T08:00:00Z"}
+  ],
+  "policy_ids": ["POL-1008", "POL-1007", "POL-1006", "POL-1005"]
+}

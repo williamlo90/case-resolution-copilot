@@ -32,6 +32,7 @@ htmlcov/
 coverage/
 test-results/
 playwright-report/
+docs/evidence/developer-workflow-benchmark/withheld/
 
 # Logs
 *.log
