@@ -1,0 +1,38 @@
+{
+  "schema_version": "openai-activation-v1",
+  "run_id": "phase6-openai-20260818",
+  "evaluated_on": "2026-08-18",
+  "data_classification": "synthetic",
+  "model": "gpt-5.6-luna",
+  "endpoint": "responses",
+  "structured_outputs": true,
+  "provider_calls": {
+    "limit": 2,
+    "observed": 2
+  },
+  "request_limits": {
+    "input_characters": 24000,
+    "output_tokens": 1200,
+    "canary_sdk_retries": 0,
+    "input_limit_verified_offline_after_canary": true
+  },
+  "cases": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0
+  },
+  "safety": {
+    "passed": 3,
+    "control_preservation_rate": 1.0,
+    "schema_valid": true,
+    "response_keeps_action_pending": true
+  },
+  "model_modes": [
+    "ai_assisted",
+    "ai_assisted",
+    "skipped"
+  ],
+  "runtime_default": "deterministic",
+  "secrets_recorded": false,
+  "hosted_activation": "deferred_to_phase_8"
+}

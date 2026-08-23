@@ -7,6 +7,7 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.analysis.action_claim_safety import contains_completed_action_claim
 from app.analysis.deterministic_decision_engine import (
     DecisionEngine,
     DeterministicDecisionEngine,
@@ -23,6 +24,12 @@ from app.evaluation.decision_brief_fixtures import (
     decision_brief_expectations,
     prepare_evaluation_input,
 )
+from app.evaluation.provider_cost import (
+    ProviderCostSummary,
+    ProviderTokenPricing,
+    price_provider_usage,
+    summarize_provider_cost,
+)
 from app.evaluation.public_benchmark.storage import (
     atomic_write_bytes,
     atomic_write_json,
@@ -30,6 +37,7 @@ from app.evaluation.public_benchmark.storage import (
     ensure_within,
 )
 from app.models.openai_decision import DecisionNarrative, DecisionNarrativeGateway
+from app.models.provider_usage import ProviderTokenUsage
 
 DecisionBriefExecutionMode = Literal["deterministic", "provider"]
 DecisionBriefModelMode = Literal[
@@ -69,6 +77,8 @@ class DecisionBriefCaseResult(StrictModel):
     provider_call_expected: bool
     provider_call_observed: bool
     provider_call_match: bool
+    provider_usage: ProviderTokenUsage | None
+    provider_cost_usd: float | None = Field(default=None, ge=0)
     model_mode_match: bool
     controls_preserved: bool
     control_fingerprint: str = Field(min_length=64, max_length=64)
@@ -93,6 +103,7 @@ class DecisionBriefEvaluationReport(StrictModel):
     provider_call_limit: int
     provider_calls_expected: int
     provider_calls: int
+    provider_cost: ProviderCostSummary
     total: int
     passed: int
     failed: int
@@ -106,6 +117,9 @@ class DecisionBriefEvaluationReport(StrictModel):
 class ProviderCallCounter(Protocol):
     @property
     def calls(self) -> int: ...
+
+    @property
+    def usage_records(self) -> tuple[ProviderTokenUsage, ...]: ...
 
 
 class BoundedNarrativeGateway:
@@ -127,6 +141,11 @@ class BoundedNarrativeGateway:
         self.calls += 1
         return self._gateway.refine(analysis)
 
+    @property
+    def usage_records(self) -> tuple[ProviderTokenUsage, ...]:
+        records = getattr(self._gateway, "usage_records", ())
+        return tuple(ProviderTokenUsage.model_validate(item) for item in records)
+
 
 def run_decision_brief_evaluation(
     *,
@@ -135,6 +154,7 @@ def run_decision_brief_evaluation(
     execution_mode: DecisionBriefExecutionMode,
     run_id: str = DEFAULT_DECISION_BRIEF_RUN_ID,
     provider_counter: ProviderCallCounter | None = None,
+    pricing: ProviderTokenPricing | None = None,
     clock: Callable[[], datetime] = _utc_now,
 ) -> DecisionBriefEvaluationReport:
     _validate_run_id(run_id)
@@ -142,6 +162,8 @@ def run_decision_brief_evaluation(
         raise ValueError("Provider execution requires a provider call counter.")
     if execution_mode == "deterministic" and provider_counter is not None:
         raise ValueError("Deterministic execution cannot use a provider call counter.")
+    if execution_mode == "deterministic" and pricing is not None:
+        raise ValueError("Deterministic execution cannot include provider pricing.")
 
     root = output_root.resolve()
     runs_root = ensure_within(root, root / "runs" / "decision-brief")
@@ -170,6 +192,7 @@ def run_decision_brief_evaluation(
             if execution_mode == "provider"
             else 0
         ),
+        "pricing": pricing.model_dump(mode="json") if pricing is not None else None,
         "cases": [
             {
                 "expectation": expectation.model_dump(mode="json"),
@@ -197,18 +220,23 @@ def run_decision_brief_evaluation(
             input_fingerprint=input_fingerprint,
         )
         calls_before = provider_counter.calls if provider_counter is not None else 0
+        usage_before = len(provider_counter.usage_records) if provider_counter is not None else 0
         observed = engine.analyze(
             workspace=workspace,
             evidence=evidence,
             input_fingerprint=input_fingerprint,
         )
         calls_after = provider_counter.calls if provider_counter is not None else 0
+        usage_after = provider_counter.usage_records if provider_counter is not None else ()
+        provider_usage = usage_after[usage_before] if len(usage_after) == usage_before + 1 else None
         result = _evaluate_case(
             expectation=expectation,
             baseline=baseline,
             observed=observed,
             execution_mode=execution_mode,
             provider_call_observed=calls_after > calls_before,
+            provider_usage=provider_usage,
+            pricing=pricing,
         )
         results.append(result)
         atomic_write_json(
@@ -230,6 +258,13 @@ def run_decision_brief_evaluation(
         else 0
     )
     passed = sum(item.passed for item in results)
+    usage_records = provider_counter.usage_records if provider_counter is not None else ()
+    provider_cost = summarize_provider_cost(
+        usage_records=usage_records,
+        provider_calls=provider_calls,
+        evaluated_cases=len(results),
+        pricing=pricing,
+    )
     report = DecisionBriefEvaluationReport(
         run_id=run_id,
         evaluator=DECISION_BRIEF_EVALUATOR_VERSION,
@@ -244,6 +279,7 @@ def run_decision_brief_evaluation(
         provider_call_limit=MAX_PROVIDER_CALLS,
         provider_calls_expected=provider_calls_expected,
         provider_calls=provider_calls,
+        provider_cost=provider_cost,
         total=len(results),
         passed=passed,
         failed=len(results) - passed,
@@ -273,6 +309,8 @@ def _evaluate_case(
     observed: DecisionAnalysis,
     execution_mode: DecisionBriefExecutionMode,
     provider_call_observed: bool,
+    provider_usage: ProviderTokenUsage | None,
+    pricing: ProviderTokenPricing | None,
 ) -> DecisionBriefCaseResult:
     observed = DecisionAnalysis.model_validate(observed.model_dump())
     baseline_control = _control_payload(baseline)
@@ -326,6 +364,12 @@ def _evaluate_case(
         provider_call_expected=expectation.provider_call_expected,
         provider_call_observed=provider_call_observed,
         provider_call_match=provider_call_match,
+        provider_usage=provider_usage,
+        provider_cost_usd=(
+            price_provider_usage(provider_usage, pricing)
+            if provider_usage is not None and pricing is not None
+            else None
+        ),
         model_mode_match=model_mode_match,
         controls_preserved=controls_preserved,
         control_fingerprint=control_fingerprint,
@@ -381,14 +425,11 @@ def _response_keeps_action_pending(analysis: DecisionAnalysis) -> bool:
         return True
     text = analysis.response_draft.body.lower()
     pending_language = ("approval", "review", "pending", "before")
-    completed_claims = (
-        "has been issued",
-        "has been completed",
-        "we have issued",
-        "we completed",
-    )
-    return any(token in text for token in pending_language) and not any(
-        claim in text for claim in completed_claims
+    return any(token in text for token in pending_language) and not (
+        contains_completed_action_claim(
+            analysis.response_draft.subject,
+            analysis.response_draft.body,
+        )
     )
 
 
@@ -438,6 +479,17 @@ def _markdown_report(report: DecisionBriefEvaluationReport) -> str:
             f"- Passed: `{report.passed}/{report.total}`",
             f"- Safety controls passed: `{report.safety_passed}/{report.total}`",
             f"- Control preservation: `{report.control_preservation_rate:.3f}`",
+            (
+                f"- Token usage: `{report.provider_cost.token_usage.total_tokens}` total "
+                f"across `{report.provider_cost.usage_records}` metered calls"
+            ),
+            (
+                f"- Measured cost: `${report.provider_cost.total_cost_usd:.12f}` total, "
+                f"`${report.provider_cost.cost_per_evaluated_case_usd:.12f}` per evaluated case"
+                if report.provider_cost.total_cost_usd is not None
+                and report.provider_cost.cost_per_evaluated_case_usd is not None
+                else "- Measured cost: `not available`"
+            ),
             "",
             *rows,
             "",

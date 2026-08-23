@@ -16,6 +16,7 @@ from app.evaluation.decision_brief_fixtures import (
     build_evaluation_workspace,
     decision_brief_expectations,
 )
+from app.evaluation.provider_cost import ProviderCostSummary, ProviderTokenPricing
 
 __all__ = [
     "DECISION_BRIEF_EVALUATOR_VERSION",
@@ -28,6 +29,8 @@ __all__ = [
     "DecisionBriefExpectation",
     "DecisionBriefModelMode",
     "ProviderCallCounter",
+    "ProviderCostSummary",
+    "ProviderTokenPricing",
     "build_evaluation_evidence",
     "build_evaluation_workspace",
     "decision_brief_expectations",

@@ -2,10 +2,11 @@ import json
 from collections.abc import Callable
 from typing import Any, Protocol, cast
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.domain.decision_briefs import DecisionAnalysis
 from app.models.gateway import ModelGatewayTimeout, ModelGatewayUnavailable
+from app.models.provider_usage import ProviderTokenUsage
 
 OPENAI_DECISION_INSTRUCTIONS = """
 Draft clear support decision language from the supplied server-generated control record.
@@ -17,6 +18,9 @@ Do not invent customer details, policy clauses, evidence, amounts, or completed 
 Never claim that an action has already happened. Make the response draft clear that any
 review-required action remains pending human approval.
 """.strip()
+
+OPENAI_DECISION_MAX_INPUT_CHARS = 24_000
+OPENAI_DECISION_MAX_OUTPUT_TOKENS = 1_200
 
 
 class DecisionNarrative(BaseModel):
@@ -36,7 +40,41 @@ class DecisionNarrativeGateway(Protocol):
 
 
 class _ParsedResponse(Protocol):
-    output_parsed: DecisionNarrative | None
+    @property
+    def output_parsed(self) -> DecisionNarrative | None: ...
+
+    @property
+    def usage(self) -> "_ResponseUsage | None": ...
+
+
+class _InputTokenDetails(Protocol):
+    @property
+    def cached_tokens(self) -> int: ...
+
+    @property
+    def cache_write_tokens(self) -> int: ...
+
+
+class _OutputTokenDetails(Protocol):
+    @property
+    def reasoning_tokens(self) -> int: ...
+
+
+class _ResponseUsage(Protocol):
+    @property
+    def input_tokens(self) -> int: ...
+
+    @property
+    def input_tokens_details(self) -> _InputTokenDetails: ...
+
+    @property
+    def output_tokens(self) -> int: ...
+
+    @property
+    def output_tokens_details(self) -> _OutputTokenDetails: ...
+
+    @property
+    def total_tokens(self) -> int: ...
 
 
 class _ResponsesResource(Protocol):
@@ -65,6 +103,7 @@ class OpenAIDecisionNarrativeGateway:
     ) -> None:
         self.model_version = model
         self._client = client
+        self._usage_records: list[ProviderTokenUsage] = []
         self._client_factory = client_factory or (
             lambda: _build_openai_client(
                 api_key=api_key,
@@ -74,21 +113,30 @@ class OpenAIDecisionNarrativeGateway:
         )
 
     def refine(self, analysis: DecisionAnalysis) -> DecisionNarrative:
+        model_input = json.dumps(
+            _minimized_control_record(analysis),
+            sort_keys=True,
+            separators=(",", ":"),
+            default=str,
+        )
+        if len(model_input) > OPENAI_DECISION_MAX_INPUT_CHARS:
+            raise ModelGatewayUnavailable(
+                "AI narrative generation input exceeded the configured safety limit."
+            )
         try:
             response = self._client_instance().responses.parse(
                 model=cast(Any, self.model_version),
                 instructions=OPENAI_DECISION_INSTRUCTIONS,
-                input=json.dumps(
-                    _minimized_control_record(analysis),
-                    sort_keys=True,
-                    separators=(",", ":"),
-                    default=str,
-                ),
+                input=model_input,
                 text_format=DecisionNarrative,
                 reasoning={"effort": "low"},
-                max_output_tokens=1200,
+                max_output_tokens=OPENAI_DECISION_MAX_OUTPUT_TOKENS,
                 store=False,
             )
+        except ValidationError as exc:
+            raise ModelGatewayUnavailable(
+                "AI narrative generation returned an invalid structured result."
+            ) from exc
         except Exception as exc:
             error_kind = _openai_error_kind(exc)
             if error_kind == "timeout":
@@ -97,11 +145,16 @@ class OpenAIDecisionNarrativeGateway:
                 raise ModelGatewayUnavailable("AI narrative generation is unavailable.") from exc
             raise
 
+        usage = _provider_token_usage(response)
+        if usage is not None:
+            self._usage_records.append(usage)
         if response.output_parsed is None:
-            raise ModelGatewayUnavailable(
-                "AI narrative generation returned no structured result."
-            )
+            raise ModelGatewayUnavailable("AI narrative generation returned no structured result.")
         return response.output_parsed
+
+    @property
+    def usage_records(self) -> tuple[ProviderTokenUsage, ...]:
+        return tuple(self._usage_records)
 
     def close(self) -> None:
         if self._client is not None:
@@ -140,6 +193,22 @@ def _openai_error_kind(error: Exception) -> str | None:
     if isinstance(error, OpenAIError):
         return "provider"
     return None
+
+
+def _provider_token_usage(response: _ParsedResponse) -> ProviderTokenUsage | None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+    input_details = usage.input_tokens_details
+    output_details = usage.output_tokens_details
+    return ProviderTokenUsage(
+        input_tokens=usage.input_tokens,
+        cached_input_tokens=input_details.cached_tokens,
+        cache_write_input_tokens=input_details.cache_write_tokens,
+        output_tokens=usage.output_tokens,
+        reasoning_output_tokens=output_details.reasoning_tokens,
+        total_tokens=usage.total_tokens,
+    )
 
 
 def _minimized_control_record(analysis: DecisionAnalysis) -> dict[str, object]:
