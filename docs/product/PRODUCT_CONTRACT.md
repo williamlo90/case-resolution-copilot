@@ -6,9 +6,13 @@ Original decision: 2026-07-21
 
 Reconstruction review: 2026-08-05
 
+Connected workflow amendment: 2026-08-12
+
 Owner: Product and engineering
 
 Decision type: Product scope and delivery contract
+
+Related decision: `docs/product/CONNECTED_WORKFLOW_CONTRACT.md`
 
 This document is the source of truth for product scope, authority, and acceptance. Historical
 pre-pivot plans remain available in the archived repository, but they are not active requirements.
@@ -250,6 +254,18 @@ The SaaS is an overlay, not the master database for the client's business object
   the external record.
 - Provider-specific errors are mapped to stable product states and plain-language recovery guidance.
 
+### Initial connected workflow
+
+The first real case-source adapter is a Gmail test inbox. It validates the provider-neutral flow from
+email thread to case, governed decision, human approval, and provider-side response draft. The
+application may create an approved draft but must not expose or invoke automatic sending. Gmail's
+draft-management scope technically permits sending, so that broader provider grant must be disclosed
+and controlled while the product capability remains draft-only.
+
+Gmail is an implementation choice for the first controlled workflow, not a required concept in the
+generic case model. The detailed product and UX behavior is defined in
+`docs/product/CONNECTED_WORKFLOW_CONTRACT.md`.
+
 ## 12. Success Measures
 
 The MVP must instrument, but must not pre-claim, these measures:
@@ -303,7 +319,7 @@ The redesign is acceptable only when:
 
 These decisions are deliberately deferred until implementation planning:
 
-- the first real helpdesk integration;
+- the first full helpdesk integration after the Gmail controlled workflow;
 - the first real action provider;
 - authentication vendor and organization provisioning method;
 - commercial packaging and pricing;

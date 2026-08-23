@@ -73,9 +73,16 @@ Important groups:
 - `SUPPORT_COPILOT_EMBEDDING_PROVIDER`: deterministic or OpenAI embeddings.
 - `SUPPORT_COPILOT_CASE_SOURCE_PROVIDER`: deterministic seed or signed case webhook.
 - `SUPPORT_COPILOT_ACTION_TARGET_PROVIDER`: deterministic adapter or signed action webhook.
+- `SUPPORT_COPILOT_INBOX_*` and `SUPPORT_COPILOT_GMAIL_*`: bounded connected-inbox import,
+  synchronization, and approved Gmail draft creation.
+- `SUPPORT_COPILOT_POLICY_*`: versioned 512-dimensional hybrid policy index and V1/V2 rollout
+  controls.
 
 Production configuration fails closed when provider requirements are incomplete. Sensitive values
 are represented as secrets, omitted from safe log context, and covered by the repository scan.
+Connected Inbox and Policy RAG V2 are disabled by default; use the
+[activation checklist](../docs/runbooks/CONNECTED_INBOX_AND_RAG_V2_ACTIVATION.md) instead of
+enabling several flags at once.
 
 ## Database Safety
 
@@ -149,6 +156,11 @@ Primary route groups:
 /api/reviews
 /api/actions
 /api/connections
+/api/connections/{connection_id}/inbox/status
+/api/connections/{connection_id}/inbox/threads
+/api/connections/{connection_id}/imports
+/api/internal/inbox-sync/drain
+/api/internal/policy-index/drain
 /api/quality
 /api/notifications
 /api/settings

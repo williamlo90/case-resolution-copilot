@@ -4,6 +4,8 @@ Status: Approved direction for UI/UX redesign
 Date: 2026-07-21  
 Depends on: `docs/product/PRODUCT_CONTRACT.md`
 
+Connected workflow amendment: `docs/product/CONNECTED_WORKFLOW_CONTRACT.md`
+
 This document defines the user roles, information architecture, page responsibilities, core
 journeys, interaction states, and usability rules for the SaaS client application. It is a UX
 contract, not a visual mockup or implementation plan.
@@ -396,6 +398,12 @@ Each connection card shows:
 - test, reauthorize, disable, and remove commands.
 
 Removal must explain the effect on active cases and historical records.
+
+The first connected workflow uses a Gmail test inbox. Its normal UI describes two capabilities:
+**Read conversations** and **Create drafts**. It must state plainly that the application exposes no
+send command while Google's draft-management consent technically permits sending. Connection setup,
+imported-conversation states, stale-review behavior, and draft delivery are defined in
+`docs/product/CONNECTED_WORKFLOW_CONTRACT.md`.
 
 ### Team
 

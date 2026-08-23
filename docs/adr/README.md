@@ -6,3 +6,4 @@
 - [ADR-004: Mock data and AI boundary](./ADR-004-mock-data-and-ai-boundary.md)
 - [ADR-005: Backend modular monolith](./ADR-005-backend-modular-monolith.md)
 - [ADR-006: PostgreSQL is the durable source of truth](./ADR-006-postgresql-source-of-truth.md)
+- [ADR-007: Provider-neutral connected inbox](./ADR-007-provider-neutral-connected-inbox.md)

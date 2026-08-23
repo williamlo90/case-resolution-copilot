@@ -3,6 +3,8 @@
 Status: Implemented in Backend Sprint B3; PostgreSQL execution deferred
 Date: 22 July 2026
 
+RAG V2 design: `docs/backend/GOVERNED_RAG_V2.md`
+
 ## Purpose
 
 The governed policy service gives each organization an attributable policy root, reviewable draft

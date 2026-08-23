@@ -16,6 +16,19 @@ application controls and authorized people decide what may happen.
 
 The hosted application is invite-only. The public walkthrough contains labelled demo data only.
 
+## Evidence Snapshot
+
+| Metric | Governed coverage | Supporting artifact |
+| ---: | --- | --- |
+| **4** | Specialist, Supervisor, Administrator, and Auditor roles | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
+| **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
+| **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](backend/evaluations/workflow/traceability.json) |
+
+The separate [historical hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+shows the recorded synthetic workflow from Specialist submission through Supervisor approval,
+controlled execution, duplicate blocking, and Auditor inspection. These are engineering-coverage
+metrics and bounded product evidence, not customer-impact measurements.
+
 ## Why It Exists
 
 Complex cases rarely live in one message. Facts can be split across conversations, payments,
@@ -112,23 +125,37 @@ The stack is Next.js, TypeScript, FastAPI, PostgreSQL/pgvector, Clerk, and an op
 narrative provider. It is a modular monolith, not a microservice system. Deterministic providers
 keep repository verification independent of paid credentials.
 
-## Current Verification
+## Verification Evidence
 
-Verification is recorded in two layers so a focused hardening rerun is not presented as a second
-full release run:
+### Current reconstructed-source verification
 
 | Evidence layer | Result |
 | --- | ---: |
-| Reconstruction baseline | 12 / 12 serial release checks passed before the final audit corrections |
-| Release-hardening static checks | Ruff, Mypy over 195 application files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 73 focused backend tests and 4 focused frontend tests passed |
-| Baseline acceptance matrix | 54 controls / 71 variants passed |
-| Baseline workflow traceability | 8 scenarios / 19 proofs / 21 variants passed |
+| Release-hardening static checks | Ruff, strict Mypy over 290 backend application files, TypeScript, and ESLint passed |
+| Release-hardening regressions | 389 backend unit/contract tests and 160 frontend tests passed serially |
+| Migration and secret safety | Full Alembic SQL generation passed through revision `0024`; repository secret scan found 0 findings |
 
-The PostgreSQL integration suite is present behind a destructive disposable-database guard, but it
-has not been rerun for this reconstructed revision. Historical database and hosted results are not
-counted as current source evidence. The full release verifier should be rerun before promotion; the
-focused hardening gate is not a substitute for that release decision.
+The guarded PostgreSQL integration suite has not been rerun for this reconstructed revision. Static
+Alembic SQL generation does not prove that revisions `0021`-`0024` have been applied successfully to
+a live PostgreSQL database, and credential-free tests do not prove Google or OpenAI activation.
+
+### Baseline coverage artifacts
+
+- The [local acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) records
+  54 controls exercised through 71 acceptance variants.
+- The [workflow traceability map](backend/evaluations/workflow/traceability.json) records 19
+  traceable proofs across 8 scenarios and 21 workflow variants.
+
+These committed baseline artifacts describe designed coverage; they are not presented as a fresh
+full-release or PostgreSQL rerun for the reconstructed revision.
+
+### Historical hosted product evidence
+
+The [hosted deterministic acceptance](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+records Specialist submission, Supervisor approval, one controlled action, durable receipt
+capture, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It
+comes from the predecessor hosted deployment and does not prove that the current reconstructed
+commit is deployed.
 
 The [GitHub quality gate](https://github.com/williamlo90/case-resolution-copilot/actions/workflows/quality-gate.yml)
 runs on pull requests or manual dispatch, never on every push. It adds dependency audits and a

@@ -3,6 +3,8 @@
 Status: Implemented in Backend Sprint B6
 Date: 23 July 2026
 
+Connected inbox extension: `docs/backend/CONNECTED_INBOX_ARCHITECTURE.md`
+
 ## Purpose
 
 An approved resolution may authorize a business change, but approval never performs the change.
@@ -102,6 +104,22 @@ operator must reconcile again or escalate.
 A supervisor or administrator may record a manual outcome with a reason. That creates an
 attributable reconciliation record; it does not fabricate a provider receipt. Escalation assigns
 the recovery work and keeps the original attempts intact.
+
+## Approved Gmail Draft Delivery
+
+Connected inbox write-back is deliberately narrower than controlled action execution. It can create
+a reply draft only after the current review snapshot is approved and still fresh. The delivery row
+binds the approved decision snapshot, policy evidence, policy control state, conversation, and exact
+response draft. Changing any binding produces a different idempotency key and requires fresh
+authorization.
+
+An identical replay returns the completed delivery without a second provider call. If Gmail may
+have created the draft but the response is lost, the state becomes `outcome_unknown`; reconciliation
+looks up the correlation key and records the existing draft instead of replaying the write. The API,
+gateway protocol, Gmail adapter, and transport expose no send operation or `/send` route.
+
+Draft creation requires `case:manage`. Review approval still requires the separate role and snapshot
+checks documented in [Reviews](REVIEWS.md), so draft access cannot manufacture approval.
 
 ## Connections
 

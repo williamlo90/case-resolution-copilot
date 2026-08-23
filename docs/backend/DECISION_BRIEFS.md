@@ -1,14 +1,15 @@
 # Generic Decision Briefs
 
-Status: Implemented in Backend Sprint B4
-Date: 23 July 2026
+Status: Implemented and revalidated in Connected Workflow Phase 5
+Date: 18 August 2026
 
 ## Purpose
 
 A decision brief turns persisted case context and governed policy evidence into a reviewable,
 versioned proposal. It is a decision-support record, not autonomous authority. The backend may
 summarize, identify gaps, evaluate deterministic risks, draft a response, and propose actions; it
-cannot approve or execute those actions in B4.
+cannot approve or execute those actions. Approval and Gmail draft creation are separate,
+server-enforced workflow stages.
 
 ## API
 
@@ -63,6 +64,18 @@ action is approved. `abstained` means usable policy authority was unavailable. A
 The default engine performs no external model call. Model, prompt, graph, and risk-rule version
 labels describe deterministic code versions used to reproduce the brief.
 
+## Optional AI Narrative Boundary
+
+OpenAI may rewrite only the rationale, uncertainty, response subject, and response body. The
+server-generated facts, policy status, information gaps, risks, outcome, impact, actions, approval
+requirements, and proposal state remain deterministic. Provider output is parsed into a strict
+Pydantic schema; extra or missing fields fail closed to the built-in deterministic wording.
+
+Every generated narrative field is checked for language that claims a controlled action already
+happened. Common active and passive claims such as an issued refund, applied credit, processed
+reversal, or sent reply are rejected before persistence. Explicit pending language remains valid.
+The rejection creates a safe, auditable checkpoint and does not change the deterministic controls.
+
 ## Persistence And Idempotency
 
 The input fingerprint covers case version, request/category, exact business-context fingerprints,
@@ -73,10 +86,16 @@ immutable version.
 Checkpoints persist only step names, outcomes, safe summaries, and input/output fingerprints. The
 schema has no raw prompt, provider payload, reasoning, or chain-of-thought columns.
 
+Review submission persists proposal, context, evidence, risk, and approval-rule fingerprints in one
+immutable snapshot. Approved Gmail draft delivery references that review and separately records the
+decision, evidence, policy, conversation, and response fingerprints. Its idempotency key binds all
+of those authorized inputs, so an identical replay returns the durable delivery instead of invoking
+the provider again.
+
 ## Migration And Verification
 
 Alembic creates analysis, proposal, context, evidence, risk, and response-draft records directly.
 The reconstructed runtime ships no legacy proposal mapper. Deterministic generation, single-flight,
-stale-output rejection, transaction-boundary, contract, and evaluation tests run in the serial
-release gate. PostgreSQL constraints and concurrent lease behavior must still be rerun through the
-guarded disposable-database suite for this exact revision.
+stale-output rejection, transaction-boundary, narrative-boundary, contract, and evaluation tests
+run in the serial release gate. PostgreSQL constraints and concurrent lease behavior must still be
+rerun through the guarded disposable-database suite for this exact revision.
