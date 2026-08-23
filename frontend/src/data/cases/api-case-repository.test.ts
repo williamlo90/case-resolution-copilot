@@ -119,7 +119,7 @@ describe("apiCaseRepository", () => {
     });
   });
 
-  it("accepts a case that has not produced a decision brief yet", async () => {
+  it("accepts a freshly imported case without a brief or business context", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -163,25 +163,7 @@ describe("apiCaseRepository", () => {
                 locale: "en-US",
                 contact: "customer@example.com",
               },
-              business_contexts: [
-                {
-                  id: "CTX-2048-INVOICE",
-                  organization_id: "ORG-0001",
-                  case_id: "CS-2048",
-                  type: "invoice",
-                  label: "Invoice INV-88241",
-                  source: "billing_simulator",
-                  source_reference: "INV-88241",
-                  status: "paid",
-                  fields: { total: "USD 99.00" },
-                  captured_at: "2026-07-23T09:00:00.000Z",
-                  source_freshness: {
-                    status: "current",
-                    checked_at: "2026-07-23T09:00:00.000Z",
-                  },
-                  version: 1,
-                },
-              ],
+              business_contexts: [],
               facts: [],
               missing_information: [],
               evidence: [],
@@ -204,14 +186,15 @@ describe("apiCaseRepository", () => {
     expect(workspace?.proposal).toBeNull();
     expect(workspace?.responseDraft).toBeNull();
     expect(workspace?.facts).toEqual([]);
+    expect(workspace?.businessContexts).toEqual([]);
     expect(workspace?.conversation.messages[0]).toMatchObject({
       authorName: "Maya Chen",
       body: "I was charged twice.",
     });
     expect(workspace?.collections).toEqual({
       businessContexts: {
-        returned: 1,
-        total: 1,
+        returned: 0,
+        total: 0,
         hasMore: false,
         nextCursor: null,
       },

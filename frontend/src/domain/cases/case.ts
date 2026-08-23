@@ -137,7 +137,7 @@ export const CaseWorkspaceSchema = z.object({
     source: z.string().min(1),
     status: z.string().min(1),
     fields: z.record(z.string(), z.string()),
-  })).min(1),
+  })),
   facts: z.array(z.object({
     id: z.string().min(1),
     statement: z.string().min(1),
