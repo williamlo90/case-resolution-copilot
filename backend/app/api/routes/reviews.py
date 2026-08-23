@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies.embeddings import configured_embedding_provider
 from app.api.dependencies.identity import authorize_actor, current_actor
+from app.api.dependencies.policy_retrieval import configured_policy_retrieval
 from app.api.errors import AppError
 from app.api.presenters.reviews import (
     present_review_detail,
@@ -81,6 +82,11 @@ def _service(request: Request, session: Session) -> ReviewService:
             policy_repository,
             case_repository,
             embedding_provider,
+            retrieval=configured_policy_retrieval(
+                request,
+                store=policy_repository,
+                v1_embedding_provider=embedding_provider,
+            ),
         ),
         ActionMaterializationService(ActionRepository(session)),
         OrganizationSettingsRepository(session),

@@ -283,6 +283,13 @@ class CasePolicyEvidenceRecord(BaseModel):
     chunking_version: str
     embedding_version: str
     index_version: str
+    embedding_profile_key: str | None = None
+    retrieval_algorithm_version: str | None = None
+    query_fingerprint: str | None = None
+    dense_rank: int | None = None
+    lexical_rank: int | None = None
+    fused_retrieval_score: float | None = None
+    retrieval_run_correlation_id: str | None = None
     recorded_at: datetime
 
 
@@ -356,6 +363,13 @@ class PolicyEvidenceBinding(BaseModel):
     retrieval_score: float
     applicability: str
     fingerprint: str
+    embedding_profile_key: str | None = None
+    retrieval_algorithm_version: str | None = None
+    query_fingerprint: str | None = None
+    dense_rank: int | None = None
+    lexical_rank: int | None = None
+    fused_retrieval_score: float | None = None
+    retrieval_run_correlation_id: str | None = None
 
 
 class LegacyPolicyClauseImport(BaseModel):

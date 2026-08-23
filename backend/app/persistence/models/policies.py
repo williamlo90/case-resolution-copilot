@@ -5,6 +5,7 @@ from pgvector.sqlalchemy import VECTOR
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Computed,
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
@@ -14,7 +15,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -200,6 +201,11 @@ class GovernedPolicyClauseModel(Base):
             postgresql_ops={"embedding": "vector_cosine_ops"},
             postgresql_with={"m": 16, "ef_construction": 64},
         ),
+        Index(
+            "ix_governed_policy_clauses_search_vector_gin",
+            "search_vector",
+            postgresql_using="gin",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -216,6 +222,15 @@ class GovernedPolicyClauseModel(Base):
     embedding_version: Mapped[str] = mapped_column(String(64), nullable=False)
     index_version: Mapped[str] = mapped_column(String(64), nullable=False)
     embedding: Mapped[list[float]] = mapped_column(VECTOR(32), nullable=False)
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('simple', coalesce(heading, '') || ' ' || "
+            "coalesce(text, '') || ' ' || coalesce(applies_when, ''))",
+            persisted=True,
+        ),
+        nullable=False,
+    )
 
 
 class CasePolicyEvidenceModel(Base):
@@ -231,6 +246,10 @@ class CasePolicyEvidenceModel(Base):
         CheckConstraint(
             "retrieval_score >= -1 AND retrieval_score <= 1",
             name="ck_case_policy_evidence_score",
+        ),
+        CheckConstraint(
+            "fused_retrieval_score IS NULL OR fused_retrieval_score >= 0",
+            name="ck_case_policy_evidence_fused_score",
         ),
         UniqueConstraint("organization_id", "public_id", name="uq_case_policy_evidence_org_public"),
         UniqueConstraint("organization_id", "id", name="uq_case_policy_evidence_org_id"),
@@ -309,6 +328,13 @@ class CasePolicyEvidenceModel(Base):
     chunking_version: Mapped[str] = mapped_column(String(64), nullable=False)
     embedding_version: Mapped[str] = mapped_column(String(64), nullable=False)
     index_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    embedding_profile_key: Mapped[str | None] = mapped_column(String(100))
+    retrieval_algorithm_version: Mapped[str | None] = mapped_column(String(64))
+    query_fingerprint: Mapped[str | None] = mapped_column(String(64))
+    dense_rank: Mapped[int | None] = mapped_column(Integer)
+    lexical_rank: Mapped[int | None] = mapped_column(Integer)
+    fused_retrieval_score: Mapped[float | None] = mapped_column()
+    retrieval_run_correlation_id: Mapped[str | None] = mapped_column(String(100))
     recorded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now
     )

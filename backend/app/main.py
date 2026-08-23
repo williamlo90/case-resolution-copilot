@@ -27,9 +27,13 @@ from app.api.routes.cases import router as cases_router
 from app.api.routes.connections import router as connections_router
 from app.api.routes.decision_briefs import router as decision_briefs_router
 from app.api.routes.health import create_health_router
+from app.api.routes.inbox_connections import router as inbox_connections_router
+from app.api.routes.inbox_drafts import router as inbox_drafts_router
+from app.api.routes.inbox_internal import router as inbox_internal_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.organizations import router as organizations_router
 from app.api.routes.policies import router as policies_router
+from app.api.routes.policy_index_internal import router as policy_index_internal_router
 from app.api.routes.quality import router as quality_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
@@ -46,11 +50,17 @@ from app.integrations.webhook_action_gateway import SignedWebhookActionGateway
 from app.logging import configure_logging
 from app.models.openai_decision import OpenAIDecisionNarrativeGateway
 from app.persistence.database import Database
+from app.persistence.policy_indexing import SqlAlchemyPolicyIndexUnitOfWorkFactory
 from app.retrieval.embeddings import (
     DEFAULT_EMBEDDING_PROVIDER,
     EmbeddingProvider,
     OpenAIEmbeddingProvider,
 )
+from app.retrieval.v2.embeddings import (
+    deterministic_policy_embedding_provider,
+    openai_policy_embedding_provider,
+)
+from app.runtime.inbox import build_inbox_runtime
 from app.security.authentication import (
     AuthProvider,
     ClerkAuthProvider,
@@ -60,6 +70,7 @@ from app.security.authentication import (
     DeterministicAuthProvider,
     UnavailableProviderAuth,
 )
+from app.services.policy_indexing import PolicyIndexingService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -70,9 +81,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     baseline_decision_engine = DeterministicDecisionEngine()
     openai_gateway: OpenAIDecisionNarrativeGateway | None = None
     openai_embedding_provider: OpenAIEmbeddingProvider | None = None
+    openai_policy_v2_provider: OpenAIEmbeddingProvider | None = None
     webhook_action_gateway: SignedWebhookActionGateway | None = None
     decision_engine: DecisionEngine = baseline_decision_engine
     embedding_provider: EmbeddingProvider = DEFAULT_EMBEDDING_PROVIDER
+    policy_v2_embedding_provider: EmbeddingProvider = (
+        deterministic_policy_embedding_provider()
+    )
+    inbox_runtime = build_inbox_runtime(database=database, settings=runtime_settings)
     if runtime_settings.model_provider == "openai":
         openai_api_key = runtime_settings.openai_secret()
         assert openai_api_key is not None
@@ -96,6 +112,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             max_retries=runtime_settings.openai_max_retries,
         )
         embedding_provider = openai_embedding_provider
+    if runtime_settings.policy_v2_embedding_provider == "openai":
+        openai_api_key = runtime_settings.openai_secret()
+        assert openai_api_key is not None
+        openai_policy_v2_provider = openai_policy_embedding_provider(
+            api_key=openai_api_key,
+            model=runtime_settings.openai_embedding_model,
+            timeout_seconds=runtime_settings.openai_timeout_seconds,
+            max_retries=runtime_settings.openai_max_retries,
+        )
+        policy_v2_embedding_provider = openai_policy_v2_provider
+    policy_indexing_service = (
+        PolicyIndexingService(
+            unit_of_work=SqlAlchemyPolicyIndexUnitOfWorkFactory(database),
+            embedding_provider=policy_v2_embedding_provider,
+            profile_key=runtime_settings.policy_v2_profile_key,
+            job_limit=runtime_settings.policy_index_job_limit,
+            page_budget=runtime_settings.policy_embedding_batch_size,
+        )
+        if database is not None and runtime_settings.policy_indexing_enabled
+        else None
+    )
     secret_key = runtime_settings.clerk_secret()
     jwt_key = runtime_settings.clerk_public_key()
     auth_provider: AuthProvider
@@ -169,8 +206,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 openai_gateway.close()
             if openai_embedding_provider:
                 openai_embedding_provider.close()
+            if openai_policy_v2_provider:
+                openai_policy_v2_provider.close()
             if invitation_gateway:
                 invitation_gateway.close()
+            if inbox_runtime:
+                inbox_runtime.close()
             if database:
                 database.dispose()
         logger.info("application_stopped", extra={"service": runtime_settings.service_name})
@@ -194,7 +235,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=runtime_settings.allowed_cors_origins(),
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=cors_headers,
         expose_headers=[
             CORRELATION_HEADER,
@@ -209,7 +250,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = runtime_settings
     app.state.decision_engine = decision_engine
     app.state.embedding_provider = embedding_provider
+    app.state.policy_v2_embedding_provider = policy_v2_embedding_provider
+    app.state.policy_indexing_service = policy_indexing_service
     app.state.action_gateway = action_gateway
+    app.state.inbox_runtime = inbox_runtime
     app.include_router(
         create_health_router(
             runtime_settings.service_name,
@@ -223,9 +267,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(session_router)
     app.include_router(organizations_router)
     app.include_router(policies_router)
+    app.include_router(policy_index_internal_router)
     app.include_router(reviews_router)
     app.include_router(actions_router)
     app.include_router(connections_router)
+    app.include_router(inbox_connections_router)
+    app.include_router(inbox_drafts_router)
+    app.include_router(inbox_internal_router)
     app.include_router(quality_router)
     app.include_router(notifications_router)
     app.include_router(settings_router)

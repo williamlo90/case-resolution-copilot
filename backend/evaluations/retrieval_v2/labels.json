@@ -1,0 +1,99 @@
+{
+  "version": "retrieval-v2-label-v1",
+  "corpus_clause_public_ids": [
+    "POLC-0B1057FC8ECADE8B",
+    "POLC-52C7F343E7F06397",
+    "POLC-5116CA2576849DF0",
+    "POLC-84543BFFB489E85C",
+    "POLC-86C97CDB1B22E1DA",
+    "POLC-E0E899A35EB28A12",
+    "POLC-6B74277897E4D5BC",
+    "POLC-B9BCD8E568B73BA9"
+  ],
+  "cases": [
+    {
+      "case_id": "RAG2-001",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1008",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-0B1057FC8ECADE8B",
+      "near_match_clause_public_id": "POLC-52C7F343E7F06397",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-002",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1008",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-52C7F343E7F06397",
+      "near_match_clause_public_id": "POLC-0B1057FC8ECADE8B",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-003",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1007",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-5116CA2576849DF0",
+      "near_match_clause_public_id": "POLC-84543BFFB489E85C",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-004",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1007",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-84543BFFB489E85C",
+      "near_match_clause_public_id": "POLC-5116CA2576849DF0",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-005",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1006",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-86C97CDB1B22E1DA",
+      "near_match_clause_public_id": "POLC-E0E899A35EB28A12",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-006",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1006",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-E0E899A35EB28A12",
+      "near_match_clause_public_id": "POLC-86C97CDB1B22E1DA",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-007",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1005",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-6B74277897E4D5BC",
+      "near_match_clause_public_id": "POLC-B9BCD8E568B73BA9",
+      "safety_critical": true
+    },
+    {
+      "case_id": "RAG2-008",
+      "expected_status": "relevant",
+      "expected_policy_public_id": "POL-1005",
+      "expected_policy_version": 1,
+      "expected_clause_public_id": "POLC-B9BCD8E568B73BA9",
+      "near_match_clause_public_id": "POLC-6B74277897E4D5BC",
+      "safety_critical": true
+    },
+    {"case_id": "RAG2-009", "expected_status": "stale"},
+    {
+      "case_id": "RAG2-010",
+      "expected_status": "missing",
+      "cross_tenant_probe": true,
+      "expected_boundary_outcome": "organization_not_found"
+    },
+    {"case_id": "RAG2-011", "expected_status": "missing"},
+    {"case_id": "RAG2-012", "expected_status": "inapplicable"},
+    {"case_id": "RAG2-013", "expected_status": "stale"},
+    {"case_id": "RAG2-014", "expected_status": "conflicting"},
+    {"case_id": "RAG2-015", "expected_status": "missing"}
+  ]
+}

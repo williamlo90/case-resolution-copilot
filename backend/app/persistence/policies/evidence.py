@@ -90,6 +90,13 @@ class PolicyEvidenceRepository(PolicyRepositoryBase):
                     chunking_version=binding.clause.chunking_version,
                     embedding_version=binding.clause.embedding_version,
                     index_version=binding.clause.index_version,
+                    embedding_profile_key=binding.embedding_profile_key,
+                    retrieval_algorithm_version=binding.retrieval_algorithm_version,
+                    query_fingerprint=binding.query_fingerprint,
+                    dense_rank=binding.dense_rank,
+                    lexical_rank=binding.lexical_rank,
+                    fused_retrieval_score=binding.fused_retrieval_score,
+                    retrieval_run_correlation_id=binding.retrieval_run_correlation_id,
                     recorded_at=utc_now(),
                 )
                 .on_conflict_do_nothing(

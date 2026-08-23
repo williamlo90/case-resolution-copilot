@@ -1,0 +1,7 @@
+{
+  "version": "retrieval-v2-manifest-v1",
+  "inputs_file": "inputs.json",
+  "labels_file": "labels.json",
+  "inputs_sha256": "a7849e0da848b9c02832c734df8a497ca4637ed4a242dff3e41ff5e8a1e4fe2b",
+  "labels_sha256": "9177a7249a175bcfc4da2992232ee2dbcc00f3c8f843c6b1858d2394fe0f2653"
+}

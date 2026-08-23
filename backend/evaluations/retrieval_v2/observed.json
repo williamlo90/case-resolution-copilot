@@ -1,0 +1,986 @@
+{
+  "version": "retrieval-v2-report-v1",
+  "generated_at": "2026-08-14T17:25:13.210187Z",
+  "inputs_sha256": "a7849e0da848b9c02832c734df8a497ca4637ed4a242dff3e41ff5e8a1e4fe2b",
+  "labels_sha256": "9177a7249a175bcfc4da2992232ee2dbcc00f3c8f843c6b1858d2394fe0f2653",
+  "live_openai_evaluated": true,
+  "phase4_gate_passed": true,
+  "phase4_gate_failures": [],
+  "profiles": [
+    {
+      "profile_key": "deterministic-hash-v1",
+      "provider": "deterministic",
+      "retrieval_generation": "v1",
+      "evidence_tier": "live_neon_release_corpus_plus_frozen_guard_contracts",
+      "metrics": {
+        "cases": 15,
+        "relevant_cases": 8,
+        "failure_state_cases": 7,
+        "status_accuracy": 1.0,
+        "policy_version_accuracy": 1.0,
+        "safety_critical_policy_version_accuracy": 1.0,
+        "recall_at_3": 1.0,
+        "mean_reciprocal_rank": 1.0,
+        "failure_state_accuracy": 1.0,
+        "boundary_outcome_accuracy": 1.0,
+        "wrong_version_count": 0,
+        "unsupported_citation_count": 0,
+        "cross_tenant_result_count": 0,
+        "near_match_at_rank_1_count": 0,
+        "embedding_calls": 15,
+        "latency_p50_ms": 138.056,
+        "latency_p95_ms": 562.427,
+        "gate_passed": true,
+        "gate_failures": []
+      },
+      "observations": [
+        {
+          "case_id": "RAG2-001",
+          "status": "relevant",
+          "latency_ms": 562.427,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.4767313145617045
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-002",
+          "status": "relevant",
+          "latency_ms": 175.292,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.6149187271272759
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-B9BCD8E568B73BA9",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.2499999925494193
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-003",
+          "status": "relevant",
+          "latency_ms": 138.056,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.5600000286102288
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.48507125631187153
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-004",
+          "status": "relevant",
+          "latency_ms": 220.682,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.7622517347335815
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.7177405571264198
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-005",
+          "status": "relevant",
+          "latency_ms": 147.571,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-86C97CDB1B22E1DA",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.7833679447550821
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.33004917710873083
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-006",
+          "status": "relevant",
+          "latency_ms": 253.211,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-E0E899A35EB28A12",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.7918075919151306
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.3152641449947402
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-007",
+          "status": "relevant",
+          "latency_ms": 160.764,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.6902685576837395
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.4596194302808898
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-008",
+          "status": "relevant",
+          "latency_ms": 152.375,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-B9BCD8E568B73BA9",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.6086976709573769
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": null,
+              "lexical_rank": null,
+              "score": 0.288230648987573
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-009",
+          "status": "stale",
+          "latency_ms": 125.542,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-010",
+          "status": "missing",
+          "latency_ms": 105.256,
+          "embedding_calls": 1,
+          "boundary_outcome": "organization_not_found",
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-011",
+          "status": "missing",
+          "latency_ms": 2.896,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-012",
+          "status": "inapplicable",
+          "latency_ms": 2.06,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-013",
+          "status": "stale",
+          "latency_ms": 1.855,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-014",
+          "status": "conflicting",
+          "latency_ms": 2.104,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-015",
+          "status": "missing",
+          "latency_ms": 1.092,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": []
+        }
+      ]
+    },
+    {
+      "profile_key": "deterministic-hash-v2-d512",
+      "provider": "deterministic",
+      "retrieval_generation": "v2",
+      "evidence_tier": "live_neon_release_corpus_plus_frozen_guard_contracts",
+      "metrics": {
+        "cases": 15,
+        "relevant_cases": 8,
+        "failure_state_cases": 7,
+        "status_accuracy": 1.0,
+        "policy_version_accuracy": 1.0,
+        "safety_critical_policy_version_accuracy": 1.0,
+        "recall_at_3": 1.0,
+        "mean_reciprocal_rank": 1.0,
+        "failure_state_accuracy": 1.0,
+        "boundary_outcome_accuracy": 1.0,
+        "wrong_version_count": 0,
+        "unsupported_citation_count": 0,
+        "cross_tenant_result_count": 0,
+        "near_match_at_rank_1_count": 0,
+        "embedding_calls": 8,
+        "latency_p50_ms": 415.96,
+        "latency_p95_ms": 582.113,
+        "gate_passed": true,
+        "gate_failures": []
+      },
+      "observations": [
+        {
+          "case_id": "RAG2-001",
+          "status": "relevant",
+          "latency_ms": 582.113,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": 1,
+              "score": 0.01639344262295082
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-002",
+          "status": "relevant",
+          "latency_ms": 415.964,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-003",
+          "status": "relevant",
+          "latency_ms": 560.812,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-004",
+          "status": "relevant",
+          "latency_ms": 415.96,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-005",
+          "status": "relevant",
+          "latency_ms": 427.852,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-86C97CDB1B22E1DA",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-E0E899A35EB28A12",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-006",
+          "status": "relevant",
+          "latency_ms": 499.597,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-E0E899A35EB28A12",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-86C97CDB1B22E1DA",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-007",
+          "status": "relevant",
+          "latency_ms": 419.353,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-008",
+          "status": "relevant",
+          "latency_ms": 449.742,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-B9BCD8E568B73BA9",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-009",
+          "status": "stale",
+          "latency_ms": 146.147,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-010",
+          "status": "missing",
+          "latency_ms": 116.443,
+          "embedding_calls": 0,
+          "boundary_outcome": "organization_not_found",
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-011",
+          "status": "missing",
+          "latency_ms": 0.573,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-012",
+          "status": "inapplicable",
+          "latency_ms": 0.884,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-013",
+          "status": "stale",
+          "latency_ms": 0.388,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-014",
+          "status": "conflicting",
+          "latency_ms": 0.381,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-015",
+          "status": "missing",
+          "latency_ms": 0.346,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        }
+      ]
+    },
+    {
+      "profile_key": "openai-text-embedding-3-small-v2-d512",
+      "provider": "openai",
+      "retrieval_generation": "v2",
+      "evidence_tier": "live_neon_release_corpus_plus_frozen_guard_contracts",
+      "metrics": {
+        "cases": 15,
+        "relevant_cases": 8,
+        "failure_state_cases": 7,
+        "status_accuracy": 1.0,
+        "policy_version_accuracy": 1.0,
+        "safety_critical_policy_version_accuracy": 1.0,
+        "recall_at_3": 1.0,
+        "mean_reciprocal_rank": 1.0,
+        "failure_state_accuracy": 1.0,
+        "boundary_outcome_accuracy": 1.0,
+        "wrong_version_count": 0,
+        "unsupported_citation_count": 0,
+        "cross_tenant_result_count": 0,
+        "near_match_at_rank_1_count": 0,
+        "embedding_calls": 8,
+        "latency_p50_ms": 823.374,
+        "latency_p95_ms": 5536.589,
+        "gate_passed": true,
+        "gate_failures": []
+      },
+      "observations": [
+        {
+          "case_id": "RAG2-001",
+          "status": "relevant",
+          "latency_ms": 5536.589,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-002",
+          "status": "relevant",
+          "latency_ms": 1126.008,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-003",
+          "status": "relevant",
+          "latency_ms": 935.162,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": 2,
+              "lexical_rank": 2,
+              "score": 0.03225806451612903
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-004",
+          "status": "relevant",
+          "latency_ms": 954.549,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": 2,
+              "lexical_rank": 2,
+              "score": 0.03225806451612903
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": 3,
+              "lexical_rank": 3,
+              "score": 0.031746031746031744
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-005",
+          "status": "relevant",
+          "latency_ms": 823.374,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-86C97CDB1B22E1DA",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-E0E899A35EB28A12",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-006",
+          "status": "relevant",
+          "latency_ms": 909.277,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-E0E899A35EB28A12",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1006",
+              "policy_version": 1,
+              "clause_public_id": "POLC-86C97CDB1B22E1DA",
+              "dense_rank": 2,
+              "lexical_rank": 2,
+              "score": 0.03225806451612903
+            },
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-007",
+          "status": "relevant",
+          "latency_ms": 838.571,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-6B74277897E4D5BC",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-0B1057FC8ECADE8B",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1008",
+              "policy_version": 1,
+              "clause_public_id": "POLC-52C7F343E7F06397",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-008",
+          "status": "relevant",
+          "latency_ms": 826.655,
+          "embedding_calls": 1,
+          "boundary_outcome": null,
+          "clauses": [
+            {
+              "policy_public_id": "POL-1005",
+              "policy_version": 1,
+              "clause_public_id": "POLC-B9BCD8E568B73BA9",
+              "dense_rank": 1,
+              "lexical_rank": 1,
+              "score": 0.03278688524590164
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-5116CA2576849DF0",
+              "dense_rank": null,
+              "lexical_rank": 2,
+              "score": 0.016129032258064516
+            },
+            {
+              "policy_public_id": "POL-1007",
+              "policy_version": 1,
+              "clause_public_id": "POLC-84543BFFB489E85C",
+              "dense_rank": null,
+              "lexical_rank": 3,
+              "score": 0.015873015873015872
+            }
+          ]
+        },
+        {
+          "case_id": "RAG2-009",
+          "status": "stale",
+          "latency_ms": 125.847,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-010",
+          "status": "missing",
+          "latency_ms": 93.643,
+          "embedding_calls": 0,
+          "boundary_outcome": "organization_not_found",
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-011",
+          "status": "missing",
+          "latency_ms": 0.481,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-012",
+          "status": "inapplicable",
+          "latency_ms": 0.3,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-013",
+          "status": "stale",
+          "latency_ms": 0.284,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-014",
+          "status": "conflicting",
+          "latency_ms": 0.285,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        },
+        {
+          "case_id": "RAG2-015",
+          "status": "missing",
+          "latency_ms": 0.308,
+          "embedding_calls": 0,
+          "boundary_outcome": null,
+          "clauses": []
+        }
+      ]
+    }
+  ]
+}

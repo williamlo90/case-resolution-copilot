@@ -10,6 +10,7 @@ from app.analysis.deterministic_decision_engine import (
 )
 from app.api.dependencies.embeddings import configured_embedding_provider
 from app.api.dependencies.identity import authorize_actor, current_actor
+from app.api.dependencies.policy_retrieval import configured_policy_retrieval
 from app.api.errors import AppError
 from app.api.presenters.decision_briefs import present_decision_brief
 from app.api.schemas.decision_briefs import (
@@ -130,6 +131,7 @@ def _service(request: Request) -> tuple[Database, DecisionEngine]:
 
 
 def _decision_service(
+    request: Request,
     session: Session,
     engine: DecisionEngine,
     embedding_provider: EmbeddingProvider,
@@ -143,6 +145,11 @@ def _decision_service(
             policy_repository,
             case_repository,
             embedding_provider,
+            configured_policy_retrieval(
+                request,
+                store=policy_repository,
+                v1_embedding_provider=embedding_provider,
+            ),
         ),
         engine,
         DecisionGenerationRepository(session),
@@ -151,6 +158,7 @@ def _decision_service(
 
 def _release_generation(
     *,
+    request: Request,
     database: Database,
     engine: DecisionEngine,
     embedding_provider: EmbeddingProvider,
@@ -161,7 +169,12 @@ def _release_generation(
 ) -> None:
     try:
         with database.session() as session:
-            _decision_service(session, engine, embedding_provider).release_generation(
+            _decision_service(
+                request,
+                session,
+                engine,
+                embedding_provider,
+            ).release_generation(
                 actor=actor,
                 case_id=case_id,
                 preparation=preparation,
@@ -189,6 +202,7 @@ def generate_decision_brief(
     try:
         with database.session() as session:
             prepared = _decision_service(
+                request,
                 session,
                 engine,
                 embedding_provider,
@@ -207,6 +221,7 @@ def generate_decision_brief(
                 )
                 with database.session() as session:
                     brief = _decision_service(
+                        request,
                         session,
                         engine,
                         embedding_provider,
@@ -219,6 +234,7 @@ def generate_decision_brief(
                     )
             except Exception as exc:
                 _release_generation(
+                    request=request,
                     database=database,
                     engine=engine,
                     embedding_provider=embedding_provider,
@@ -264,6 +280,7 @@ def get_current_decision_brief(
     try:
         with _database(request).session() as session:
             brief = _decision_service(
+                request,
                 session,
                 _decision_engine(request),
                 configured_embedding_provider(request),
@@ -293,6 +310,7 @@ def get_decision_brief_version(
     try:
         with _database(request).session() as session:
             brief = _decision_service(
+                request,
                 session,
                 _decision_engine(request),
                 configured_embedding_provider(request),

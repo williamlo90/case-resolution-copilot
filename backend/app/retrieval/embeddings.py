@@ -72,12 +72,16 @@ class OpenAIEmbeddingProvider:
         model: str,
         timeout_seconds: float,
         max_retries: int,
+        dimensions: int = EMBEDDING_DIMENSIONS,
+        version: str | None = None,
         client: _OpenAIEmbeddingClient | None = None,
     ) -> None:
+        if dimensions < 1 or dimensions > 3072:
+            raise ValueError("Embedding dimensions must be between 1 and 3072.")
         self._model = model
-        self._dimensions = EMBEDDING_DIMENSIONS
-        self._version = (
-            "openai-embedding-v1-d32-" + sha256(model.encode()).hexdigest()[:12]
+        self._dimensions = dimensions
+        self._version = version or (
+            f"openai-embedding-v1-d{dimensions}-" + sha256(model.encode()).hexdigest()[:12]
         )
         self._client = client or cast(
             _OpenAIEmbeddingClient,

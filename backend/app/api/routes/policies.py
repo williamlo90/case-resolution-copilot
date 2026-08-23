@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies.embeddings import configured_embedding_provider
 from app.api.dependencies.identity import authorize_actor, current_actor
+from app.api.dependencies.policy_retrieval import configured_policy_retrieval
 from app.api.errors import AppError
 from app.api.schemas.common import ActorSummaryResponse
 from app.api.schemas.policies import (
@@ -620,6 +621,11 @@ def list_case_policy_evidence(
                 repository,
                 CaseRepository(session),
                 configured_embedding_provider(request),
+                retrieval=configured_policy_retrieval(
+                    request,
+                    store=repository,
+                    v1_embedding_provider=configured_embedding_provider(request),
+                ),
             ).list_for_case(actor=actor, case_id=case_id)
     except PolicyNotFound as exc:
         raise _translate(exc) from exc
@@ -653,6 +659,11 @@ def refresh_case_policy_evidence(
                 repository,
                 CaseRepository(session),
                 configured_embedding_provider(request),
+                retrieval=configured_policy_retrieval(
+                    request,
+                    store=repository,
+                    v1_embedding_provider=configured_embedding_provider(request),
+                ),
             ).refresh_for_case(
                 actor=actor,
                 case_id=case_id,
