@@ -33,6 +33,9 @@ import {
   CaseDecisionRail,
   type WorkflowControl,
 } from "./case-decision-rail";
+import type { InboxDraftAction } from "@/features/connections/action-contracts";
+import { GmailDraftControl } from "@/features/connections/components/gmail-draft-control";
+import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
 
 type WorkspaceTab = "brief" | "conversation" | "evidence" | "activity";
 
@@ -88,6 +91,9 @@ export function CaseWorkspace({
   addNoteAction,
   loadConversationHistoryAction,
   loadActivityHistoryAction,
+  deliverDraftAction,
+  reconcileDraftAction,
+  initialDraftDelivery,
 }: {
   workspace: CaseWorkspaceModel;
   workflowAction?: WorkflowControl;
@@ -98,6 +104,9 @@ export function CaseWorkspace({
   addNoteAction?: ServerCommand;
   loadConversationHistoryAction?: ConversationHistoryAction;
   loadActivityHistoryAction?: ActivityHistoryAction;
+  deliverDraftAction?: InboxDraftAction;
+  reconcileDraftAction?: InboxDraftAction;
+  initialDraftDelivery?: InboxDraftDelivery | null;
 }) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("brief");
   const status = caseStatusPresentation[workspace.case.status];
@@ -190,6 +199,16 @@ export function CaseWorkspace({
               addNoteAction={addNoteAction}
               loadHistoryAction={loadConversationHistoryAction}
             />
+            {workspace.responseDraft &&
+            (deliverDraftAction || reconcileDraftAction || initialDraftDelivery) ? (
+              <GmailDraftControl
+                draftVersion={workspace.responseDraft.version}
+                draftStatus={workspace.responseDraft.status}
+                initialDelivery={initialDraftDelivery}
+                deliverDraftAction={deliverDraftAction}
+                reconcileDraftAction={reconcileDraftAction}
+              />
+            ) : null}
           </div>
         ) : null}
         {activeTab === "evidence" ? (

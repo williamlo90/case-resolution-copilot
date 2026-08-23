@@ -286,6 +286,9 @@ class ConversationMessageModel(Base):
         UniqueConstraint(
             "organization_id", "public_id", name="uq_conversation_messages_org_public"
         ),
+        UniqueConstraint(
+            "organization_id", "id", name="uq_conversation_messages_org_id"
+        ),
         ForeignKeyConstraint(
             ["organization_id", "case_id"],
             ["cases.organization_id", "cases.id"],
@@ -331,6 +334,7 @@ class ResponseDraftModel(Base):
             "status IN ('draft', 'ready', 'blocked')", name="ck_response_drafts_status"
         ),
         UniqueConstraint("organization_id", "case_id", name="uq_response_drafts_org_case"),
+        UniqueConstraint("organization_id", "id", name="uq_response_drafts_org_id"),
         UniqueConstraint("organization_id", "public_id", name="uq_response_drafts_org_public"),
         ForeignKeyConstraint(
             ["organization_id", "case_id"],

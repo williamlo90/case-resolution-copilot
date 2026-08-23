@@ -1,4 +1,8 @@
 import { getCaseRepository } from "@/data/cases/case-repository-provider";
+import { getAdministrationRepository } from "@/data/administration/administration-repository-provider";
+import { ApiClientError } from "@/data/api/api-client";
+import { apiInboxDraftRepository } from "@/data/connections/api-inbox-draft-repository";
+import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
 import { CaseWorkspace } from "@/features/cases/components/case-workspace";
 import { notFound } from "next/navigation";
 import {
@@ -10,13 +14,36 @@ import {
   submitCaseReview,
   updateCaseWorkflow,
 } from "../../_actions/cases";
+import {
+  deliverResponseDraft,
+  reconcileResponseDraft,
+} from "../../_actions/inbox-drafts";
 
 export default async function CaseWorkspacePage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
   const repository = getCaseRepository();
-  const workspace = await repository.getCaseWorkspace(caseId);
-  if (!workspace) notFound();
   const connected = repository.source === "api";
+  const [workspace, sessionContext] = await Promise.all([
+    repository.getCaseWorkspace(caseId),
+    connected
+      ? getAdministrationRepository().getSessionContext()
+      : Promise.resolve(null),
+  ]);
+  if (!workspace) notFound();
+  const canManageCase =
+    sessionContext?.actor.permissions.includes("case:manage") ?? false;
+  const inboxCase = workspace.case.sourceId.startsWith("inbox:");
+  let latestDraftDelivery: InboxDraftDelivery | null = null;
+  if (connected && canManageCase && inboxCase && workspace.responseDraft) {
+    try {
+      latestDraftDelivery = await apiInboxDraftRepository.getLatest(
+        workspace.case.id,
+        workspace.responseDraft.version,
+      );
+    } catch (error) {
+      if (!(error instanceof ApiClientError)) throw error;
+    }
+  }
   const replyChannel =
     workspace.request.channel === "webhook"
       ? "email"
@@ -108,6 +135,21 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
           ? loadCaseActivityHistory.bind(null, workspace.case.id)
           : undefined
       }
+      deliverDraftAction={
+        connected && canManageCase && inboxCase && workspace.responseDraft
+          ? deliverResponseDraft.bind(
+              null,
+              workspace.case.id,
+              workspace.responseDraft.version,
+            )
+          : undefined
+      }
+      reconcileDraftAction={
+        connected && canManageCase && inboxCase && workspace.responseDraft
+          ? reconcileResponseDraft
+          : undefined
+      }
+      initialDraftDelivery={canManageCase ? latestDraftDelivery : null}
     />
   );
 }

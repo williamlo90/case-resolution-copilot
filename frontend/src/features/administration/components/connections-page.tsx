@@ -19,7 +19,13 @@ import {
   X,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/presentation-format";
-import { useActionState, useCallback, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 const healthTone = {
   healthy: "success",
@@ -132,10 +138,12 @@ export function ConnectionsPage({
   connections,
   connected,
   testConnectionAction,
+  featuredContent,
 }: {
   connections: readonly Connection[];
   connected: boolean;
   testConnectionAction?: TestConnectionCommand;
+  featuredContent?: ReactNode;
 }) {
   const presentation = usePresentationPreferences();
   const [selected, setSelected] = useState<Connection | null>(null);
@@ -166,6 +174,7 @@ export function ConnectionsPage({
           meta={connected ? "Connected workspace" : "Sample workspace"}
         />
         <div className="mx-auto max-w-[1540px] px-4 py-6 sm:px-6 lg:px-7">
+        {featuredContent ? <div className="mb-6">{featuredContent}</div> : null}
         {connections.length ? (
           <div className="grid gap-px border border-border bg-border lg:grid-cols-2">
             {connections.map((item) => (
@@ -211,7 +220,7 @@ export function ConnectionsPage({
             </article>
             ))}
           </div>
-        ) : (
+        ) : !featuredContent ? (
           <section className="border border-border px-5 py-12 text-center">
             <PlugZap aria-hidden="true" size={24} className="mx-auto text-muted" />
             <h2 className="mt-4 text-base font-semibold text-primary">
@@ -222,7 +231,7 @@ export function ConnectionsPage({
               deployment setup before pilot use.
             </p>
           </section>
-        )}
+        ) : null}
         </div>
       </div>
 

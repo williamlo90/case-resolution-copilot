@@ -33,6 +33,21 @@ from .identity import (
     MembershipModel,
     OrganizationModel,
 )
+from .inbox_connections import (
+    ConnectionCredentialEnvelopeModel,
+    InboxConnectionProfileModel,
+    InboxOAuthSessionModel,
+)
+from .inbox_messages import (
+    ExternalAttachmentModel,
+    ExternalConversationModel,
+    ExternalMessageModel,
+)
+from .inbox_operations import (
+    InboxDraftDeliveryModel,
+    InboxSyncCheckpointModel,
+    InboxSyncJobModel,
+)
 from .legacy import (
     AgentRunModel,
     ApprovalDecisionModel,
@@ -62,6 +77,11 @@ from .policies import (
     GovernedPolicyVersionModel,
     PolicyModel,
 )
+from .policy_retrieval_v2 import (
+    GovernedPolicyClauseEmbeddingV2Model,
+    PolicyEmbeddingProfileModel,
+    PolicyIndexJobModel,
+)
 from .reviews import (
     CaseReviewDecisionModel,
     CaseReviewModel,
@@ -75,6 +95,15 @@ __all__ = [
     "OrganizationModel",
     "MembershipModel",
     "InvitationModel",
+    "InboxConnectionProfileModel",
+    "ConnectionCredentialEnvelopeModel",
+    "InboxOAuthSessionModel",
+    "ExternalConversationModel",
+    "ExternalMessageModel",
+    "ExternalAttachmentModel",
+    "InboxSyncCheckpointModel",
+    "InboxSyncJobModel",
+    "InboxDraftDeliveryModel",
     "CaseModel",
     "CaseRequestModel",
     "CaseCustomerModel",
@@ -99,6 +128,9 @@ __all__ = [
     "GovernedPolicyVersionModel",
     "GovernedPolicyClauseModel",
     "CasePolicyEvidenceModel",
+    "PolicyEmbeddingProfileModel",
+    "GovernedPolicyClauseEmbeddingV2Model",
+    "PolicyIndexJobModel",
     "CaseAnalysisGenerationModel",
     "CaseAnalysisRunModel",
     "CaseAnalysisCheckpointModel",
