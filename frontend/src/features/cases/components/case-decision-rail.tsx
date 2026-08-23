@@ -8,6 +8,7 @@ import {
 } from "@/data/commands/command-state";
 import type { CaseWorkspace } from "@/domain/cases/case";
 import { formatMoney } from "@/features/cases/case-presentation";
+import type { CaseWorkflowMode } from "@/features/cases/case-workflow";
 import {
   MessageCircleQuestion,
   Play,
@@ -19,7 +20,7 @@ import {
 import { useActionState } from "react";
 
 export type WorkflowControl = {
-  mode: "request_information" | "resume_investigation";
+  mode: CaseWorkflowMode;
   action: ServerCommand;
 };
 
@@ -86,8 +87,20 @@ function CaseWorkflowControl({ control }: { control: WorkflowControl }) {
     control.action,
     initialCommandState,
   );
-  const resume = control.mode === "resume_investigation";
-  const Icon = resume ? Play : MessageCircleQuestion;
+  const investigation = control.mode !== "request_information";
+  const Icon = investigation ? Play : MessageCircleQuestion;
+  const label =
+    control.mode === "start_investigation"
+      ? "Start investigation"
+      : control.mode === "resume_investigation"
+        ? "Resume investigation"
+        : "Ask for information";
+  const pendingLabel =
+    control.mode === "start_investigation"
+      ? "Starting..."
+      : control.mode === "resume_investigation"
+        ? "Resuming..."
+        : "Updating...";
 
   return (
     <div className="space-y-3">
@@ -98,13 +111,7 @@ function CaseWorkflowControl({ control }: { control: WorkflowControl }) {
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-primary hover:bg-[#f3f6f6] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Icon aria-hidden="true" size={16} />
-          {pending
-            ? resume
-              ? "Resuming..."
-              : "Updating..."
-            : resume
-              ? "Resume investigation"
-              : "Ask for information"}
+          {pending ? pendingLabel : label}
         </button>
       </form>
       <CommandStatus state={state} />
@@ -114,12 +121,12 @@ function CaseWorkflowControl({ control }: { control: WorkflowControl }) {
 
 export function CaseDecisionRail({
   workspace,
-  workflowAction,
+  workflowActions = [],
   prepareBriefAction,
   submitReviewAction,
 }: {
   workspace: CaseWorkspace;
-  workflowAction?: WorkflowControl;
+  workflowActions?: readonly WorkflowControl[];
   prepareBriefAction?: ServerCommand;
   submitReviewAction?: ServerCommand;
 }) {
@@ -201,9 +208,9 @@ export function CaseDecisionRail({
         </section>
 
         <div className="space-y-3 px-5 py-6 lg:px-7">
-          {workflowAction ? (
-            <CaseWorkflowControl control={workflowAction} />
-          ) : null}
+          {workflowActions.map((control) => (
+            <CaseWorkflowControl key={control.mode} control={control} />
+          ))}
           {prepareBriefAction ? (
             <>
               <div className="flex items-start gap-3 pb-1">

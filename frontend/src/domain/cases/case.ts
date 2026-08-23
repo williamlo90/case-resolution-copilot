@@ -201,6 +201,7 @@ export const CaseWorkspaceSchema = z.object({
   }),
   availableCommands: z.array(z.enum([
     "assign_to_me",
+    "start_investigation",
     "request_information",
     "resume_investigation",
     "send_reply",

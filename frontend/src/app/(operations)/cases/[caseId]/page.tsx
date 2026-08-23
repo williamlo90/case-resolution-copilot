@@ -3,7 +3,12 @@ import { getAdministrationRepository } from "@/data/administration/administratio
 import { ApiClientError } from "@/data/api/api-client";
 import { apiInboxDraftRepository } from "@/data/connections/api-inbox-draft-repository";
 import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
+import type { WorkflowControl } from "@/features/cases/components/case-decision-rail";
 import { CaseWorkspace } from "@/features/cases/components/case-workspace";
+import {
+  caseWorkflowModes,
+  caseWorkflowTarget,
+} from "@/features/cases/case-workflow";
 import { notFound } from "next/navigation";
 import {
   addCaseEvidence,
@@ -49,32 +54,21 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
     workspace.request.channel === "webhook"
       ? "email"
       : workspace.request.channel;
+  const workflowActions: WorkflowControl[] = connected
+    ? caseWorkflowModes(workspace.availableCommands).map((mode) => ({
+        mode,
+        action: updateCaseWorkflow.bind(
+          null,
+          workspace.case.id,
+          workspace.case.version,
+          caseWorkflowTarget(mode),
+        ),
+      }))
+    : [];
   return (
     <CaseWorkspace
       workspace={workspace}
-      workflowAction={
-        connected && workspace.availableCommands.includes("request_information")
-          ? {
-              mode: "request_information",
-              action: updateCaseWorkflow.bind(
-                null,
-                workspace.case.id,
-                workspace.case.version,
-                "information_needed",
-              ),
-            }
-          : connected && workspace.availableCommands.includes("resume_investigation")
-            ? {
-                mode: "resume_investigation",
-                action: updateCaseWorkflow.bind(
-                  null,
-                  workspace.case.id,
-                  workspace.case.version,
-                  "investigating",
-                ),
-              }
-            : undefined
-      }
+      workflowActions={workflowActions}
       prepareBriefAction={
         connected && workspace.availableCommands.includes("revise_resolution")
           ? prepareCaseDecisionBrief.bind(

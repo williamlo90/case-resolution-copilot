@@ -192,6 +192,31 @@ describe("updateCaseWorkflow", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/cases/CS-2048");
     expect(revalidatePathMock).toHaveBeenCalledWith("/cases");
   });
+
+  it("starts investigation against the current case version", async () => {
+    apiRequestMock.mockResolvedValue({ data: {} });
+
+    const result = await updateCaseWorkflow(
+      "CS-2048",
+      5,
+      "investigating",
+      initialCommandState,
+      new FormData(),
+    );
+
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/cases/CS-2048/status",
+      expect.anything(),
+      {
+        method: "POST",
+        body: {
+          expected_version: 5,
+          status: "investigating",
+        },
+      },
+    );
+    expect(result.message).toContain("under investigation");
+  });
 });
 
 describe("case conversation commands", () => {

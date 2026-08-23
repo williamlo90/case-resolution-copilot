@@ -85,6 +85,11 @@ class CaseWorkspaceQueryService:
             if workspace.owner is None:
                 commands.append("assign_to_me")
             commands.extend(["send_reply", "add_note"])
+            if (
+                workspace.case.status is CaseStatus.NEW
+                and CaseStatus.INVESTIGATING in CASE_TRANSITIONS[workspace.case.status]
+            ):
+                commands.append("start_investigation")
             if CaseStatus.INFORMATION_NEEDED in CASE_TRANSITIONS[workspace.case.status]:
                 commands.append("request_information")
             if (
@@ -134,6 +139,8 @@ class CaseWorkspaceQueryService:
             CaseStatus.INVESTIGATING,
             CaseStatus.IN_PROGRESS,
         }:
+            return False
+        if brief.run.case_version != workspace.case.version:
             return False
         if brief.proposal.current_version != brief.version.version:
             return False

@@ -273,21 +273,50 @@ describe("CaseWorkspace", () => {
     render(
       <CaseWorkspace
         workspace={primaryCaseWorkspaceFixture}
-        workflowAction={{
-          mode: "request_information",
-          action: async () => ({
-            status: "success",
-            message: "The case is now waiting for more information.",
-            correlationId: null,
-            retryAfterSeconds: null,
-          }),
-        }}
+        workflowActions={[
+          {
+            mode: "request_information",
+            action: async () => ({
+              status: "success",
+              message: "The case is now waiting for more information.",
+              correlationId: null,
+              retryAfterSeconds: null,
+            }),
+          },
+        ]}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Ask for information" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "waiting for more information",
+    );
+  });
+
+  it("lets an operator start work on a new case", async () => {
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          case: { ...primaryCaseWorkspaceFixture.case, status: "new" },
+        }}
+        workflowActions={[
+          {
+            mode: "start_investigation",
+            action: async () => ({
+              status: "success",
+              message: "The case is now under investigation.",
+              correlationId: null,
+              retryAfterSeconds: null,
+            }),
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Start investigation" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "now under investigation",
     );
   });
 

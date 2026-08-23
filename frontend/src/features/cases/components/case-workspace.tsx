@@ -83,7 +83,7 @@ function DeferredPanelLoading({ label }: { label: string }) {
 
 export function CaseWorkspace({
   workspace,
-  workflowAction,
+  workflowActions,
   prepareBriefAction,
   submitReviewAction,
   saveDraftAction,
@@ -97,7 +97,7 @@ export function CaseWorkspace({
   initialDraftDelivery,
 }: {
   workspace: CaseWorkspaceModel;
-  workflowAction?: WorkflowControl;
+  workflowActions?: readonly WorkflowControl[];
   prepareBriefAction?: ServerCommand;
   submitReviewAction?: ServerCommand;
   saveDraftAction?: ServerCommand;
@@ -182,7 +182,7 @@ export function CaseWorkspace({
             <CaseDecisionBrief workspace={workspace} />
             <CaseDecisionRail
               workspace={workspace}
-              workflowAction={workflowAction}
+              workflowActions={workflowActions}
               prepareBriefAction={prepareBriefAction}
               submitReviewAction={submitReviewAction}
             />

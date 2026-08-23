@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from app.api.presenters.cases import present_case_workspace
-from app.domain.cases import CaseCollectionWindowRecord
+from app.domain.cases import CaseCollectionWindowRecord, CaseStatus
 from app.persistence.case_repository import CaseRepository
 from app.persistence.decision_brief_repository import DecisionBriefRepository
 from app.persistence.policy_repository import PolicyRepository
@@ -11,7 +11,7 @@ from app.services.case_workspace_query import (
     CaseWorkspaceProjection,
     CaseWorkspaceQueryService,
 )
-from tests.builders import valid_case_workspace
+from tests.builders import valid_case_workspace, valid_decision_brief
 
 
 def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
@@ -40,6 +40,7 @@ def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
         "send_reply",
         "add_note",
         "add_evidence",
+        "start_investigation",
         "request_information",
         "revise_resolution",
         "save_draft",
@@ -77,3 +78,32 @@ def test_workspace_presentation_allows_imported_case_without_business_context() 
     assert response.business_contexts == []
     assert response.collections.business_contexts.returned == 0
     assert response.collections.business_contexts.total == 0
+
+
+def test_workspace_hides_review_submission_when_case_changed_after_brief() -> None:
+    workspace = valid_case_workspace()
+    workspace = workspace.model_copy(
+        update={
+            "case": workspace.case.model_copy(
+                update={"status": CaseStatus.INVESTIGATING, "version": 2}
+            )
+        }
+    )
+    cases = MagicMock(spec=CaseRepository)
+    decisions = MagicMock(spec=DecisionBriefRepository)
+    policies = MagicMock(spec=PolicyRepository)
+    reviews = MagicMock(spec=ReviewRepository)
+    decisions.get_latest.return_value = valid_decision_brief()
+    policies.list_evidence_for_case.return_value = []
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    projection = CaseWorkspaceQueryService(
+        cases=cases,
+        decisions=decisions,
+        policies=policies,
+        reviews=reviews,
+    ).project(actor=actor, workspace=workspace)
+
+    assert "submit_for_review" not in projection.available_commands
+    assert "revise_resolution" in projection.available_commands
+    reviews.get_for_proposal.assert_not_called()

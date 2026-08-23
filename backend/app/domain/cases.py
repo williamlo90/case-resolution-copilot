@@ -65,6 +65,7 @@ class CaseQueueCursorDirection(StrEnum):
 
 type CaseCommand = Literal[
     "assign_to_me",
+    "start_investigation",
     "request_information",
     "resume_investigation",
     "send_reply",

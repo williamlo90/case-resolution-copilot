@@ -189,7 +189,7 @@ export async function updateCaseWorkflow(
     return commandSuccess(
       targetStatus === "information_needed"
         ? "The case is now waiting for more information."
-        : "The investigation was resumed.",
+        : "The case is now under investigation.",
     );
   } catch (error) {
     return commandFailure(error);

@@ -227,6 +227,7 @@ const apiCaseWorkspaceSchema = z.object({
   available_commands: z.array(
     z.enum([
       "assign_to_me",
+      "start_investigation",
       "request_information",
       "resume_investigation",
       "send_reply",
