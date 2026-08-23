@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from app.domain.inbox import (
@@ -12,7 +12,7 @@ from app.domain.inbox import (
     ThreadPage,
 )
 
-from .normalization import normalize_message
+from .normalization import header_values, normalize_message
 from .transport import GmailTransport
 
 GMAIL_API_ROOT = "https://gmail.googleapis.com/gmail/v1/users/me"
@@ -49,7 +49,6 @@ class GmailReadAdapter:
         if page_token:
             params["pageToken"] = page_token
         payload = self._get("/threads", access=access, params=params)
-        account_address = self.get_account(access).address
         summaries: list[ProviderThreadSummary] = []
         for row in _dict_rows(payload, "threads")[:limit]:
             thread_id = _text(row, "id")
@@ -61,21 +60,7 @@ class GmailReadAdapter:
             messages = _dict_rows(thread, "messages")
             if not messages:
                 continue
-            normalized = normalize_message(
-                self._get(
-                    f"/messages/{_text(messages[-1], 'id')}",
-                    access=access,
-                    params={"format": "full"},
-                ),
-                account_address=account_address,
-            )
-            summaries.append(
-                ProviderThreadSummary(
-                    provider_thread_id=thread_id,
-                    subject=normalized.subject,
-                    latest_message_at=normalized.received_at,
-                )
-            )
+            summaries.append(_thread_summary(thread_id, messages[-1]))
         return ThreadPage(
             items=tuple(summaries),
             next_page_token=_optional_text(payload, "nextPageToken"),
@@ -173,6 +158,21 @@ def _dict_rows(payload: dict[str, Any], key: str) -> list[dict[str, Any]]:
     if not isinstance(value, list):
         return []
     return [row for row in value if isinstance(row, dict)]
+
+
+def _thread_summary(
+    provider_thread_id: str,
+    latest_message: dict[str, Any],
+) -> ProviderThreadSummary:
+    timestamp = _text(latest_message, "internalDate")
+    if not timestamp.isdigit():
+        raise InboxProviderUnavailable("The inbox message timestamp is invalid.")
+    subject = header_values(latest_message).get("subject") or "(No subject)"
+    return ProviderThreadSummary(
+        provider_thread_id=provider_thread_id,
+        subject=subject[:500],
+        latest_message_at=datetime.fromtimestamp(int(timestamp) / 1000, tz=UTC),
+    )
 
 
 def _text(payload: dict[str, Any], key: str) -> str:

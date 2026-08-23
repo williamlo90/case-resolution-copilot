@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     gmail_pubsub_audience: str | None = Field(default=None, max_length=2000)
     gmail_pubsub_service_account: str | None = Field(default=None, max_length=320)
     inbox_initial_window_days: int = Field(default=14, ge=1, le=30)
-    inbox_initial_item_limit: int = Field(default=25, ge=1, le=100)
+    inbox_initial_item_limit: int = Field(default=5, ge=1, le=100)
     inbox_sync_job_limit: int = Field(default=10, ge=1, le=25)
     inbox_sync_message_limit: int = Field(default=50, ge=1, le=100)
     inbox_provider_timeout_seconds: float = Field(default=8, ge=1, le=20)

@@ -5,7 +5,7 @@ from inspect import getsource
 
 import pytest
 
-from app.domain.inbox import AuthorizationRequest, InboxProviderUnavailable
+from app.domain.inbox import AccessCredential, AuthorizationRequest, InboxProviderUnavailable
 from app.integrations.gmail import (
     GmailAuthorizationAdapter,
     GmailDraftAdapter,
@@ -79,6 +79,74 @@ def test_gmail_authorization_uses_pkce_and_incremental_offline_consent() -> None
     assert "include_granted_scopes=true" in url
     assert "code_challenge_method=S256" in url
     assert "prompt=consent" in url
+
+
+def test_gmail_thread_listing_uses_one_metadata_lookup_per_thread(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    adapter = GmailReadAdapter(timeout_seconds=1)
+    calls: list[tuple[str, dict[str, object] | None]] = []
+    timestamp = str(int(datetime(2026, 8, 12, tzinfo=UTC).timestamp() * 1000))
+
+    def fake_get(
+        path: str,
+        *,
+        access: AccessCredential,
+        params: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        del access
+        calls.append((path, params))
+        if path == "/threads":
+            return {
+                "threads": [{"id": "thread-1"}, {"id": "thread-2"}],
+                "nextPageToken": "next-page",
+                "historyId": "history-2",
+            }
+        thread_id = path.removeprefix("/threads/")
+        return {
+            "messages": [
+                {
+                    "id": f"message-{thread_id}",
+                    "threadId": thread_id,
+                    "internalDate": timestamp,
+                    "payload": {
+                        "headers": [
+                            {"name": "Subject", "value": f"Subject {thread_id}"}
+                        ]
+                    },
+                }
+            ]
+        }
+
+    monkeypatch.setattr(adapter, "_get", fake_get)
+    try:
+        page = adapter.list_threads(
+            access=AccessCredential(
+                access_token="access-token",
+                expires_at=datetime(2026, 8, 13, tzinfo=UTC),
+            ),
+            label_filter=("INBOX",),
+            after=datetime(2026, 8, 1, tzinfo=UTC),
+            page_token=None,
+            limit=2,
+        )
+    finally:
+        adapter.close()
+
+    assert [item.subject for item in page.items] == [
+        "Subject thread-1",
+        "Subject thread-2",
+    ]
+    assert [path for path, _params in calls] == [
+        "/threads",
+        "/threads/thread-1",
+        "/threads/thread-2",
+    ]
+    assert all(
+        params == {"format": "metadata", "metadataHeaders": ["Subject"]}
+        for path, params in calls
+        if path.startswith("/threads/")
+    )
 
 
 def test_gmail_adapter_surface_has_no_send_capability() -> None:

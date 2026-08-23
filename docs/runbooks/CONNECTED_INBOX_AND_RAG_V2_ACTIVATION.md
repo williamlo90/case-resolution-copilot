@@ -78,7 +78,9 @@ SUPPORT_COPILOT_INBOX_AI_DATA_TRANSFER_ENABLED=false
 
 The read path requests `gmail.readonly`. The draft path additionally requests `gmail.compose`, a
 broader restricted scope, so it remains a separate consent and activation step. The application has
-no email-send route.
+no email-send route. Interactive browsing is limited to five threads per page and requests only
+thread subject metadata; full message content is retrieved only after an administrator selects a
+thread for import.
 
 ## OpenAI Billing And Key Gate
 

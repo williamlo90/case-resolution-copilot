@@ -26,7 +26,7 @@ export const apiConnectedInboxRepository: ConnectedInboxRepository = {
   },
 
   async listThreads(connectionId, cursor = null) {
-    const parameters = new URLSearchParams({ limit: "25" });
+    const parameters = new URLSearchParams({ limit: "5" });
     if (cursor) parameters.set("cursor", cursor);
     const response = await apiRequest(
       `${connectionPath(connectionId, "/inbox/threads")}?${parameters}`,

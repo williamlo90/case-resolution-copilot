@@ -72,7 +72,7 @@ describe("connected inbox API contracts", () => {
       nextCursor: "next-page",
     });
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
-      "/api/connections/CON-INBOX-1/inbox/threads?limit=25",
+      "/api/connections/CON-INBOX-1/inbox/threads?limit=5",
     );
   });
 

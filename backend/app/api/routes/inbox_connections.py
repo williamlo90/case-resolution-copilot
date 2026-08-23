@@ -120,7 +120,7 @@ def list_inbox_threads(
     request: Request,
     actor: Annotated[ActorContext, Depends(current_actor)],
     cursor: str | None = Query(default=None, max_length=2000),
-    limit: int = Query(default=25, ge=1, le=100),
+    limit: int = Query(default=5, ge=1, le=10),
 ) -> InboxThreadListResponse:
     try:
         result = inbox_runtime(request).browse.list_threads(
