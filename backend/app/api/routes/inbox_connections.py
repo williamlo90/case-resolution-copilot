@@ -25,12 +25,20 @@ from app.api.schemas.inbox import (
     InboxThreadListResponse,
 )
 from app.domain.identity import ActorContext
-from app.domain.inbox import SelectedThreadImportCommand
+from app.domain.inbox import ProviderThreadSummary, SelectedThreadImportCommand
 from app.persistence.connection_persistence.status import InboxStatusRepository
 from app.persistence.database import Database
 from app.services.inbox.status import InboxStatusService
 
 router = APIRouter(prefix="/api/connections", tags=["connected inbox"])
+
+
+def _thread_response(item: ProviderThreadSummary) -> InboxThreadData:
+    return InboxThreadData(
+        provider_thread_id=item.provider_thread_id,
+        subject=item.subject,
+        latest_message_at=item.latest_message_at,
+    )
 
 
 def _database(request: Request) -> Database:
@@ -132,7 +140,7 @@ def list_inbox_threads(
     except INBOX_HANDLED_ERRORS as exc:
         raise inbox_error(exc) from exc
     return InboxThreadListResponse(
-        items=[InboxThreadData.model_validate(item) for item in result.items],
+        items=[_thread_response(item) for item in result.items],
         next_cursor=result.next_page_token,
     )
 
