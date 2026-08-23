@@ -2,13 +2,14 @@ from hashlib import sha256
 
 from sqlalchemy import select
 
-from app.domain.inbox import ReviewDraftAuthorization
+from app.domain.inbox import ReviewDraftAuthorization, response_content_fingerprint
 from app.domain.reviews import ReviewFreshness, ReviewSnapshotStale
 from app.persistence.models import (
     CaseModel,
     CaseReviewDecisionModel,
     CaseReviewModel,
     OrganizationModel,
+    ProposalResponseDraftModel,
     utc_now,
 )
 
@@ -61,6 +62,18 @@ class ReviewDraftAuthorizationReader(ReviewRepositoryBase):
                 freshness.reason
                 or "The approved review no longer matches the current case."
             )
+        approved_draft = self._session.scalar(
+            select(ProposalResponseDraftModel).where(
+                ProposalResponseDraftModel.organization_id == review.organization_id,
+                ProposalResponseDraftModel.case_id == review.case_id,
+                ProposalResponseDraftModel.proposal_version_id
+                == review.proposal_version_id,
+            )
+        )
+        if approved_draft is None or approved_draft.status != "ready":
+            raise ReviewSnapshotStale(
+                "The approved review does not contain a ready response draft."
+            )
         policy_fingerprint = sha256(
             "\0".join(
                 [
@@ -75,4 +88,8 @@ class ReviewDraftAuthorizationReader(ReviewRepositoryBase):
             snapshot_fingerprint=snapshot.snapshot_fingerprint,
             evidence_fingerprint=snapshot.evidence_fingerprint,
             policy_fingerprint=policy_fingerprint,
+            response_content_fingerprint=response_content_fingerprint(
+                subject=approved_draft.subject,
+                body=approved_draft.body,
+            ),
         )

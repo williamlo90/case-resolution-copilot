@@ -13,6 +13,7 @@ from app.domain.inbox import (
     InboxConflict,
     InboxProviderUnavailable,
 )
+from app.domain.reviews import ReviewSnapshotStale
 from app.ports.inbox import InboxDraftGatewayResolver
 from app.ports.inbox_access import InboxAccessProvider
 from app.ports.inbox_draft_persistence import InboxDraftUnitOfWorkFactory
@@ -65,6 +66,14 @@ class InboxDraftDeliveryService:
                 organization_public_id=actor.organization_id,
                 case_public_id=case_id,
             )
+            if (
+                case.response_content_fingerprint
+                != review.response_content_fingerprint
+            ):
+                raise ReviewSnapshotStale(
+                    "The response draft changed after approval. Review it again before "
+                    "creating a Gmail draft."
+                )
             reply = uow.deliveries.reply_context(
                 organization_public_id=actor.organization_id,
                 case_id=case.case_id,

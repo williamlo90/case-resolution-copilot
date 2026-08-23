@@ -58,6 +58,7 @@ def _case_context() -> CaseDraftContext:
             "supervisor approval."
         ),
         response_fingerprint="r" * 64,
+        response_content_fingerprint="m" * 64,
     )
 
 
@@ -67,6 +68,7 @@ def _review_authorization() -> ReviewDraftAuthorization:
         snapshot_fingerprint="d" * 64,
         evidence_fingerprint="e" * 64,
         policy_fingerprint="p" * 64,
+        response_content_fingerprint="m" * 64,
     )
 
 
@@ -419,6 +421,7 @@ def _workflow(
     *,
     approval_is_stale: bool = False,
     fail_after_create: bool = False,
+    approved_response_matches: bool = True,
 ) -> tuple[
     InboxDraftDeliveryService,
     _WorkflowState,
@@ -428,7 +431,13 @@ def _workflow(
 ]:
     state = _WorkflowState(
         case=_case_context(),
-        review=_review_authorization(),
+        review=_review_authorization().model_copy(
+            update=(
+                {}
+                if approved_response_matches
+                else {"response_content_fingerprint": "x" * 64}
+            )
+        ),
         reply=_reply_context(),
         approval_is_stale=approval_is_stale,
     )
@@ -474,6 +483,19 @@ def test_stale_approval_is_rejected_before_any_provider_access() -> None:
     service, state, gateway, access, _ = _workflow(approval_is_stale=True)
 
     with pytest.raises(ReviewSnapshotStale, match="no longer matches"):
+        _deliver(service)
+
+    assert state.delivery is None
+    assert gateway.create_calls == 0
+    assert access.calls == 0
+
+
+def test_draft_changed_after_approval_is_rejected_before_provider_access() -> None:
+    service, state, gateway, access, _ = _workflow(
+        approved_response_matches=False
+    )
+
+    with pytest.raises(ReviewSnapshotStale, match="changed after approval"):
         _deliver(service)
 
     assert state.delivery is None

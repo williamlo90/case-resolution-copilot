@@ -39,6 +39,7 @@ def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
         "assign_to_me",
         "send_reply",
         "add_note",
+        "add_evidence",
         "request_information",
         "revise_resolution",
         "save_draft",

@@ -1,5 +1,7 @@
+import json
 from datetime import datetime
 from enum import StrEnum
+from hashlib import sha256
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -117,6 +119,7 @@ class CaseDraftContext(BaseModel):
     subject: str
     body: str
     response_fingerprint: str
+    response_content_fingerprint: str
 
 
 class ReviewDraftAuthorization(BaseModel):
@@ -126,6 +129,7 @@ class ReviewDraftAuthorization(BaseModel):
     snapshot_fingerprint: str
     evidence_fingerprint: str
     policy_fingerprint: str
+    response_content_fingerprint: str
 
 
 class InboxReplyContext(BaseModel):
@@ -146,3 +150,13 @@ class DraftDeliveryResult(BaseModel):
 
     delivery: DraftDeliveryRecord
     provider_draft_url: str | None = None
+
+
+def response_content_fingerprint(*, subject: str, body: str) -> str:
+    return sha256(
+        json.dumps(
+            {"subject": subject, "body": body},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()

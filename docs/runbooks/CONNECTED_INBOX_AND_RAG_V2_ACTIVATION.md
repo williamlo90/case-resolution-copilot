@@ -13,7 +13,10 @@ explicit Phase 8 operator gates; all new capabilities stay disabled by default.
 - one active sync lease per connection plus transaction-scoped thread serialization;
 - mailbox-identity protection that rejects reauthorization with a different provider account;
 - review invalidation when imported evidence changes;
-- approved Gmail draft creation with idempotency and unknown-outcome reconciliation;
+- governed payment, delivery, order, and account evidence records for imported cases, with
+  optimistic concurrency, idempotent replay, and metadata-only audit events;
+- approved Gmail draft creation bound to the immutable proposal content, with idempotency and
+  unknown-outcome reconciliation;
 - a Connected Inbox status/read model for the Connections UI;
 - a versioned 512-dimensional policy index, lexical GIN index, dense HNSW index, metadata gate,
   reciprocal-rank fusion, diversity limits, and recorded retrieval lineage;
@@ -109,6 +112,8 @@ Capture one serial hosted journey for each role needed by the workflow. Verify:
 
 - Administrator connects, checks health, selects a thread, pauses, resumes, and disconnects;
 - Specialist reads imported evidence but cannot manage connection credentials;
+- Specialist records checked business evidence before refreshing a brief, and the write makes an
+  earlier brief or approval stale;
 - Supervisor approves the current proposal before one draft is created;
 - Auditor can inspect lineage and cannot mutate the connection, review, or draft;
 - callback replay, message replay, sync replay, and draft replay do not duplicate state;

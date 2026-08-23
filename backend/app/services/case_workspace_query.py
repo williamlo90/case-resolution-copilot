@@ -97,6 +97,7 @@ class CaseWorkspaceQueryService:
             ):
                 commands.append("resume_investigation")
             if workspace.case.status is not CaseStatus.COMPLETED:
+                commands.append("add_evidence")
                 commands.append("revise_resolution")
             commands.append("save_draft")
             if self._can_submit_or_escalate(

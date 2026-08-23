@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
@@ -68,6 +69,7 @@ type CaseCommand = Literal[
     "resume_investigation",
     "send_reply",
     "add_note",
+    "add_evidence",
     "revise_resolution",
     "save_draft",
     "submit_for_review",
@@ -155,6 +157,33 @@ class BusinessObjectCreate(BaseModel):
     @classmethod
     def require_utc(cls, value: datetime | None, info: Any) -> datetime | None:
         return _require_utc(value, info.field_name) if value is not None else None
+
+
+class BusinessEvidenceCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    type: BusinessObjectType
+    label: str = Field(min_length=1, max_length=300)
+    source: str = Field(min_length=1, max_length=100)
+    source_reference: str = Field(min_length=1, max_length=200)
+    status: str = Field(min_length=1, max_length=100)
+    fields: dict[str, str] = Field(default_factory=dict, max_length=12)
+
+    @field_validator("fields")
+    @classmethod
+    def normalize_fields(cls, value: dict[str, str]) -> dict[str, str]:
+        normalized: dict[str, str] = {}
+        for raw_key, raw_value in value.items():
+            key = raw_key.strip().lower()
+            field_value = raw_value.strip()
+            if re.fullmatch(r"[a-z][a-z0-9_]{0,49}", key) is None:
+                raise ValueError("evidence field names must use lowercase words and underscores")
+            if not field_value or len(field_value) > 500:
+                raise ValueError("evidence field values must contain 1 to 500 characters")
+            if key in normalized:
+                raise ValueError("evidence field names must be unique")
+            normalized[key] = field_value
+        return normalized
 
 
 class CaseCreate(BaseModel):
@@ -475,6 +504,14 @@ class DraftConcurrencyConflict(RuntimeError):
         )
         self.expected_version = expected_version
         self.current_version = current_version
+
+
+class BusinessEvidenceConflict(RuntimeError):
+    pass
+
+
+class BusinessEvidenceNotAllowed(RuntimeError):
+    pass
 
 
 class CaseActorNotAssignable(LookupError):

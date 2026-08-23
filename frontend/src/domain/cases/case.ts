@@ -103,6 +103,30 @@ export const CaseActivitySchema = z.object({
   status: z.enum(["completed", "current", "waiting", "failed"]),
 });
 
+export const CaseBusinessContextSchema = z.object({
+  id: z.string().min(1),
+  type: z.enum([
+    "invoice",
+    "payment",
+    "subscription",
+    "account",
+    "order",
+    "delivery",
+    "other",
+  ]),
+  label: z.string().min(1),
+  source: z.string().min(1),
+  sourceReference: z.string().min(1),
+  status: z.string().min(1),
+  fields: z.record(z.string(), z.string()),
+  capturedAt: z.string().datetime(),
+  sourceFreshness: z.object({
+    status: z.enum(["current", "stale", "unavailable"]),
+    checkedAt: z.string().datetime().nullable(),
+  }),
+  version: z.number().int().positive(),
+});
+
 export const CaseCollectionWindowSchema = z.object({
   returned: z.number().int().nonnegative(),
   total: z.number().int().nonnegative(),
@@ -130,14 +154,7 @@ export const CaseWorkspaceSchema = z.object({
     locale: z.string().min(1),
     contact: z.string().min(1),
   }),
-  businessContexts: z.array(z.object({
-    id: z.string().min(1),
-    type: z.enum(["invoice", "payment", "subscription", "account", "order", "delivery", "other"]),
-    label: z.string().min(1),
-    source: z.string().min(1),
-    status: z.string().min(1),
-    fields: z.record(z.string(), z.string()),
-  })),
+  businessContexts: z.array(CaseBusinessContextSchema),
   facts: z.array(z.object({
     id: z.string().min(1),
     statement: z.string().min(1),
@@ -188,6 +205,7 @@ export const CaseWorkspaceSchema = z.object({
     "resume_investigation",
     "send_reply",
     "add_note",
+    "add_evidence",
     "revise_resolution",
     "save_draft",
     "submit_for_review",
@@ -204,6 +222,7 @@ export type CaseConversationMessage = z.infer<
   typeof CaseConversationMessageSchema
 >;
 export type CaseActivity = z.infer<typeof CaseActivitySchema>;
+export type CaseBusinessContext = z.infer<typeof CaseBusinessContextSchema>;
 export type CaseCollectionWindow = z.infer<
   typeof CaseCollectionWindowSchema
 >;

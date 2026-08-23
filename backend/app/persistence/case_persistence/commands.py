@@ -1,9 +1,12 @@
+from hashlib import sha256
 from uuid import uuid4
 
 from sqlalchemy import or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from app.domain.cases import (
+    BusinessEvidenceConflict,
+    BusinessEvidenceCreate,
     CaseActorNotAssignable,
     CaseNotFound,
     CaseStatus,
@@ -13,6 +16,7 @@ from app.domain.cases import (
     MessageChannel,
 )
 from app.persistence.models import (
+    BusinessObjectSnapshotModel,
     ConversationMessageModel,
     ConversationThreadModel,
     MembershipModel,
@@ -155,6 +159,75 @@ class CaseCommandRepository(CaseRepositoryBase):
         self._session.flush()
         return self._required_workspace(organization_public_id, case_public_id)
 
+    def add_business_evidence(
+        self,
+        *,
+        organization_public_id: str,
+        case_public_id: str,
+        actor_id: str,
+        actor_type: str,
+        expected_case_version: int,
+        evidence: BusinessEvidenceCreate,
+        correlation_id: str,
+    ) -> CaseWorkspaceRecord:
+        case = self._required_case(organization_public_id, case_public_id)
+        existing = self._session.scalar(
+            select(BusinessObjectSnapshotModel).where(
+                BusinessObjectSnapshotModel.organization_id == case.organization_id,
+                BusinessObjectSnapshotModel.case_id == case.id,
+                BusinessObjectSnapshotModel.object_type == evidence.type.value,
+                BusinessObjectSnapshotModel.source_reference == evidence.source_reference,
+            )
+        )
+        if existing is not None:
+            if self._matches_business_evidence(existing, evidence):
+                return self._required_workspace(organization_public_id, case_public_id)
+            raise BusinessEvidenceConflict(
+                "A record with this type and source reference already exists."
+            )
+
+        updated = self._update_case(
+            case=case,
+            expected_version=expected_case_version,
+            values={},
+        )
+        now = utc_now()
+        reference_fingerprint = sha256(
+            "\0".join(
+                [case.public_id, evidence.type.value, evidence.source_reference]
+            ).encode("utf-8")
+        ).hexdigest()[:16].upper()
+        record = BusinessObjectSnapshotModel(
+            public_id=f"CTX-MAN-{reference_fingerprint}",
+            organization_id=case.organization_id,
+            case_id=case.id,
+            object_type=evidence.type.value,
+            label=evidence.label,
+            source=evidence.source,
+            source_reference=evidence.source_reference,
+            status=evidence.status,
+            fields=evidence.fields,
+            captured_at=now,
+            source_freshness="current",
+            source_checked_at=now,
+            version=1,
+        )
+        self._session.add(record)
+        self._audit(
+            case=updated,
+            actor_id=actor_id,
+            actor_type=actor_type,
+            event_type="case.evidence_added",
+            summary=f"Verified {evidence.type.value} record added.",
+            data={
+                "record_id": record.public_id,
+                "record_type": evidence.type.value,
+            },
+            correlation_id=correlation_id,
+        )
+        self._session.flush()
+        return self._required_workspace(organization_public_id, case_public_id)
+
     def save_draft(
         self,
         *,
@@ -248,3 +321,16 @@ class CaseCommandRepository(CaseRepositoryBase):
         )
         self._session.flush()
         return self._required_workspace(organization_public_id, case_public_id)
+
+    @staticmethod
+    def _matches_business_evidence(
+        existing: BusinessObjectSnapshotModel,
+        evidence: BusinessEvidenceCreate,
+    ) -> bool:
+        return (
+            existing.label == evidence.label
+            and existing.source == evidence.source
+            and existing.status == evidence.status
+            and existing.fields == evidence.fields
+            and existing.source_freshness == "current"
+        )

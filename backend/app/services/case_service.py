@@ -7,6 +7,8 @@ from typing import Literal, Protocol
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.domain.cases import (
+    BusinessEvidenceCreate,
+    BusinessEvidenceNotAllowed,
     CaseCategory,
     CaseListPageRecord,
     CaseNotFound,
@@ -92,6 +94,18 @@ class CaseStore(Protocol):
         expected_version: int,
         subject: str,
         body: str,
+        correlation_id: str,
+    ) -> CaseWorkspaceRecord: ...
+
+    def add_business_evidence(
+        self,
+        *,
+        organization_public_id: str,
+        case_public_id: str,
+        actor_id: str,
+        actor_type: str,
+        expected_case_version: int,
+        evidence: BusinessEvidenceCreate,
         correlation_id: str,
     ) -> CaseWorkspaceRecord: ...
 
@@ -224,6 +238,31 @@ class CaseService:
             expected_version=expected_version,
             subject=subject,
             body=body,
+            correlation_id=correlation_id,
+        )
+
+    def add_business_evidence(
+        self,
+        *,
+        actor: ActorContext,
+        case_id: str,
+        expected_case_version: int,
+        evidence: BusinessEvidenceCreate,
+        correlation_id: str,
+    ) -> CaseWorkspaceRecord:
+        require_permission(actor, Permission.CASE_MANAGE)
+        current = self.get_case(actor=actor, case_id=case_id)
+        if current.case.status is CaseStatus.COMPLETED:
+            raise BusinessEvidenceNotAllowed(
+                "Reopen the case before adding a verified record."
+            )
+        return self._store.add_business_evidence(
+            organization_public_id=actor.organization_id,
+            case_public_id=case_id,
+            actor_id=actor.actor_id,
+            actor_type=actor.kind.value,
+            expected_case_version=expected_case_version,
+            evidence=evidence,
             correlation_id=correlation_id,
         )
 

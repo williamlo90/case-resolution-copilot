@@ -200,6 +200,32 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
             headers=SPECIALIST,
             json={"expected_case_version": 2, "body": "Verified customer identity."},
         )
+        evidence_added = client.post(
+            "/api/cases/CS-2048/evidence-records",
+            headers=SPECIALIST,
+            json={
+                "expected_case_version": 3,
+                "type": "payment",
+                "label": "Settlement confirmation",
+                "source": "Billing system",
+                "source_reference": "PAY-SETTLEMENT-2048",
+                "status": "settled",
+                "fields": {"amount": "49.00", "currency": "USD"},
+            },
+        )
+        evidence_replayed = client.post(
+            "/api/cases/CS-2048/evidence-records",
+            headers=SPECIALIST,
+            json={
+                "expected_case_version": 3,
+                "type": "payment",
+                "label": "Settlement confirmation",
+                "source": "Billing system",
+                "source_reference": "PAY-SETTLEMENT-2048",
+                "status": "settled",
+                "fields": {"amount": "49.00", "currency": "USD"},
+            },
+        )
         drafted = client.post(
             "/api/cases/CS-2048/draft",
             headers=SPECIALIST,
@@ -212,17 +238,17 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         transitioned = client.post(
             "/api/cases/CS-2048/status",
             headers=SPECIALIST,
-            json={"expected_version": 3, "status": "investigating"},
+            json={"expected_version": 4, "status": "investigating"},
         )
         information_needed = client.post(
             "/api/cases/CS-2048/status",
             headers=SPECIALIST,
-            json={"expected_version": 4, "status": "information_needed"},
+            json={"expected_version": 5, "status": "information_needed"},
         )
         resumed = client.post(
             "/api/cases/CS-2048/status",
             headers=SPECIALIST,
-            json={"expected_version": 5, "status": "investigating"},
+            json={"expected_version": 6, "status": "investigating"},
         )
         conversation = client.get("/api/cases/CS-2048/conversation", headers=SPECIALIST)
 
@@ -244,11 +270,19 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         "current_version": 2,
     }
     assert noted.status_code == 200
+    assert evidence_added.status_code == 200
+    assert evidence_replayed.status_code == 200
+    assert evidence_replayed.json()["data"]["case"]["version"] == 4
+    assert evidence_added.json()["data"]["case"]["version"] == 4
+    assert any(
+        context["source_reference"] == "PAY-SETTLEMENT-2048"
+        for context in evidence_added.json()["data"]["business_contexts"]
+    )
     assert drafted.status_code == 200
     assert drafted.json()["data"]["response_draft"]["version"] == 2
     assert transitioned.status_code == 200
     assert transitioned.json()["data"]["case"]["status"] == "investigating"
-    assert transitioned.json()["data"]["case"]["version"] == 4
+    assert transitioned.json()["data"]["case"]["version"] == 5
     assert "request_information" in transitioned.json()["data"]["available_commands"]
     assert information_needed.status_code == 200
     assert information_needed.json()["data"]["case"]["status"] == "information_needed"
@@ -266,3 +300,11 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         assert note_event is not None
         assert note_event.actor_id == "USR-0001"
         assert "body" not in note_event.data
+        evidence_event = session.scalar(
+            select(AuditEventModel).where(
+                AuditEventModel.event_type == "case.evidence_added"
+            )
+        )
+        assert evidence_event is not None
+        assert evidence_event.actor_id == "USR-0001"
+        assert "source_reference" not in evidence_event.data

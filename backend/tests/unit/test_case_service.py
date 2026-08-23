@@ -4,6 +4,9 @@ from typing import cast
 import pytest
 
 from app.domain.cases import (
+    BusinessEvidenceCreate,
+    BusinessEvidenceNotAllowed,
+    BusinessObjectType,
     CaseCategory,
     CaseListPageRecord,
     CaseQueueCursorDirection,
@@ -34,6 +37,8 @@ class RecordingCaseStore:
         self.organization_ids: list[str] = []
         self.list_values: list[dict[str, object]] = []
         self.change_called = False
+        self.evidence_values: list[dict[str, object]] = []
+        self.workspace = valid_case_workspace()
 
     def list_cases(self, **values: object) -> CaseListPageRecord:
         self.organization_ids.append(str(values["organization_public_id"]))
@@ -47,10 +52,14 @@ class RecordingCaseStore:
 
     def get_workspace(self, **values: object) -> CaseWorkspaceRecord:
         self.organization_ids.append(str(values["organization_public_id"]))
-        return valid_case_workspace()
+        return self.workspace
 
     def change_status(self, **values: object) -> CaseWorkspaceRecord:
         self.change_called = True
+        return self.get_workspace(**values)
+
+    def add_business_evidence(self, **values: object) -> CaseWorkspaceRecord:
+        self.evidence_values.append(values)
         return self.get_workspace(**values)
 
 
@@ -146,6 +155,62 @@ def test_invalid_transition_is_rejected_before_the_write_store() -> None:
 
     assert not store.change_called
     assert store.organization_ids == ["ORG-0001"]
+
+
+def test_verified_evidence_uses_actor_scope_and_exact_case_version() -> None:
+    store = RecordingCaseStore()
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+    evidence = BusinessEvidenceCreate(
+        type=BusinessObjectType.PAYMENT,
+        label="Second settled charge",
+        source="Billing system",
+        source_reference="PAY-SECOND",
+        status="settled",
+        fields={"amount": "49.00", "currency": "USD"},
+    )
+
+    CaseService(cast(CaseStore, store)).add_business_evidence(
+        actor=actor,
+        case_id="CS-2048",
+        expected_case_version=7,
+        evidence=evidence,
+        correlation_id="corr-evidence",
+    )
+
+    assert store.evidence_values == [
+        {
+            "organization_public_id": "ORG-0001",
+            "case_public_id": "CS-2048",
+            "actor_id": actor.actor_id,
+            "actor_type": actor.kind.value,
+            "expected_case_version": 7,
+            "evidence": evidence,
+            "correlation_id": "corr-evidence",
+        }
+    ]
+
+
+def test_completed_case_rejects_new_evidence_before_the_write_store() -> None:
+    store = RecordingCaseStore()
+    store.workspace.case.status = CaseStatus.COMPLETED
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    with pytest.raises(BusinessEvidenceNotAllowed):
+        CaseService(cast(CaseStore, store)).add_business_evidence(
+            actor=actor,
+            case_id="CS-2048",
+            expected_case_version=1,
+            evidence=BusinessEvidenceCreate(
+                type=BusinessObjectType.PAYMENT,
+                label="Payment",
+                source="Billing system",
+                source_reference="PAY-1",
+                status="settled",
+            ),
+            correlation_id="corr-evidence",
+        )
+
+    assert store.evidence_values == []
 
 
 def test_case_cursor_is_opaque_and_round_trips() -> None:

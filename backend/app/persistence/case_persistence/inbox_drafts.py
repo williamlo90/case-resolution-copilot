@@ -4,7 +4,12 @@ from hashlib import sha256
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domain.inbox import CaseDraftContext, InboxConflict, InboxNotFound
+from app.domain.inbox import (
+    CaseDraftContext,
+    InboxConflict,
+    InboxNotFound,
+    response_content_fingerprint,
+)
 from app.persistence.models import CaseModel, OrganizationModel, ResponseDraftModel
 
 
@@ -37,6 +42,10 @@ class CaseDraftReader:
         case, draft = row
         if draft.version != expected_draft_version:
             raise InboxConflict("The response draft changed. Review the latest version first.")
+        if draft.status != "ready":
+            raise InboxConflict(
+                "The response draft is not approved and ready for Gmail."
+            )
         fingerprint = sha256(
             json.dumps(
                 {
@@ -59,4 +68,8 @@ class CaseDraftReader:
             subject=draft.subject,
             body=draft.body,
             response_fingerprint=fingerprint,
+            response_content_fingerprint=response_content_fingerprint(
+                subject=draft.subject,
+                body=draft.body,
+            ),
         )

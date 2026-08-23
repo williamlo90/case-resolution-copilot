@@ -50,6 +50,30 @@ const activityHistoryEnvelopeSchema = z.object({
   total: z.number().int().nonnegative(),
 });
 
+const evidenceFormSchema = z.object({
+  type: z.enum([
+    "invoice",
+    "payment",
+    "subscription",
+    "account",
+    "order",
+    "delivery",
+    "other",
+  ]),
+  label: z.string().trim().min(1).max(300),
+  source: z.string().trim().min(1).max(100),
+  sourceReference: z.string().trim().min(1).max(200),
+  status: z.string().trim().min(1).max(100),
+  amount: z.string().trim().max(30),
+  currency: z.string().trim().toUpperCase().max(3),
+  product: z.string().trim().max(200),
+  deliveryState: z.string().trim().max(100),
+  identityCheck: z.string().trim().max(100),
+  mfaState: z.string().trim().max(100),
+});
+
+const moneyAmountPattern = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
+
 export type CaseHistoryLoadResult<Item> =
   | {
       status: "success";
@@ -270,6 +294,112 @@ export async function saveCaseDraft(
     });
     revalidatePath(`/cases/${caseId}`);
     return commandSuccess("The response draft was saved.");
+  } catch (error) {
+    return commandFailure(error);
+  }
+}
+
+export async function addCaseEvidence(
+  caseId: string,
+  expectedCaseVersion: number,
+  _previousState: CommandState,
+  formData: FormData,
+): Promise<CommandState> {
+  void _previousState;
+  const parsed = evidenceFormSchema.safeParse({
+    type: formData.get("type"),
+    label: formData.get("label"),
+    source: formData.get("source"),
+    sourceReference: formData.get("source_reference"),
+    status: formData.get("status"),
+    amount: String(formData.get("amount") ?? ""),
+    currency: String(formData.get("currency") ?? ""),
+    product: String(formData.get("product") ?? ""),
+    deliveryState: String(formData.get("delivery_state") ?? ""),
+    identityCheck: String(formData.get("identity_check") ?? ""),
+    mfaState: String(formData.get("mfa_state") ?? ""),
+  });
+  if (!parsed.success) {
+    return commandFailure(
+      new ApiClientError(
+        "Complete the required record details before adding it.",
+        422,
+        "case_evidence_input_invalid",
+        "unavailable",
+      ),
+    );
+  }
+
+  const value = parsed.data;
+  const hasMoney = Boolean(value.amount || value.currency);
+  if (
+    (value.type === "payment" && !hasMoney) ||
+    (hasMoney &&
+      (!moneyAmountPattern.test(value.amount) ||
+        !/^[A-Z]{3}$/.test(value.currency)))
+  ) {
+    return commandFailure(
+      new ApiClientError(
+        "Enter the amount and a three-letter currency code.",
+        422,
+        "case_evidence_money_invalid",
+        "unavailable",
+      ),
+    );
+  }
+  if (
+    (value.type === "order" || value.type === "delivery") &&
+    !value.deliveryState
+  ) {
+    return commandFailure(
+      new ApiClientError(
+        "Choose the current delivery result for this record.",
+        422,
+        "case_evidence_delivery_invalid",
+        "unavailable",
+      ),
+    );
+  }
+  if (value.type === "account" && !value.identityCheck) {
+    return commandFailure(
+      new ApiClientError(
+        "Choose the identity-check result for this account record.",
+        422,
+        "case_evidence_identity_invalid",
+        "unavailable",
+      ),
+    );
+  }
+
+  const fields = Object.fromEntries(
+    Object.entries({
+      amount: value.amount,
+      currency: value.currency,
+      product: value.product,
+      delivery_state: value.deliveryState,
+      identity_check: value.identityCheck,
+      mfa_state: value.mfaState,
+    }).filter((entry): entry is [string, string] => Boolean(entry[1])),
+  );
+  try {
+    await postCommand(
+      `/api/cases/${encodeURIComponent(caseId)}/evidence-records`,
+      {
+        expected_case_version: expectedCaseVersion,
+        type: value.type,
+        label: value.label,
+        source: value.source,
+        source_reference: value.sourceReference,
+        status: value.status,
+        fields,
+      },
+    );
+    revalidatePath(`/cases/${caseId}`);
+    revalidatePath("/cases");
+    revalidatePath("/reviews");
+    return commandSuccess(
+      "Checked record added. Refresh the decision brief before review.",
+    );
   } catch (error) {
     return commandFailure(error);
   }

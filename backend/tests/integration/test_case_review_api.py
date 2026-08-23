@@ -26,6 +26,8 @@ from app.persistence.models import (
     CaseReviewSnapshotModel,
     MembershipModel,
     OrganizationModel,
+    ProposalResponseDraftModel,
+    ResponseDraftModel,
 )
 from app.security.authentication import (
     DETERMINISTIC_ACTORS,
@@ -335,6 +337,23 @@ def test_case_review_is_snapshot_bound_authoritative_and_tenant_scoped(
         assert snapshot.execution_eligible
         assert proposal is not None
         assert proposal.state == "approved"
+        approved_response = session.scalar(
+            select(ProposalResponseDraftModel).where(
+                ProposalResponseDraftModel.case_id == snapshot.case_id,
+                ProposalResponseDraftModel.proposal_version_id
+                == snapshot.proposal_version_id,
+            )
+        )
+        published_draft = session.scalar(
+            select(ResponseDraftModel).where(
+                ResponseDraftModel.case_id == snapshot.case_id
+            )
+        )
+        assert approved_response is not None
+        assert published_draft is not None
+        assert published_draft.status == "ready"
+        assert published_draft.subject == approved_response.subject
+        assert published_draft.body == approved_response.body
         assert session.scalar(select(func.count(CaseReviewModel.id))) == 1
         assert session.scalar(select(func.count(CaseReviewSnapshotModel.id))) == 1
         assert session.scalar(select(func.count(CaseReviewReservationModel.id))) == 1

@@ -6,6 +6,7 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.persistence.database import Database
 from app.retrieval.ingest import ingest_policy
@@ -33,6 +34,14 @@ def migrated_database(test_database_url: str) -> Iterator[None]:
     os.environ["SUPPORT_COPILOT_DATABASE_URL"] = test_database_url
     cleanup_database = Database(test_database_url)
     try:
+        try:
+            with cleanup_database.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+        except SQLAlchemyError:
+            pytest.fail(
+                "TEST_DATABASE_URL could not authenticate to the disposable database.",
+                pytrace=False,
+            )
         _truncate_application_tables(cleanup_database)
     finally:
         cleanup_database.dispose()

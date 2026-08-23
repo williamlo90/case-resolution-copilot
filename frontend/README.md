@@ -32,7 +32,8 @@ pnpm lint
 pnpm typecheck
 ```
 
-The resource-safe local gate does not include `pnpm build`.
+The resource-safe local gate does not include `pnpm build`. When explicitly run, the build uses
+Webpack with two workers; Turbopack is not part of this workflow.
 `pnpm dev` also fails closed because the Next.js Webpack and Clerk route compilation needs about
 1 GB of working set on the current laptop. Use a hosted preview for manual login and visual checks.
 The bounded `pnpm check:dev-memory` diagnostic is reserved for explicitly approved memory work and

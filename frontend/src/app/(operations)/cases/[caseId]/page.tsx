@@ -6,6 +6,7 @@ import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
 import { CaseWorkspace } from "@/features/cases/components/case-workspace";
 import { notFound } from "next/navigation";
 import {
+  addCaseEvidence,
   addCaseConversationEntry,
   loadCaseActivityHistory,
   loadCaseConversationHistory,
@@ -133,6 +134,15 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
       loadActivityHistoryAction={
         connected && workspace.collections.activity.nextCursor
           ? loadCaseActivityHistory.bind(null, workspace.case.id)
+          : undefined
+      }
+      addEvidenceAction={
+        connected && workspace.availableCommands.includes("add_evidence")
+          ? addCaseEvidence.bind(
+              null,
+              workspace.case.id,
+              workspace.case.version,
+            )
           : undefined
       }
       deliverDraftAction={

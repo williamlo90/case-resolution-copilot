@@ -26,6 +26,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import {
+  addCaseEvidence,
   addCaseConversationEntry,
   loadCaseActivityHistory,
   loadCaseConversationHistory,
@@ -286,6 +287,75 @@ describe("case conversation commands", () => {
       status: "error",
       message: "Earlier activity is temporarily unavailable.",
     });
+  });
+});
+
+describe("case evidence commands", () => {
+  afterEach(() => {
+    apiRequestMock.mockReset();
+    redirectMock.mockReset();
+    revalidatePathMock.mockReset();
+  });
+
+  it("adds a checked payment record against the exact case version", async () => {
+    apiRequestMock.mockResolvedValue({ data: {} });
+    const formData = new FormData();
+    formData.set("type", "payment");
+    formData.set("label", "Second settled charge");
+    formData.set("source", "Billing system");
+    formData.set("source_reference", "PAY-SECOND");
+    formData.set("status", "settled");
+    formData.set("amount", "49.00");
+    formData.set("currency", "usd");
+
+    const result = await addCaseEvidence(
+      "CS-2048",
+      6,
+      initialCommandState,
+      formData,
+    );
+
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/cases/CS-2048/evidence-records",
+      expect.anything(),
+      {
+        method: "POST",
+        body: {
+          expected_case_version: 6,
+          type: "payment",
+          label: "Second settled charge",
+          source: "Billing system",
+          source_reference: "PAY-SECOND",
+          status: "settled",
+          fields: { amount: "49.00", currency: "USD" },
+        },
+      },
+    );
+    expect(result.message).toContain("Checked record added");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/cases/CS-2048");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/reviews");
+  });
+
+  it("rejects an incomplete payment before calling the backend", async () => {
+    const formData = new FormData();
+    formData.set("type", "payment");
+    formData.set("label", "Second charge");
+    formData.set("source", "Billing system");
+    formData.set("source_reference", "PAY-SECOND");
+    formData.set("status", "settled");
+
+    const result = await addCaseEvidence(
+      "CS-2048",
+      6,
+      initialCommandState,
+      formData,
+    );
+
+    expect(result).toMatchObject({
+      status: "error",
+      message: expect.stringContaining("amount"),
+    });
+    expect(apiRequestMock).not.toHaveBeenCalled();
   });
 });
 

@@ -322,6 +322,7 @@
             "resume_investigation",
             "send_reply",
             "add_note",
+            "add_evidence",
             "revise_resolution",
             "save_draft",
             "submit_for_review",

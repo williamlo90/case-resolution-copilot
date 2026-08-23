@@ -28,6 +28,8 @@ from app.persistence.models import (
     CaseReviewModel,
     CaseReviewReservationModel,
     CaseReviewSnapshotModel,
+    ProposalResponseDraftModel,
+    ResponseDraftModel,
     utc_now,
 )
 
@@ -386,6 +388,11 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
             decision=decision,
             now=now,
         )
+        draft_update = (
+            self._publish_approved_response_draft(review, now=now)
+            if decision is ReviewDecision.APPROVE
+            else {}
+        )
         self._set_proposal_state(review, _proposal_state(decision), now=now)
         self._session.add(
             AuditEventModel(
@@ -403,6 +410,7 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
                     "decision": decision.value,
                     "snapshot_fingerprint": snapshot_fingerprint,
                     **case_update,
+                    **draft_update,
                 },
                 correlation_id=correlation_id,
                 occurred_at=now,
@@ -410,6 +418,56 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
         )
         self._session.flush()
         return self._load_bundle(review, now=now)
+
+    def _publish_approved_response_draft(
+        self,
+        review: CaseReviewModel,
+        *,
+        now: datetime,
+    ) -> dict[str, object]:
+        approved = self._session.scalar(
+            select(ProposalResponseDraftModel).where(
+                ProposalResponseDraftModel.organization_id == review.organization_id,
+                ProposalResponseDraftModel.case_id == review.case_id,
+                ProposalResponseDraftModel.proposal_version_id
+                == review.proposal_version_id,
+            )
+        )
+        if approved is None or approved.status != "ready":
+            raise ReviewSnapshotStale(
+                "The reviewed resolution does not contain a ready response draft."
+            )
+        draft = self._session.scalar(
+            select(ResponseDraftModel)
+            .where(
+                ResponseDraftModel.organization_id == review.organization_id,
+                ResponseDraftModel.case_id == review.case_id,
+            )
+            .with_for_update()
+        )
+        if draft is None:
+            draft = ResponseDraftModel(
+                public_id=_stable_public_id("DFT", review.public_id),
+                organization_id=review.organization_id,
+                case_id=review.case_id,
+                subject=approved.subject,
+                body=approved.body,
+                status="ready",
+                version=1,
+                updated_at=now,
+            )
+            self._session.add(draft)
+        else:
+            draft.subject = approved.subject
+            draft.body = approved.body
+            draft.status = "ready"
+            draft.version += 1
+            draft.updated_at = now
+        self._session.flush()
+        return {
+            "response_draft_id": draft.public_id,
+            "response_draft_version": draft.version,
+        }
 
     def _advance_case_after_decision(
         self,

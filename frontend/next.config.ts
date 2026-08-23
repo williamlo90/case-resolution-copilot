@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
+    cpus: 2,
     preloadEntriesOnStart: false,
     serverSourceMaps: false,
     webpackMemoryOptimizations: true,

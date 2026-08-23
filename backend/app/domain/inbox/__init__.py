@@ -27,6 +27,7 @@ from .drafts import (
     FindDraftRequest,
     InboxReplyContext,
     ReviewDraftAuthorization,
+    response_content_fingerprint,
 )
 from .errors import (
     InboxAuthorizationError,
@@ -88,6 +89,7 @@ __all__ = [
     "FindDraftRequest",
     "InboxReplyContext",
     "ReviewDraftAuthorization",
+    "response_content_fingerprint",
     "ExternalAttachmentRecord",
     "ExternalConversationRecord",
     "ExternalMessageRecord",

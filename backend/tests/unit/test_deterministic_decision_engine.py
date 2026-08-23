@@ -11,6 +11,7 @@ from app.analysis.deterministic_decision_engine import (
 )
 from app.domain.cases import (
     BusinessObjectRecord,
+    BusinessObjectType,
     CaseCollectionWindowRecord,
     CaseConcurrencyConflict,
     CaseRecord,
@@ -20,6 +21,7 @@ from app.domain.cases import (
     CaseWorkspaceRecord,
     ConversationThreadRecord,
     CustomerContextRecord,
+    SourceFreshness,
 )
 from app.domain.decision_briefs import (
     AnalysisStatus,
@@ -198,6 +200,47 @@ def test_billing_case_does_not_infer_duplicate_settlement_from_attempt_count() -
     assert result.impact_amount is None
     assert result.proposed_actions[0].type == "request_information"
     assert result.response_draft.status.value == "blocked"
+
+
+def test_billing_case_requires_two_settled_payment_references() -> None:
+    workspace = _workspace("CS-2048")
+    first_payment = workspace.business_contexts[0]
+    workspace.business_contexts.append(
+        BusinessObjectRecord(
+            id=uuid4(),
+            public_id="CTX-PAY-PENDING",
+            organization_id=workspace.case.organization_id,
+            case_id=workspace.case.id,
+            type=BusinessObjectType.PAYMENT,
+            label="Second payment attempt",
+            source="Billing system",
+            source_reference="PAY-PENDING-02",
+            status="pending",
+            fields={"amount": "49.00", "currency": "USD"},
+            captured_at=first_payment.captured_at,
+            source_freshness=SourceFreshness.CURRENT,
+            source_checked_at=first_payment.source_checked_at,
+            version=1,
+        )
+    )
+    workspace.collections.business_contexts.returned += 1
+    workspace.collections.business_contexts.total += 1
+    evidence = _evidence(EvidenceRetrievalStatus.RELEVANT)
+    result = DeterministicDecisionEngine().analyze(
+        workspace=workspace,
+        evidence=evidence,
+        input_fingerprint=decision_input_fingerprint(
+            workspace=workspace,
+            evidence=evidence,
+            context_fingerprint=combined_context_fingerprint(workspace),
+            evidence_fingerprint=combined_evidence_fingerprint(evidence),
+        ),
+    )
+
+    assert result.state is DecisionProposalState.INFORMATION_NEEDED
+    assert {gap.label for gap in result.missing_information} == {
+        "Second payment reference"
+    }
 
 
 def test_stale_account_context_requires_refresh_and_identity_verification() -> None:

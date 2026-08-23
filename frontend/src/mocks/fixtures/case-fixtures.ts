@@ -81,9 +81,9 @@ export const primaryCaseWorkspaceFixture: CaseWorkspace = CaseWorkspaceSchema.pa
   },
   customer: { id: "CUS-100284", tier: "standard", locale: "en-SG", contact: "maya.chen@example.com" },
   businessContexts: [
-    { id: "SUB-88421", type: "subscription", label: "Pro monthly subscription", source: "Billing system", status: "active", fields: { plan: "Pro Monthly", billing_period: "May 2026", price: "USD 99.00" } },
-    { id: "PAY-5501", type: "payment", label: "First captured charge", source: "Billing system", status: "paid", fields: { amount: "USD 99.00", captured_at: "10 May 2026 09:14" } },
-    { id: "PAY-5502", type: "payment", label: "Duplicate captured charge", source: "Billing system", status: "duplicate", fields: { amount: "USD 99.00", captured_at: "10 May 2026 09:15" } },
+    { id: "SUB-88421", type: "subscription", label: "Pro monthly subscription", source: "Billing system", sourceReference: "SUB-88421", status: "active", fields: { plan: "Pro Monthly", billing_period: "May 2026", price: "USD 99.00" }, capturedAt: "2026-07-21T03:20:00.000Z", sourceFreshness: { status: "current", checkedAt: "2026-07-21T03:20:00.000Z" }, version: 1 },
+    { id: "PAY-5501", type: "payment", label: "First captured charge", source: "Billing system", sourceReference: "PAY-5501", status: "paid", fields: { amount: "USD 99.00", captured_at: "10 May 2026 09:14" }, capturedAt: "2026-07-21T03:20:00.000Z", sourceFreshness: { status: "current", checkedAt: "2026-07-21T03:20:00.000Z" }, version: 1 },
+    { id: "PAY-5502", type: "payment", label: "Duplicate captured charge", source: "Billing system", sourceReference: "PAY-5502", status: "duplicate", fields: { amount: "USD 99.00", captured_at: "10 May 2026 09:15" }, capturedAt: "2026-07-21T03:20:00.000Z", sourceFreshness: { status: "current", checkedAt: "2026-07-21T03:20:00.000Z" }, version: 1 },
   ],
   facts: [
     { id: "FACT-1", statement: "Two USD 99.00 charges were captured one minute apart.", source: "Billing system", verifiedAt: "2026-07-21T03:20:00.000Z" },
@@ -144,7 +144,7 @@ export const primaryCaseWorkspaceFixture: CaseWorkspace = CaseWorkspaceSchema.pa
       nextCursor: null,
     },
   },
-  availableCommands: ["request_information", "send_reply", "add_note", "revise_resolution", "save_draft", "submit_for_review", "escalate", "export_audit"],
+  availableCommands: ["request_information", "send_reply", "add_note", "add_evidence", "revise_resolution", "save_draft", "submit_for_review", "escalate", "export_audit"],
 });
 
 export const caseWorkspaceFixtures: readonly CaseWorkspace[] = caseSummaryFixtures.map((summary) => {
@@ -172,8 +172,8 @@ export const caseWorkspaceFixtures: readonly CaseWorkspace[] = caseSummaryFixtur
     responseDraft: { ...primaryCaseWorkspaceFixture.responseDraft, subject: summary.issue },
     availableCommands: summary.owner
       ? summary.status === "information_needed" || summary.status === "waiting_customer"
-        ? ["resume_investigation", "send_reply", "add_note", "revise_resolution", "save_draft", "escalate", "export_audit"]
-        : ["request_information", "send_reply", "add_note", "revise_resolution", "save_draft", "submit_for_review", "escalate", "export_audit"]
-      : ["assign_to_me", "send_reply", "add_note", "export_audit"],
+        ? ["resume_investigation", "send_reply", "add_note", "add_evidence", "revise_resolution", "save_draft", "escalate", "export_audit"]
+        : ["request_information", "send_reply", "add_note", "add_evidence", "revise_resolution", "save_draft", "submit_for_review", "escalate", "export_audit"]
+      : ["assign_to_me", "send_reply", "add_note", "add_evidence", "export_audit"],
   });
 });

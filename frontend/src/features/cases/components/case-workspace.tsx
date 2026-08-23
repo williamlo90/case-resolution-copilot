@@ -89,6 +89,7 @@ export function CaseWorkspace({
   saveDraftAction,
   addReplyAction,
   addNoteAction,
+  addEvidenceAction,
   loadConversationHistoryAction,
   loadActivityHistoryAction,
   deliverDraftAction,
@@ -102,6 +103,7 @@ export function CaseWorkspace({
   saveDraftAction?: ServerCommand;
   addReplyAction?: ServerCommand;
   addNoteAction?: ServerCommand;
+  addEvidenceAction?: ServerCommand;
   loadConversationHistoryAction?: ConversationHistoryAction;
   loadActivityHistoryAction?: ActivityHistoryAction;
   deliverDraftAction?: InboxDraftAction;
@@ -217,7 +219,10 @@ export function CaseWorkspace({
             role="tabpanel"
             aria-labelledby="case-panel-tab-evidence"
           >
-            <CaseEvidencePanel workspace={workspace} />
+            <CaseEvidencePanel
+              workspace={workspace}
+              addEvidenceAction={addEvidenceAction}
+            />
           </div>
         ) : null}
         {activeTab === "activity" ? (

@@ -61,6 +61,56 @@ describe("CaseWorkspace", () => {
     expect(auditButton.closest("form")).toHaveAttribute("method", "post");
   });
 
+  it("collects checked records with fields that match the selected record type", async () => {
+    const addEvidence = vi.fn(async () => ({
+      status: "success" as const,
+      message: "Checked record added.",
+      correlationId: null,
+      retryAfterSeconds: null,
+    }));
+    render(
+      <CaseWorkspace
+        workspace={primaryCaseWorkspaceFixture}
+        addEvidenceAction={addEvidence}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Evidence" }));
+    expect(
+      await screen.findByRole("heading", { name: "Add a checked record" }),
+    ).toBeVisible();
+    fireEvent.change(screen.getByLabelText("Record name"), {
+      target: { value: "Second settled charge" },
+    });
+    fireEvent.change(screen.getByLabelText("Where you checked it"), {
+      target: { value: "Billing system" },
+    });
+    fireEvent.change(screen.getByLabelText("Record reference"), {
+      target: { value: "PAY-SECOND" },
+    });
+    fireEvent.change(screen.getByLabelText("Current status"), {
+      target: { value: "settled" },
+    });
+    fireEvent.change(screen.getByLabelText("Amount (required)"), {
+      target: { value: "49.00" },
+    });
+    fireEvent.change(screen.getByLabelText("Currency (required)"), {
+      target: { value: "USD" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add checked record" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Checked record added",
+    );
+    expect(addEvidence).toHaveBeenCalledOnce();
+
+    fireEvent.change(screen.getByLabelText("Record type"), {
+      target: { value: "account" },
+    });
+    expect(screen.getByLabelText("Identity check")).toBeVisible();
+    expect(screen.queryByLabelText("Amount (required)")).not.toBeInTheDocument();
+  });
+
   it("supports arrow-key navigation for workspace and composer tabs", async () => {
     render(
       <CaseWorkspace

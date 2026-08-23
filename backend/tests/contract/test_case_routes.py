@@ -27,6 +27,19 @@ def test_case_routes_authorize_before_database_readiness() -> None:
             headers={"X-Actor-ID": "USR-0001"},
             json={"expected_version": 1},
         )
+        evidence_forbidden = client.post(
+            "/api/cases/CS-2048/evidence-records",
+            headers={"X-Actor-ID": "USR-0004", "X-Actor-Role": "administrator"},
+            json={
+                "expected_case_version": 1,
+                "type": "payment",
+                "label": "Second charge",
+                "source": "Billing system",
+                "source_reference": "PAY-2",
+                "status": "settled",
+                "fields": {"amount": "49.00", "currency": "USD"},
+            },
+        )
 
     assert unauthenticated.status_code == 401
     assert read_unavailable.status_code == 503
@@ -36,6 +49,8 @@ def test_case_routes_authorize_before_database_readiness() -> None:
     assert write_forbidden.status_code == 403
     assert write_forbidden.json()["error"]["code"] == "case_manage_forbidden"
     assert write_unavailable.status_code == 503
+    assert evidence_forbidden.status_code == 403
+    assert evidence_forbidden.json()["error"]["code"] == "case_manage_forbidden"
 
 
 def test_case_intake_fails_closed_when_webhook_is_not_configured() -> None:

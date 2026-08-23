@@ -280,6 +280,7 @@ def _information_gaps(
             context.source_reference
             for context in workspace.business_contexts
             if context.type is BusinessObjectType.PAYMENT
+            and context.status == "settled"
         }
         if len(payment_references) < 2:
             gaps.append(

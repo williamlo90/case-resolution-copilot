@@ -121,6 +121,11 @@ connect, import, and replay evidence.
 The RAG corpus contains only official policies and procedures. Emails, invoices, and payment proofs
 remain case evidence; they are not policy corpus entries.
 
+An imported conversation may start with no structured business context. An authorized operator can
+add a checked payment, delivery, order, or account record from the Evidence tab. Each write is
+tenant-scoped, audited without copying business values into the audit event, idempotent for the same
+record reference, and increments the case version so an earlier brief or approval becomes stale.
+
 Retrieval requirements:
 
 - Versioned policy chunks.
@@ -166,6 +171,11 @@ Evidence and limits are recorded in
 [`backend/evaluations/decision_draft`](../../backend/evaluations/decision_draft/README.md). Live
 Gmail draft creation remains a single bounded hosted acceptance step in Phase 8; it is not implied
 by this synthetic local result.
+
+Hardening note (2026-08-23): approval now publishes the immutable proposal response into the
+case-level ready draft. Gmail delivery compares a content fingerprint against that approved proposal
+before provider or credential access. A later edit returns the draft to `draft` status and requires a
+new review; the delivery path cannot silently substitute mutable case text for approved text.
 
 ## Phase 6 - Activate Paid OpenAI Access
 

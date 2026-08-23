@@ -19,7 +19,14 @@ from app.api.schemas.proposals import (
     ProposedActionResponse,
     ResponseDraftResponse,
 )
-from app.domain.cases import CaseCategory, CaseCommand, CaseRisk, CaseStatus, CaseUrgency
+from app.domain.cases import (
+    BusinessObjectType,
+    CaseCategory,
+    CaseCommand,
+    CaseRisk,
+    CaseStatus,
+    CaseUrgency,
+)
 
 
 class CaseOwnerResponse(ApiSchema):
@@ -184,3 +191,13 @@ class AssignCaseRequest(ApiSchema):
 class ChangeCaseStatusRequest(ApiSchema):
     expected_version: Version
     status: CaseStatus
+
+
+class AddCaseEvidenceRequest(ApiSchema):
+    expected_case_version: Version
+    type: BusinessObjectType
+    label: str = Field(min_length=1, max_length=300)
+    source: str = Field(min_length=1, max_length=100)
+    source_reference: str = Field(min_length=1, max_length=200)
+    status: str = Field(min_length=1, max_length=100)
+    fields: dict[str, str] = Field(default_factory=dict, max_length=12)

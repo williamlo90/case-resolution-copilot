@@ -22,6 +22,7 @@ from app.api.presenters.cases import (
     present_conversation_message,
 )
 from app.api.schemas.cases import (
+    AddCaseEvidenceRequest,
     AssignCaseRequest,
     CaseActivityPageResponse,
     CaseDetailResponse,
@@ -36,6 +37,9 @@ from app.api.schemas.conversations import (
     SaveDraftRequest,
 )
 from app.domain.cases import (
+    BusinessEvidenceConflict,
+    BusinessEvidenceCreate,
+    BusinessEvidenceNotAllowed,
     CaseActorNotAssignable,
     CaseCategory,
     CaseConcurrencyConflict,
@@ -110,6 +114,10 @@ def _translate(error: Exception) -> AppError:
         return AppError(code="invalid_case_history_cursor", message=str(error), status_code=400)
     if isinstance(error, InvalidCaseTransition):
         return AppError(code="invalid_case_transition", message=str(error), status_code=409)
+    if isinstance(error, BusinessEvidenceConflict):
+        return AppError(code="case_evidence_conflict", message=str(error), status_code=409)
+    if isinstance(error, BusinessEvidenceNotAllowed):
+        return AppError(code="case_evidence_not_allowed", message=str(error), status_code=409)
     if isinstance(error, (CaseConcurrencyConflict, DraftConcurrencyConflict)):
         return AppError(
             code="version_conflict",
@@ -141,6 +149,8 @@ def _execute_case_command(
         workspace = operation()
     except (
         CaseActorNotAssignable,
+        BusinessEvidenceConflict,
+        BusinessEvidenceNotAllowed,
         CaseConcurrencyConflict,
         CaseNotFound,
         DraftConcurrencyConflict,
@@ -419,6 +429,36 @@ def add_internal_note(
                 expected_case_version=command.expected_case_version,
                 channel=MessageChannel.INTERNAL_NOTE,
                 body=command.body,
+                correlation_id=str(request.state.correlation_id),
+            ),
+            session,
+        )
+
+
+@router.post("/{case_id}/evidence-records", response_model=CaseDetailResponse)
+def add_case_evidence(
+    case_id: str,
+    command: AddCaseEvidenceRequest,
+    request: Request,
+    actor: Annotated[ActorContext, Depends(current_actor)],
+) -> CaseDetailResponse:
+    authorize_actor(actor, Permission.CASE_MANAGE, error_code="case_manage_forbidden")
+    with _database(request).session() as session:
+        service = CaseService(CaseRepository(session))
+        return _execute_case_command(
+            actor,
+            lambda: service.add_business_evidence(
+                actor=actor,
+                case_id=case_id,
+                expected_case_version=command.expected_case_version,
+                evidence=BusinessEvidenceCreate(
+                    type=command.type,
+                    label=command.label,
+                    source=command.source,
+                    source_reference=command.source_reference,
+                    status=command.status,
+                    fields=command.fields,
+                ),
                 correlation_id=str(request.state.correlation_id),
             ),
             session,
