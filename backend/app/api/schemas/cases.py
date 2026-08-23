@@ -130,7 +130,7 @@ class CaseWorkspaceResponse(ApiSchema):
     request: CaseRequestResponse
     conversation: ConversationThreadResponse
     customer: CustomerContextResponse
-    business_contexts: list[BusinessObjectSnapshotResponse] = Field(min_length=1)
+    business_contexts: list[BusinessObjectSnapshotResponse]
     facts: list[VerifiedFactResponse]
     missing_information: list[MissingInformationResponse]
     evidence: list[PolicyEvidenceResponse]

@@ -615,7 +615,6 @@
               "items": {
                 "$ref": "#/$defs/BusinessObjectSnapshotResponse"
               },
-              "minItems": 1,
               "title": "Business Contexts",
               "type": "array"
             },

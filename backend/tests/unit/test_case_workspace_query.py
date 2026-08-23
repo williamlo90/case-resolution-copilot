@@ -1,11 +1,16 @@
 from unittest.mock import MagicMock
 
+from app.api.presenters.cases import present_case_workspace
+from app.domain.cases import CaseCollectionWindowRecord
 from app.persistence.case_repository import CaseRepository
 from app.persistence.decision_brief_repository import DecisionBriefRepository
 from app.persistence.policy_repository import PolicyRepository
 from app.persistence.review_repository import ReviewRepository
 from app.security.authentication import DeterministicAuthProvider
-from app.services.case_workspace_query import CaseWorkspaceQueryService
+from app.services.case_workspace_query import (
+    CaseWorkspaceProjection,
+    CaseWorkspaceQueryService,
+)
 from tests.builders import valid_case_workspace
 
 
@@ -39,3 +44,35 @@ def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
         "save_draft",
     }
     reviews.get_for_proposal.assert_not_called()
+
+
+def test_workspace_presentation_allows_imported_case_without_business_context() -> None:
+    workspace = valid_case_workspace()
+    workspace = workspace.model_copy(
+        update={
+            "business_contexts": [],
+            "collections": workspace.collections.model_copy(
+                update={
+                    "business_contexts": CaseCollectionWindowRecord(
+                        returned=0,
+                        total=0,
+                        has_more=False,
+                    )
+                }
+            ),
+        }
+    )
+
+    response = present_case_workspace(
+        CaseWorkspaceProjection(
+            workspace=workspace,
+            brief=None,
+            evidence=(),
+            available_commands=(),
+        ),
+        organization_id="ORG-NORTHSTAR",
+    )
+
+    assert response.business_contexts == []
+    assert response.collections.business_contexts.returned == 0
+    assert response.collections.business_contexts.total == 0
