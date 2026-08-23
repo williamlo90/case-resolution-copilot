@@ -65,8 +65,15 @@ const apiBusinessContextSchema = z.object({
   ]),
   label: z.string().min(1),
   source: z.string().min(1),
+  source_reference: z.string().min(1),
   status: z.string().min(1),
   fields: z.record(z.string(), z.string()),
+  captured_at: z.string().datetime(),
+  source_freshness: z.object({
+    status: z.enum(["current", "stale", "unavailable"]),
+    checked_at: z.string().datetime().nullable(),
+  }),
+  version: z.number().int().positive(),
 });
 
 const apiEvidenceSchema = z.object({
@@ -216,7 +223,21 @@ function mapSnapshot(
       source: item.source,
       verifiedAt: item.verified_at,
     })),
-    businessContexts: raw.business_contexts,
+    businessContexts: raw.business_contexts.map((context) => ({
+      id: context.id,
+      type: context.type,
+      label: context.label,
+      source: context.source,
+      sourceReference: context.source_reference,
+      status: context.status,
+      fields: context.fields,
+      capturedAt: context.captured_at,
+      sourceFreshness: {
+        status: context.source_freshness.status,
+        checkedAt: context.source_freshness.checked_at,
+      },
+      version: context.version,
+    })),
     evidence: raw.evidence.map((item) => ({
       id: item.id,
       title: item.title,
