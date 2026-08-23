@@ -201,7 +201,7 @@ class DecisionBriefCreate(BaseModel):
     evidence_fingerprint: str = Field(min_length=64, max_length=64)
     analysis: DecisionAnalysis
     evidence: list[EvidenceSnapshotReference]
-    contexts: list[ContextSnapshotReference] = Field(min_length=1)
+    contexts: list[ContextSnapshotReference]
 
 
 class DecisionGenerationLease(BaseModel):

@@ -486,6 +486,37 @@ def test_service_builds_server_owned_snapshot_references() -> None:
     assert len(store.command.input_fingerprint) == 64
 
 
+def test_service_records_an_empty_context_snapshot_for_an_inbox_case() -> None:
+    workspace = _workspace("CS-2048")
+    workspace.business_contexts = []
+    workspace.collections.business_contexts = CaseCollectionWindowRecord(
+        returned=0,
+        total=0,
+        has_more=False,
+    )
+    store = _BriefStore()
+    service = DecisionBriefService(
+        store,
+        _CaseStore(workspace),
+        _EvidenceResolver(_evidence(EvidenceRetrievalStatus.MISSING)),
+        DeterministicDecisionEngine(),
+        _GenerationStore(),
+    )
+
+    service.generate(
+        actor=DeterministicAuthProvider().authenticate("USR-0001"),
+        case_id=workspace.case.public_id,
+        expected_case_version=1,
+        correlation_id="corr-inbox-context",
+    )
+
+    assert store.command is not None
+    assert store.command.contexts == []
+    assert store.command.analysis.status is AnalysisStatus.ABSTAINED
+    assert store.command.analysis.state is DecisionProposalState.INFORMATION_NEEDED
+    assert store.command.analysis.proposed_actions[0].type == "request_information"
+
+
 def test_service_reuses_an_identical_brief_before_running_the_model() -> None:
     workspace = _workspace("CS-2047")
     store = _BriefStore()
