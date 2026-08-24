@@ -7,11 +7,12 @@ The fixtures are not loaded by normal application startup. The guarded non-produ
 
 ```powershell
 cd backend
-$env:SUPPORT_COPILOT_ALLOW_BENCHMARK_SEED="1"
-uv run python -m scripts.seed_policies
-uv run python -m scripts.seed_developer_workflow_benchmark
+.\.venv\Scripts\python.exe -m scripts.prepare_developer_workflow_benchmark `
+  --confirm-disposable-database
 ```
 
-The script is additive and idempotent by public ID. It refuses production, requires a database URL,
-requires explicit opt-in, verifies the four governed policies already exist, and never deletes or
-updates unrelated cases.
+The wrapper requires `TEST_DATABASE_SCOPE=disposable`, verifies that the declared endpoint ID
+matches a direct TLS Neon URL, applies pending Alembic migrations, and requires explicit
+confirmation. Seeding is additive and idempotent by public ID. It never deletes or updates
+unrelated cases. On a fresh branch it first creates the deterministic benchmark organization and
+role set required by the fixtures.

@@ -13,14 +13,13 @@ DEMO_MEMBERS = (
 )
 
 
-def main() -> None:
-    settings = Settings()
-    if settings.environment == "production":
+def seed_identity(*, database_url: str | None, environment: str) -> None:
+    if environment == "production":
         raise RuntimeError("Deterministic identity seed is disabled in production.")
-    if not settings.database_url:
+    if not database_url:
         raise RuntimeError("SUPPORT_COPILOT_DATABASE_URL is required to seed demo identity.")
 
-    database = Database(settings.database_url)
+    database = Database(database_url)
     try:
         with database.session() as session:
             organization = session.scalar(
@@ -58,11 +57,17 @@ def main() -> None:
             OrganizationSettingsRepository(session).ensure_defaults(
                 organization_public_id="ORG-0001"
             )
-        print(
-            "Deterministic organization, four demo members, and default settings are present."
-        )
+        print("Deterministic organization, four demo members, and default settings are present.")
     finally:
         database.dispose()
+
+
+def main() -> None:
+    settings = Settings()
+    seed_identity(
+        database_url=settings.database_url,
+        environment=settings.environment,
+    )
 
 
 if __name__ == "__main__":

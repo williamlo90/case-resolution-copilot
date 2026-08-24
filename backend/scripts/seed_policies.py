@@ -8,14 +8,13 @@ from app.security.authentication import DeterministicAuthProvider
 from app.services.policy_service import PolicyService
 
 
-def main() -> None:
-    settings = Settings()
-    if settings.environment == "production":
+def seed_policies(*, database_url: str | None, environment: str) -> None:
+    if environment == "production":
         raise RuntimeError("Deterministic policy seed is disabled in production.")
-    if not settings.database_url:
+    if not database_url:
         raise RuntimeError("SUPPORT_COPILOT_DATABASE_URL is required to seed governed policies.")
 
-    database = Database(settings.database_url)
+    database = Database(database_url)
     actor = DeterministicAuthProvider().authenticate("USR-0003")
     seeds = DeterministicPolicySourceSimulator().fetch_policies()
     created = 0
@@ -67,6 +66,14 @@ def main() -> None:
         print(f"{created} governed policies created; {len(seeds) - created} already existed.")
     finally:
         database.dispose()
+
+
+def main() -> None:
+    settings = Settings()
+    seed_policies(
+        database_url=settings.database_url,
+        environment=settings.environment,
+    )
 
 
 if __name__ == "__main__":

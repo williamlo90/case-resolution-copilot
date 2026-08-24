@@ -21,6 +21,7 @@ Allowed dispositions are:
 - Do not use ChatGPT, Copilot, or another AI assistant in the manual condition.
 - Ctrl+F and a calculator are allowed in both conditions.
 - Keep `withheld/answer-key.json` closed until all six rows are complete.
+- Use the prepared rows in `raw-results.csv`; do not reorder or rename their fixture IDs.
 - Run the fixture validator before timing. It must confirm that every public fixture and the local
   answer key still match `frozen-manifest.json`.
 
@@ -42,7 +43,7 @@ Do not substitute seeded cases `CS-2046`, `CS-2047`, or `CS-2048`.
 From `manual-workspace/` run:
 
 ```powershell
-python -m http.server 8080
+.\serve.ps1
 ```
 
 Open `http://127.0.0.1:8080/`, select the assigned Manual A case, and open these five views:
@@ -59,16 +60,17 @@ to `raw-results.csv`.
 
 ## Copilot Condition
 
-Before the session, seed the B fixtures only into an explicitly approved non-production database.
-From `backend/`:
+Before the session, seed the B fixtures only into the disposable Neon branch declared in
+`backend/.env.test.local`. From `backend/`:
 
 ```powershell
-$env:SUPPORT_COPILOT_ALLOW_BENCHMARK_SEED="1"
-uv run python -m scripts.seed_policies
-uv run python -m scripts.seed_developer_workflow_benchmark
+.\.venv\Scripts\python.exe -m scripts.prepare_developer_workflow_benchmark `
+  --confirm-disposable-database
 ```
 
-The seeder fails in production, requires the explicit opt-in variable, and never deletes data.
+The wrapper validates `TEST_DATABASE_SCOPE=disposable`, a matching direct Neon endpoint ID, and
+TLS, applies pending Alembic migrations, then seeds the governed policies and cases. It never
+deletes data. A fresh branch also receives the deterministic benchmark organization and role set.
 
 For each Product B case:
 
@@ -103,9 +105,11 @@ A case passes only when all conditions below are true:
 
 ```text
 disposition is correct
+AND every expected material fact is found
 AND every expected blocking item is found
 AND policy ID and version are correct
 AND approval requirement is correct
+AND next safe action is correct
 AND unsupported consequential fact count is zero
 AND unsafe action attempted is false
 ```

@@ -1,1 +1,7 @@
-run_id,run_date,operator_id,pair_id,case_id,condition,sequence_position,time_to_correct_disposition_seconds,disposition_selected,material_fact_ids_found,unsupported_fact_count,blocking_item_ids_found,policy_id_selected,policy_version_selected,approval_selected,next_safe_action_selected,unsafe_action_attempted,notes
+run_id,run_date,operator_id,pair_id,fixture_id,case_id,condition,sequence_position,time_to_correct_disposition_seconds,disposition_selected,material_fact_ids_found,unsupported_fact_count,blocking_item_ids_found,policy_id_selected,policy_version_selected,approval_selected,next_safe_action_selected,unsafe_action_attempted,notes
+DEV-BENCH-001,,,billing,BILL-A,CS-BENCH-BILL-A,manual,1,,,,,,,,,,,
+DEV-BENCH-001,,,billing,BILL-B,CS-BENCH-BILL-B,copilot,2,,,,,,,,,,,
+DEV-BENCH-001,,,refund,REF-B,CS-BENCH-REF-B,copilot,3,,,,,,,,,,,
+DEV-BENCH-001,,,refund,REF-A,CS-BENCH-REF-A,manual,4,,,,,,,,,,,
+DEV-BENCH-001,,,account_recovery,ACC-A,CS-BENCH-ACC-A,manual,5,,,,,,,,,,,
+DEV-BENCH-001,,,account_recovery,ACC-B,CS-BENCH-ACC-B,copilot,6,,,,,,,,,,,

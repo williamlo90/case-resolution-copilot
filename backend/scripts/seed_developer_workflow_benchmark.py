@@ -32,14 +32,19 @@ def _fixture_paths() -> list[Path]:
     return sorted(FIXTURE_DIRECTORY.glob("*.json"))
 
 
-def _require_safe_configuration(settings: Settings) -> None:
-    if settings.environment == "production":
+def _require_safe_configuration(
+    *,
+    database_url: str | None,
+    environment: str,
+    acknowledged: bool,
+) -> None:
+    if environment == "production":
         raise RuntimeError("Benchmark seeding is disabled in production.")
-    if os.getenv("SUPPORT_COPILOT_ALLOW_BENCHMARK_SEED") != "1":
+    if not acknowledged:
         raise RuntimeError(
             "Set SUPPORT_COPILOT_ALLOW_BENCHMARK_SEED=1 to acknowledge synthetic data seeding."
         )
-    if not settings.database_url:
+    if not database_url:
         raise RuntimeError("SUPPORT_COPILOT_DATABASE_URL is required.")
 
 
@@ -108,14 +113,22 @@ def _seed_messages(
     return added
 
 
-def main() -> None:
-    settings = Settings()
-    _require_safe_configuration(settings)
+def seed_benchmark_fixtures(
+    *,
+    database_url: str | None,
+    environment: str,
+    acknowledged: bool,
+) -> None:
+    _require_safe_configuration(
+        database_url=database_url,
+        environment=environment,
+        acknowledged=acknowledged,
+    )
     paths = _fixture_paths()
     if len(paths) != 3:
         raise RuntimeError(f"Expected exactly three product fixtures, found {len(paths)}.")
 
-    database = Database(settings.database_url or "")
+    database = Database(database_url or "")
     created = 0
     messages_added = 0
     try:
@@ -143,6 +156,15 @@ def main() -> None:
         )
     finally:
         database.dispose()
+
+
+def main() -> None:
+    settings = Settings()
+    seed_benchmark_fixtures(
+        database_url=settings.database_url,
+        environment=settings.environment,
+        acknowledged=os.getenv("SUPPORT_COPILOT_ALLOW_BENCHMARK_SEED") == "1",
+    )
 
 
 if __name__ == "__main__":

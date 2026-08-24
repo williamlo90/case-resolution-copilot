@@ -14,7 +14,10 @@ not pass.
 - `frozen-manifest.json` commits SHA-256 hashes for the public fixtures and the withheld answer key
   before any timed run is recorded.
 - The manual five-view browser workspace and guarded Product B seed script are ready.
-- The result sheet and report are templates only. No timed benchmark has been run and no time-saving
+- The six rows in `raw-results.csv` are prefilled in the frozen run order.
+- The scorer refuses incomplete sessions and opens the withheld answer key only after all six rows
+  pass completeness checks.
+- The result sheet and report remain unexecuted. No timed benchmark has been run and no time-saving
   claim is supported yet.
 
 ## Benchmark Lanes
@@ -38,6 +41,7 @@ and receipt reconciliation without a second execute operation. See `safety-scena
 developer-workflow-benchmark/
 |-- README.md
 |-- PROTOCOL.md
+|-- OPERATOR_RUNBOOK.md
 |-- frozen-manifest.json
 |-- pair-manifest.json
 |-- safety-scenarios.json
@@ -73,9 +77,23 @@ no browser, server, database, container, or provider call.
 
 ## Run Later
 
-Follow [PROTOCOL.md](PROTOCOL.md). Do not open `withheld/answer-key.json` until all six timed runs
-are recorded. Product fixture seeding requires an explicitly approved non-production database and
-is intentionally not part of local validation.
+Start with [OPERATOR_RUNBOOK.md](OPERATOR_RUNBOOK.md), then use [PROTOCOL.md](PROTOCOL.md) when a
+rule needs clarification. Do not open `withheld/answer-key.json` until all six timed runs are
+recorded. Product fixture seeding requires an explicitly approved non-production database and is
+intentionally not part of local validation.
+
+After all six rows are complete, run the scorer from `backend/`:
+
+```powershell
+uv run python -m scripts.score_developer_workflow_benchmark `
+  --product-commit <tested-commit> `
+  --benchmark-commit <benchmark-commit> `
+  --browser "Microsoft Edge" `
+  --deployment "https://your-deployment.example" `
+  --seed-target "approved-non-production-branch"
+```
+
+This generates `scored-results.csv` and replaces the report template with a scored report.
 
 ## Claim Boundary
 

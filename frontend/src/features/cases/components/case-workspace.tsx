@@ -14,9 +14,9 @@ import type {
 import type { CaseWorkspace as CaseWorkspaceModel } from "@/domain/cases/case";
 import {
   caseCategoryLabels,
-  caseStatusPresentation,
   formatSla,
 } from "@/features/cases/case-presentation";
+import { resolveCaseWorkspaceStatus } from "@/features/cases/case-workspace-status";
 import {
   ArrowLeft,
   Clock3,
@@ -111,7 +111,7 @@ export function CaseWorkspace({
   initialDraftDelivery?: InboxDraftDelivery | null;
 }) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("brief");
-  const status = caseStatusPresentation[workspace.case.status];
+  const status = resolveCaseWorkspaceStatus(workspace, initialDraftDelivery);
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-surface">
