@@ -189,6 +189,10 @@ def test_refund_case_produces_reviewable_evidence_bound_resolution() -> None:
     assert result.proposed_actions[0].review_required is True
     assert any(risk.outcome is RiskOutcome.REQUIRES_REVIEW for risk in result.risks)
     assert len(result.checkpoints) == 4
+    assert result.response_draft.subject == "Update on your refund request"
+    assert result.response_draft.body.startswith("Hello Marcus Lee,")
+    assert "service order is unused and delivery has not started" in (result.response_draft.body)
+    assert "The refund remains pending and has not been issued" in result.response_draft.body
 
 
 def test_billing_case_does_not_infer_duplicate_settlement_from_attempt_count() -> None:
@@ -200,6 +204,12 @@ def test_billing_case_does_not_infer_duplicate_settlement_from_attempt_count() -
     assert result.impact_amount is None
     assert result.proposed_actions[0].type == "request_information"
     assert result.response_draft.status.value == "blocked"
+    assert result.response_draft.subject == "Information needed for your billing case"
+    assert result.response_draft.body.startswith("Hello Nadia Prasetyo,")
+    assert "one captured payment record, not two settled charges" in (result.response_draft.body)
+    assert "second settled payment reference" in result.response_draft.body
+    assert "before considering any billing adjustment" in result.response_draft.body
+    assert "We received your request" not in result.response_draft.body
 
 
 def test_billing_case_requires_two_settled_payment_references() -> None:
@@ -238,9 +248,7 @@ def test_billing_case_requires_two_settled_payment_references() -> None:
     )
 
     assert result.state is DecisionProposalState.INFORMATION_NEEDED
-    assert {gap.label for gap in result.missing_information} == {
-        "Second payment reference"
-    }
+    assert {gap.label for gap in result.missing_information} == {"Second payment reference"}
 
 
 def test_stale_account_context_requires_refresh_and_identity_verification() -> None:
@@ -312,7 +320,7 @@ def test_input_fingerprint_changes_with_case_version() -> None:
         context_fingerprint=context_fingerprint,
         evidence_fingerprint=evidence_fingerprint,
         model_version="openai:gpt-5.6-luna",
-        prompt_version="openai-decision-narrative-v1",
+        prompt_version="openai-decision-narrative-v2",
     )
 
     assert first != second

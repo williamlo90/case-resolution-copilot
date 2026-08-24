@@ -17,6 +17,7 @@ from app.domain.decision_briefs import (
     DecisionAnalysis,
     DecisionProposalState,
     DecisionRiskCheck,
+    InformationGap,
     ProposalConfidence,
     ProposedActionDraft,
     ResponseSuggestionStatus,
@@ -95,9 +96,58 @@ def _baseline() -> DecisionAnalysis:
             )
         ],
         risk_rule_version="generic-risk-rules-v1",
-        model_version="deterministic-decision-engine-v1",
-        prompt_version="decision-brief-rules-v1",
+        model_version="deterministic-decision-engine-v2",
+        prompt_version="decision-brief-rules-v2",
         graph_version="generic-decision-brief-v1",
+    )
+
+
+def _information_needed_baseline() -> DecisionAnalysis:
+    baseline = _baseline()
+    return baseline.model_copy(
+        update={
+            "missing_information": [
+                InformationGap(
+                    id="GAP-1",
+                    label="Second payment reference",
+                    description=(
+                        "Confirm a second settled payment reference before treating the "
+                        "charge as a duplicate."
+                    ),
+                    blocking=True,
+                )
+            ],
+            "outcome": "Verify the second charge before a billing adjustment",
+            "impact_amount": None,
+            "impact_currency": None,
+            "confidence": ProposalConfidence.LOW,
+            "uncertainty": (
+                "The outcome remains uncertain until the second payment reference is confirmed."
+            ),
+            "state": DecisionProposalState.INFORMATION_NEEDED,
+            "proposed_actions": [
+                ProposedActionDraft(
+                    type="request_information",
+                    label="Request the missing information",
+                    parameters={"items": "Second payment reference"},
+                    impact_amount=None,
+                    impact_currency=None,
+                    expected_outcome=(
+                        "Blocking information is recorded before the decision is revised."
+                    ),
+                    review_required=False,
+                )
+            ],
+            "response_draft": SuggestedResponseDraft(
+                subject="Information needed for your billing case",
+                body=(
+                    "Hello Dimas Setiawan,\n\nOur records currently show one captured "
+                    "payment record, not two settled charges.\n\nPlease send the second "
+                    "settled payment reference or an updated statement showing both charges."
+                ),
+                status=ResponseSuggestionStatus.BLOCKED,
+            ),
+        }
     )
 
 
@@ -212,6 +262,7 @@ def test_openai_gateway_uses_structured_responses_with_minimized_context() -> No
     assert resource.arguments["max_output_tokens"] == OPENAI_DECISION_MAX_OUTPUT_TOKENS
     serialized_input = str(resource.arguments["input"])
     assert len(serialized_input) <= OPENAI_DECISION_MAX_INPUT_CHARS
+    assert "ready_for_review" in serialized_input
     assert "Payment status is recorded as settled." in serialized_input
     assert "CS-SECRET" not in serialized_input
     assert "PRIVATE-REFERENCE" not in serialized_input
@@ -329,8 +380,8 @@ def test_openai_client_is_initialized_only_on_first_ai_request() -> None:
 
 
 class _BaselineEngine:
-    model_version = "deterministic-decision-engine-v1"
-    prompt_version = "decision-brief-rules-v1"
+    model_version = "deterministic-decision-engine-v2"
+    prompt_version = "decision-brief-rules-v2"
     graph_version = "generic-decision-brief-v1"
     risk_rule_version = "generic-risk-rules-v1"
 
@@ -457,7 +508,8 @@ def test_ai_narrative_allows_explicitly_pending_action_language() -> None:
     pending = _narrative().model_copy(
         update={
             "response_body": (
-                "We have not issued a refund. The proposed refund remains pending approval."
+                "We have not reversed the duplicate charge. The proposed reversal remains "
+                "pending approval."
             )
         }
     )
@@ -470,3 +522,65 @@ def test_ai_narrative_allows_explicitly_pending_action_language() -> None:
 
     assert result.response_draft.body == pending.response_body
     assert result.checkpoints[-1].status is CheckpointStatus.COMPLETED
+
+
+def test_ai_narrative_rejects_a_generic_information_needed_response() -> None:
+    baseline = _information_needed_baseline()
+    generic = DecisionNarrative(
+        rationale="A second settled payment reference is still required.",
+        uncertainty="The duplicate charge cannot be confirmed yet.",
+        response_subject="Update on your case",
+        response_body="We received your request and are reviewing the available information.",
+    )
+    engine = OpenAIAssistedDecisionEngine(
+        baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
+        narrative_gateway=_NarrativeGateway(result=generic),
+    )
+
+    result = _run(engine)
+
+    assert result.response_draft == baseline.response_draft
+    assert result.checkpoints[-1].status is CheckpointStatus.ABSTAINED
+    assert result.model_version == "openai:gpt-5.6-luna:misaligned"
+
+
+def test_ai_narrative_accepts_a_specific_information_request() -> None:
+    baseline = _information_needed_baseline()
+    specific = DecisionNarrative(
+        rationale="A second settled payment reference is still required.",
+        uncertainty="The duplicate charge cannot be confirmed yet.",
+        response_subject="Information needed for your billing case",
+        response_body=(
+            "Please send the second settled payment reference or an updated statement "
+            "showing both charges. We need it before considering a billing adjustment."
+        ),
+    )
+    engine = OpenAIAssistedDecisionEngine(
+        baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
+        narrative_gateway=_NarrativeGateway(result=specific),
+    )
+
+    result = _run(engine)
+
+    assert result.response_draft.body == specific.response_body
+    assert result.checkpoints[-1].status is CheckpointStatus.COMPLETED
+
+
+def test_ai_narrative_rejects_internal_control_language_in_customer_draft() -> None:
+    baseline = _baseline()
+    internal = _narrative().model_copy(
+        update={
+            "response_body": (
+                "The duplicate charge reversal has low confidence and needs supervisor approval."
+            )
+        }
+    )
+    engine = OpenAIAssistedDecisionEngine(
+        baseline=cast(DecisionEngine, _BaselineEngine(baseline)),
+        narrative_gateway=_NarrativeGateway(result=internal),
+    )
+
+    result = _run(engine)
+
+    assert result.response_draft == baseline.response_draft
+    assert result.model_version == "openai:gpt-5.6-luna:misaligned"

@@ -17,6 +17,18 @@ actions, and approval requirements are authoritative. Do not add, remove, or cha
 Do not invent customer details, policy clauses, evidence, amounts, or completed actions.
 Never claim that an action has already happened. Make the response draft clear that any
 review-required action remains pending human approval.
+
+The response draft is customer-facing and must follow the proposal state and next safe action.
+When information is needed, name the exact missing record, ask for it in practical language,
+explain why it is needed, and say what happens next. Do not replace a known information gap with
+a generic acknowledgement such as "we are reviewing your request." When a resolution is ready
+for review, mention the verified basis in plain language, describe the proposed action as pending,
+and state that it has not happened yet.
+
+Do not expose internal IDs, policy versions, confidence labels, risk-check names, approval roles,
+or implementation terms in the customer response. Preserve useful customer-safe details from the
+baseline response draft, including its salutation. Do not promise an outcome that the control
+record does not authorize.
 """.strip()
 
 OPENAI_DECISION_MAX_INPUT_CHARS = 24_000
@@ -213,6 +225,7 @@ def _provider_token_usage(response: _ParsedResponse) -> ProviderTokenUsage | Non
 
 def _minimized_control_record(analysis: DecisionAnalysis) -> dict[str, object]:
     return {
+        "proposal_state": analysis.state.value,
         "policy_status": analysis.policy_status.value,
         "facts": [fact.statement for fact in analysis.facts],
         "missing_information": [

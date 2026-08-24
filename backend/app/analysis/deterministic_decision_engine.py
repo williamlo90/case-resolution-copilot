@@ -3,6 +3,7 @@ from decimal import Decimal
 from hashlib import sha256
 from typing import Protocol
 
+from app.analysis.customer_response_drafting import draft_customer_response
 from app.domain.cases import (
     BusinessObjectRecord,
     BusinessObjectType,
@@ -21,15 +22,13 @@ from app.domain.decision_briefs import (
     InformationGap,
     ProposalConfidence,
     ProposedActionDraft,
-    ResponseSuggestionStatus,
     RiskOutcome,
-    SuggestedResponseDraft,
     VerifiedFact,
 )
 from app.domain.policies import EvidenceRetrievalResult, EvidenceRetrievalStatus
 
-DECISION_MODEL_VERSION = "deterministic-decision-engine-v1"
-DECISION_PROMPT_VERSION = "decision-brief-rules-v1"
+DECISION_MODEL_VERSION = "deterministic-decision-engine-v2"
+DECISION_PROMPT_VERSION = "decision-brief-rules-v2"
 DECISION_GRAPH_VERSION = "generic-decision-brief-v1"
 DECISION_RISK_RULE_VERSION = "generic-risk-rules-v1"
 
@@ -157,7 +156,12 @@ class DeterministicDecisionEngine:
         )
         uncertainty = _uncertainty(evidence.status, blocking, workspace)
         rationale = _rationale(evidence.status, facts, blocking, risks)
-        response = _response(workspace.case.category, state, blocking)
+        response = draft_customer_response(
+            workspace=workspace,
+            state=state,
+            blocking=blocking,
+            actions=actions,
+        )
         status = (
             AnalysisStatus.COMPLETED
             if evidence.status is EvidenceRetrievalStatus.RELEVANT
@@ -279,8 +283,7 @@ def _information_gaps(
         payment_references = {
             context.source_reference
             for context in workspace.business_contexts
-            if context.type is BusinessObjectType.PAYMENT
-            and context.status == "settled"
+            if context.type is BusinessObjectType.PAYMENT and context.status == "settled"
         }
         if len(payment_references) < 2:
             gaps.append(
@@ -543,37 +546,6 @@ def _rationale(
     return (
         f"{len(facts)} source-backed fact(s) and published policy evidence support the proposed "
         f"outcome. {review_count} deterministic authority check(s) require human review."
-    )
-
-
-def _response(
-    category: CaseCategory,
-    state: DecisionProposalState,
-    blocking: list[InformationGap],
-) -> SuggestedResponseDraft:
-    if state is DecisionProposalState.INFORMATION_NEEDED:
-        needed = ", ".join(gap.label.lower() for gap in blocking) or "policy confirmation"
-        return SuggestedResponseDraft(
-            subject="Update on your support case",
-            body=(
-                "We are reviewing your case. Before confirming an outcome, we need to verify "
-                f"{needed}. We will update you after that check is complete."
-            ),
-            status=ResponseSuggestionStatus.BLOCKED,
-        )
-    category_text = {
-        CaseCategory.BILLING_DISPUTE: "the duplicate charge",
-        CaseCategory.REFUND_REQUEST: "the refund request",
-        CaseCategory.ACCOUNT_ACCESS: "the account recovery request",
-        CaseCategory.SERVICE_EXCEPTION: "the service correction",
-    }[category]
-    return SuggestedResponseDraft(
-        subject="Proposed resolution for your support case",
-        body=(
-            f"We reviewed the available records and prepared a resolution for {category_text}. "
-            "The proposed action is pending the required human review before any change is made."
-        ),
-        status=ResponseSuggestionStatus.READY,
     )
 
 

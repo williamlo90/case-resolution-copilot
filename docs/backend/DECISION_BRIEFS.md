@@ -44,6 +44,8 @@ Each response contains:
 - exact `EVD-*` and `CTX-*` bindings used for that version;
 - review-required proposed actions;
 - a suggested customer response that cannot overwrite a manually saved draft;
+- customer wording tied to the verified evidence and next safe action, without internal control
+  labels or premature promises;
 - ordered business-safe checkpoints.
 
 `completed` means the deterministic analysis ran with relevant governed policy. It does not mean the

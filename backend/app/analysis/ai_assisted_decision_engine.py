@@ -2,6 +2,7 @@ import json
 from hashlib import sha256
 
 from app.analysis.action_claim_safety import contains_completed_action_claim
+from app.analysis.customer_response_safety import customer_response_is_aligned
 from app.analysis.deterministic_decision_engine import DecisionEngine
 from app.domain.cases import CaseWorkspaceRecord
 from app.domain.decision_briefs import (
@@ -14,7 +15,7 @@ from app.domain.policies import EvidenceRetrievalResult
 from app.models.gateway import ModelGatewayError
 from app.models.openai_decision import DecisionNarrativeGateway
 
-AI_DECISION_PROMPT_VERSION = "openai-decision-narrative-v1"
+AI_DECISION_PROMPT_VERSION = "openai-decision-narrative-v2"
 
 
 class OpenAIAssistedDecisionEngine:
@@ -26,9 +27,7 @@ class OpenAIAssistedDecisionEngine:
     ) -> None:
         self._baseline = baseline
         self._narrative_gateway = narrative_gateway
-        self.model_version = (
-            f"{narrative_gateway.provider_name}:{narrative_gateway.model_version}"
-        )
+        self.model_version = f"{narrative_gateway.provider_name}:{narrative_gateway.model_version}"
         self.prompt_version = AI_DECISION_PROMPT_VERSION
         self.graph_version = baseline.graph_version
         self.risk_rule_version = baseline.risk_rule_version
@@ -78,6 +77,19 @@ class OpenAIAssistedDecisionEngine:
                 summary=(
                     "AI drafting was rejected because it described a controlled action as "
                     "already complete. The deterministic safe response was retained."
+                ),
+            )
+        if not customer_response_is_aligned(
+            baseline,
+            subject=narrative.response_subject,
+            body=narrative.response_body,
+        ):
+            return self._fallback(
+                baseline,
+                suffix="misaligned",
+                summary=(
+                    "AI drafting was rejected because the customer response did not match "
+                    "the governed next step. The deterministic safe response was retained."
                 ),
             )
 

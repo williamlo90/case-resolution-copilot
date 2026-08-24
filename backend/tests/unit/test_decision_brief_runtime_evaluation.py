@@ -40,15 +40,12 @@ class _SuccessfulNarrativeGateway:
                 total_tokens=140,
             )
         )
-        action_pending = any(action.review_required for action in analysis.proposed_actions)
         return DecisionNarrative(
             rationale="The verified records support the server-owned proposed outcome.",
             uncertainty="A human reviewer retains authority over consequential actions.",
-            response_subject="Update on your support case",
+            response_subject=analysis.response_draft.subject,
             response_body=(
-                "The proposed action is pending supervisor approval before any change is made."
-                if action_pending
-                else "We need the listed information before confirming an outcome."
+                f"{analysis.response_draft.body}\n\nWe will keep you updated as this moves forward."
             ),
         )
 
@@ -118,7 +115,7 @@ def test_decision_brief_runtime_evaluation_freezes_controls_and_bounds_provider_
     assert contract_path.with_name("progress.json").is_file()
     report_path = contract_path.with_name("report.json")
     assert report_path.is_file()
-    assert "pending supervisor approval" not in report_path.read_text(encoding="utf-8")
+    assert "keep you updated" not in report_path.read_text(encoding="utf-8")
 
     with pytest.raises(FileExistsError, match="already exists"):
         run_decision_brief_evaluation(
