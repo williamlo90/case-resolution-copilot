@@ -265,6 +265,23 @@ remain explicit Phase 8 work.
 
 ## Phase 8 - Deployment And Operational Readiness
 
+Status on 2026-08-23: **core connected journey passed; operational edge cases and impact benchmark remain open**.
+
+Completed against the hosted current-source deployment:
+
+- one allowlisted synthetic Gmail case was enriched with checked payment evidence;
+- current policy evidence supported a refreshed AI-assisted brief;
+- administrator submission, self-review denial, specialist read-only access, and independent
+  supervisor approval passed;
+- approval materialized an immutable ready response and one Gmail draft without sending email;
+- reload preserved the draft result and removed the create command;
+- three hosted defects found during the journey were corrected and regression-tested.
+
+The sanitized record is
+[`docs/evidence/hosted-connected-draft-acceptance/2026-08-23`](../evidence/hosted-connected-draft-acceptance/2026-08-23/README.md).
+Phase 8 is not complete until the timed benchmark, warm authenticated LCP measurement, and hosted
+connection/provider failure paths below are executed.
+
 - Apply migrations to the intended Neon environment.
 - Deploy with new feature flags disabled.
 - Add Vercel environment variables at the final activation gate.

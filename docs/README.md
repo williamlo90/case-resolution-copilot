@@ -58,11 +58,13 @@ contracts and operating material used to build and evaluate the application.
 - [Phase 6 OpenAI activation evidence](../backend/evaluations/openai_activation/README.md)
 - [Hosted product walkthrough](evidence/production-demo/README.md)
 - [Hosted deterministic workflow acceptance](evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+- [Hosted connected Gmail draft acceptance](evidence/hosted-connected-draft-acceptance/2026-08-23/README.md)
 - [Developer-operated decision readiness benchmark](evidence/developer-workflow-benchmark/README.md)
 
-The screenshot evidence predates the repository reconstruction and records the predecessor hosted
-deployment of the same product. Current-source verification and historical hosted product evidence
-must be reported separately; historical screenshots are not proof for a new code revision.
+The screenshot evidence from 2026-08-05 predates the repository reconstruction and records the
+predecessor hosted deployment of the same product. The 2026-08-23 connected-draft record tests the
+current repository revision and is intentionally textual to avoid retaining connected-inbox
+identifiers. Historical screenshots are not proof for a new code revision.
 
 ## Naming Compatibility
 
