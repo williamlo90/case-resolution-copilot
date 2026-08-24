@@ -1,8 +1,16 @@
+from datetime import timedelta
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 from app.api.presenters.cases import present_case_workspace
-from app.domain.cases import CaseCollectionWindowRecord, CaseStatus, ResponseDraftRecord
+from app.domain.cases import (
+    CaseCollectionWindowRecord,
+    CaseStatus,
+    ConversationMessageRecord,
+    MessageAuthorType,
+    MessageChannel,
+    ResponseDraftRecord,
+)
 from app.persistence.case_repository import CaseRepository
 from app.persistence.decision_brief_repository import DecisionBriefRepository
 from app.persistence.policy_repository import PolicyRepository
@@ -43,10 +51,83 @@ def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
         "add_evidence",
         "start_investigation",
         "request_information",
-        "revise_resolution",
         "save_draft",
     }
     reviews.get_for_proposal.assert_not_called()
+
+
+def test_workspace_waits_for_new_information_before_offering_resume() -> None:
+    workspace = valid_case_workspace()
+    workspace = workspace.model_copy(
+        update={
+            "case": workspace.case.model_copy(
+                update={"status": CaseStatus.INFORMATION_NEEDED, "version": 2}
+            ),
+            "business_contexts": [],
+            "messages": [],
+        }
+    )
+    decisions = MagicMock(spec=DecisionBriefRepository)
+    decisions.get_latest.return_value = valid_decision_brief()
+    policies = MagicMock(spec=PolicyRepository)
+    policies.list_evidence_for_case.return_value = []
+    reviews = MagicMock(spec=ReviewRepository)
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    projection = CaseWorkspaceQueryService(
+        cases=MagicMock(spec=CaseRepository),
+        decisions=decisions,
+        policies=policies,
+        reviews=reviews,
+    ).project(actor=actor, workspace=workspace)
+
+    assert "resume_investigation" not in projection.available_commands
+    assert "revise_resolution" not in projection.available_commands
+
+
+def test_workspace_offers_resume_when_new_customer_information_arrives() -> None:
+    workspace = valid_case_workspace()
+    new_message = ConversationMessageRecord(
+        id=uuid4(),
+        public_id="MSG-NEW-INFORMATION",
+        organization_id=workspace.case.organization_id,
+        case_id=workspace.case.id,
+        thread_id=workspace.thread.id,
+        author_type=MessageAuthorType.CUSTOMER,
+        author_id="CUS-NEW-INFORMATION",
+        author_name="Customer",
+        channel=MessageChannel.EMAIL,
+        body="Here is the missing payment reference.",
+        internal=False,
+        source_reference="SET-NEW-0001",
+        version=1,
+        created_at=NOW + timedelta(minutes=1),
+    )
+    workspace = workspace.model_copy(
+        update={
+            "case": workspace.case.model_copy(
+                update={"status": CaseStatus.INFORMATION_NEEDED, "version": 2}
+            ),
+            "business_contexts": [],
+            "messages": [new_message],
+        }
+    )
+    decisions = MagicMock(spec=DecisionBriefRepository)
+    decisions.get_latest.return_value = valid_decision_brief()
+    policies = MagicMock(spec=PolicyRepository)
+    policies.list_evidence_for_case.return_value = []
+    reviews = MagicMock(spec=ReviewRepository)
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    projection = CaseWorkspaceQueryService(
+        cases=MagicMock(spec=CaseRepository),
+        decisions=decisions,
+        policies=policies,
+        reviews=reviews,
+    ).project(actor=actor, workspace=workspace)
+
+    assert "resume_investigation" in projection.available_commands
+    assert "revise_resolution" not in projection.available_commands
 
 
 def test_workspace_presentation_allows_imported_case_without_business_context() -> None:

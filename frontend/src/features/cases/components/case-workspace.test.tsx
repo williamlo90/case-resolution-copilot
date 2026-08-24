@@ -386,10 +386,70 @@ describe("CaseWorkspace", () => {
       />,
     );
 
+    expect(screen.getByText("Start with the investigation")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Start investigation" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "now under investigation",
     );
+  });
+
+  it("explains why a waiting case needs to resume", () => {
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          case: {
+            ...primaryCaseWorkspaceFixture.case,
+            status: "information_needed",
+          },
+        }}
+        workflowActions={[
+          {
+            mode: "resume_investigation",
+            action: async () => ({
+              status: "success",
+              message: "The case is now under investigation.",
+              correlationId: null,
+              retryAfterSeconds: null,
+            }),
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("New information is ready")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Resume the investigation now so the decision can be updated.",
+      ),
+    ).toBeVisible();
+  });
+
+  it("shows a passive waiting state when no new information exists", () => {
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          case: {
+            ...primaryCaseWorkspaceFixture.case,
+            status: "information_needed",
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Waiting for new information")).toBeVisible();
+    expect(
+      screen.getByText(
+        "No action is needed until a customer reply or verified evidence arrives.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Resume investigation" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Refresh brief" }),
+    ).not.toBeInTheDocument();
   });
 
   it("hides audit export when the actor is not allowed to export it", async () => {
@@ -424,7 +484,12 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    expect(screen.getByText("AI-assisted wording")).toBeVisible();
+    expect(screen.getByText("Decision brief needs an update")).toBeVisible();
+    expect(
+      screen.getByText(
+        "The case changed after this brief was prepared. Refresh it before choosing the next action.",
+      ),
+    ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Refresh brief" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Decision brief updated",
@@ -447,6 +512,7 @@ describe("CaseWorkspace", () => {
       />,
     );
 
+    expect(screen.getByText("Decision brief is the next step")).toBeVisible();
     expect(screen.getByRole("button", { name: "Prepare brief" })).toBeVisible();
   });
 });

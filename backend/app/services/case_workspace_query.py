@@ -5,6 +5,7 @@ from app.domain.cases import (
     CaseCommand,
     CaseStatus,
     CaseWorkspaceRecord,
+    MessageAuthorType,
 )
 from app.domain.decision_briefs import DecisionBriefRecord, DecisionProposalState
 from app.domain.identity import ActorContext, Permission
@@ -82,6 +83,10 @@ class CaseWorkspaceQueryService:
     ) -> list[CaseCommand]:
         commands: list[CaseCommand] = []
         if actor.can(Permission.CASE_MANAGE):
+            new_information_available = self._has_new_information(
+                workspace=workspace,
+                brief=brief,
+            )
             if workspace.owner is None:
                 commands.append("assign_to_me")
             commands.extend(["send_reply", "add_note"])
@@ -99,11 +104,16 @@ class CaseWorkspaceQueryService:
                     CaseStatus.WAITING_CUSTOMER,
                 }
                 and CaseStatus.INVESTIGATING in CASE_TRANSITIONS[workspace.case.status]
+                and new_information_available
             ):
                 commands.append("resume_investigation")
             if workspace.case.status is not CaseStatus.COMPLETED:
                 commands.append("add_evidence")
-                commands.append("revise_resolution")
+                if self._brief_needs_preparation(
+                    workspace=workspace,
+                    brief=brief,
+                ):
+                    commands.append("revise_resolution")
             commands.append("save_draft")
             if self._can_submit_or_escalate(
                 actor=actor,
@@ -125,6 +135,51 @@ class CaseWorkspaceQueryService:
         if actor.can(Permission.AUDIT_READ):
             commands.append("export_audit")
         return commands
+
+    @staticmethod
+    def _has_new_information(
+        *,
+        workspace: CaseWorkspaceRecord,
+        brief: DecisionBriefRecord | None,
+    ) -> bool:
+        if brief is not None:
+            waiting_started_at = brief.run.completed_at
+        else:
+            status_changes = [
+                event.occurred_at
+                for event in workspace.activity
+                if event.event_type == "case.status_changed"
+            ]
+            if not status_changes:
+                return False
+            waiting_started_at = max(status_changes)
+
+        if any(context.captured_at > waiting_started_at for context in workspace.business_contexts):
+            return True
+        if any(
+            message.created_at > waiting_started_at
+            and message.author_type in {MessageAuthorType.CUSTOMER, MessageAuthorType.SYSTEM}
+            for message in workspace.messages
+        ):
+            return True
+        return any(
+            event.occurred_at > waiting_started_at
+            and event.event_type in {"case.evidence_added", "case.inbox_message_imported"}
+            for event in workspace.activity
+        )
+
+    @staticmethod
+    def _brief_needs_preparation(
+        *,
+        workspace: CaseWorkspaceRecord,
+        brief: DecisionBriefRecord | None,
+    ) -> bool:
+        if workspace.case.status not in {
+            CaseStatus.INVESTIGATING,
+            CaseStatus.IN_PROGRESS,
+        }:
+            return False
+        return brief is None or brief.run.case_version != workspace.case.version
 
     def _can_submit_or_escalate(
         self,

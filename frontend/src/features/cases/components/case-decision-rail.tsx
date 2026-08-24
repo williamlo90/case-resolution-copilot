@@ -10,6 +10,7 @@ import type { CaseWorkspace } from "@/domain/cases/case";
 import { formatMoney } from "@/features/cases/case-presentation";
 import type { CaseWorkflowMode } from "@/features/cases/case-workflow";
 import {
+  Clock3,
   MessageCircleQuestion,
   Play,
   RefreshCw,
@@ -153,9 +154,33 @@ function CaseWorkflowControl({ control }: { control: WorkflowControl }) {
       : control.mode === "resume_investigation"
         ? "Resuming..."
         : "Updating...";
+  const guidance =
+    control.mode === "start_investigation"
+      ? {
+          label: "Start with the investigation",
+          description:
+            "Review the case evidence before preparing a decision brief.",
+        }
+      : control.mode === "resume_investigation"
+        ? {
+            label: "New information is ready",
+            description:
+              "Resume the investigation now so the decision can be updated.",
+          }
+        : {
+            label: "More information is required",
+            description:
+              "Request the missing evidence before choosing a final action.",
+          };
 
   return (
     <div className="space-y-3">
+      <div>
+        <p className="text-sm font-medium text-primary">{guidance.label}</p>
+        <p className="mt-1 text-xs leading-5 text-secondary">
+          {guidance.description}
+        </p>
+      </div>
       <form action={formAction}>
         <button
           type="submit"
@@ -188,6 +213,13 @@ export function CaseDecisionRail({
     proposal !== null &&
     workspace.availableCommands.includes("submit_for_review");
   const humanReview = humanReviewPresentation(workspace);
+  const canResume = workflowActions.some(
+    (control) => control.mode === "resume_investigation",
+  );
+  const waitingForInformation =
+    ["information_needed", "waiting_customer"].includes(
+      workspace.case.status,
+    ) && !canResume;
 
   return (
     <aside
@@ -266,6 +298,24 @@ export function CaseDecisionRail({
         </section>
 
         <div className="space-y-3 px-5 py-6 lg:px-7">
+          {waitingForInformation ? (
+            <div className="flex items-start gap-3">
+              <Clock3
+                aria-hidden="true"
+                size={17}
+                className="mt-0.5 shrink-0 text-info"
+              />
+              <div>
+                <p className="text-sm font-medium text-primary">
+                  Waiting for new information
+                </p>
+                <p className="mt-1 text-xs leading-5 text-secondary">
+                  No action is needed until a customer reply or verified
+                  evidence arrives.
+                </p>
+              </div>
+            </div>
+          ) : null}
           {workflowActions.map((control) => (
             <CaseWorkflowControl key={control.mode} control={control} />
           ))}
@@ -279,10 +329,14 @@ export function CaseDecisionRail({
                 />
                 <div>
                   <p className="text-sm font-medium text-primary">
-                    AI-assisted wording
+                    {proposal
+                      ? "Decision brief needs an update"
+                      : "Decision brief is the next step"}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-secondary">
-                    Facts, risk checks, and approval rules stay unchanged.
+                    {proposal
+                      ? "The case changed after this brief was prepared. Refresh it before choosing the next action."
+                      : "Prepare it to identify verified facts, missing information, and the next safe action."}
                   </p>
                 </div>
               </div>

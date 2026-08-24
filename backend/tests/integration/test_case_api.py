@@ -289,7 +289,7 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
     assert "request_information" in transitioned.json()["data"]["available_commands"]
     assert information_needed.status_code == 200
     assert information_needed.json()["data"]["case"]["status"] == "information_needed"
-    assert "resume_investigation" in information_needed.json()["data"]["available_commands"]
+    assert "resume_investigation" not in information_needed.json()["data"]["available_commands"]
     assert "request_information" not in information_needed.json()["data"]["available_commands"]
     assert resumed.status_code == 200
     assert resumed.json()["data"]["case"]["status"] == "investigating"
