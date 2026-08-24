@@ -11,6 +11,7 @@ from app.domain.cases import (
     MessageChannel,
     ResponseDraftRecord,
 )
+from app.domain.decision_briefs import DecisionProposalState
 from app.persistence.case_repository import CaseRepository
 from app.persistence.decision_brief_repository import DecisionBriefRepository
 from app.persistence.policy_repository import PolicyRepository
@@ -50,10 +51,38 @@ def test_workspace_query_uses_valid_models_and_server_owned_commands() -> None:
         "add_note",
         "add_evidence",
         "start_investigation",
-        "request_information",
         "save_draft",
     }
     reviews.get_for_proposal.assert_not_called()
+
+
+def test_workspace_offers_information_request_after_brief_finds_a_gap() -> None:
+    workspace = valid_case_workspace()
+    workspace = workspace.model_copy(
+        update={"case": workspace.case.model_copy(update={"status": CaseStatus.INVESTIGATING})}
+    )
+    decisions = MagicMock(spec=DecisionBriefRepository)
+    decisions.get_latest.return_value = valid_decision_brief(
+        state=DecisionProposalState.INFORMATION_NEEDED,
+        review_required=False,
+        impact_amount=None,
+        impact_currency=None,
+        action_type="request_information",
+    )
+    policies = MagicMock(spec=PolicyRepository)
+    policies.list_evidence_for_case.return_value = []
+    reviews = MagicMock(spec=ReviewRepository)
+    actor = DeterministicAuthProvider().authenticate("USR-0001")
+
+    projection = CaseWorkspaceQueryService(
+        cases=MagicMock(spec=CaseRepository),
+        decisions=decisions,
+        policies=policies,
+        reviews=reviews,
+    ).project(actor=actor, workspace=workspace)
+
+    assert "request_information" in projection.available_commands
+    assert "revise_resolution" not in projection.available_commands
 
 
 def test_workspace_waits_for_new_information_before_offering_resume() -> None:

@@ -95,7 +95,12 @@ class CaseWorkspaceQueryService:
                 and CaseStatus.INVESTIGATING in CASE_TRANSITIONS[workspace.case.status]
             ):
                 commands.append("start_investigation")
-            if CaseStatus.INFORMATION_NEEDED in CASE_TRANSITIONS[workspace.case.status]:
+            if (
+                CaseStatus.INFORMATION_NEEDED in CASE_TRANSITIONS[workspace.case.status]
+                and brief is not None
+                and brief.version.state is DecisionProposalState.INFORMATION_NEEDED
+                and brief.run.case_version == workspace.case.version
+            ):
                 commands.append("request_information")
             if (
                 workspace.case.status
