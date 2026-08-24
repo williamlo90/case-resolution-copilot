@@ -38,6 +38,14 @@ const decisionBriefCommandEnvelopeSchema = z.object({
   }),
 });
 
+const caseCommandVersionEnvelopeSchema = z.object({
+  data: z.object({
+    case: z.object({
+      version: z.number().int().positive(),
+    }),
+  }),
+});
+
 const conversationHistoryEnvelopeSchema = z.object({
   items: z.array(apiConversationMessageSchema),
   next_cursor: z.string().nullable(),
@@ -73,6 +81,70 @@ const evidenceFormSchema = z.object({
 });
 
 const moneyAmountPattern = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
+
+type DecisionBriefCommandResponse = z.infer<
+  typeof decisionBriefCommandEnvelopeSchema
+>;
+
+async function requestDecisionBrief(
+  caseId: string,
+  expectedCaseVersion: number,
+): Promise<DecisionBriefCommandResponse> {
+  return apiRequest(
+    `/api/cases/${encodeURIComponent(caseId)}/proposals`,
+    decisionBriefCommandEnvelopeSchema,
+    {
+      method: "POST",
+      body: { expected_case_version: expectedCaseVersion },
+    },
+  );
+}
+
+function decisionBriefCommandResult(
+  response: DecisionBriefCommandResponse,
+  currentProposalVersion: number,
+  initialAnalysis: boolean,
+): CommandState {
+  if (response.data.proposal.version === currentProposalVersion) {
+    return commandSuccess("The analysis is already up to date.");
+  }
+  if (response.data.analysis.status === "abstained") {
+    return commandWarning(
+      "Analysis finished, but more verified information is needed before a resolution can be prepared.",
+    );
+  }
+  const aiDraft = response.data.checkpoints.find(
+    (checkpoint) => checkpoint.step === "ai_narrative",
+  );
+  if (initialAnalysis) {
+    return aiDraft?.status === "abstained"
+      ? commandWarning(
+          "Case analyzed with backup wording because AI drafting was unavailable.",
+        )
+      : commandSuccess(
+          "Case analyzed. Review the verified facts, missing information, and suggested response.",
+        );
+  }
+  if (aiDraft?.status === "completed") {
+    return commandSuccess(
+      "Analysis updated. AI drafted the wording; checks and approval rules stayed unchanged.",
+    );
+  }
+  if (aiDraft?.status === "abstained") {
+    return commandWarning(
+      "Analysis updated with backup wording because AI drafting was unavailable.",
+    );
+  }
+  return commandSuccess(
+    "Analysis updated from the current facts and policies.",
+  );
+}
+
+function revalidateCase(caseId: string): void {
+  revalidatePath(`/cases/${caseId}`);
+  revalidatePath("/cases");
+  revalidatePath("/reviews");
+}
 
 export type CaseHistoryLoadResult<Item> =
   | {
@@ -196,6 +268,62 @@ export async function updateCaseWorkflow(
   }
 }
 
+export async function analyzeCase(
+  caseId: string,
+  expectedCaseVersion: number,
+  currentProposalVersion: number,
+  claimUnassignedCase: boolean,
+  _previousState: CommandState,
+  _formData: FormData,
+): Promise<CommandState> {
+  void _previousState;
+  void _formData;
+  let caseVersion = expectedCaseVersion;
+  let caseUpdated = false;
+  try {
+    if (claimUnassignedCase) {
+      const assignment = await apiRequest(
+        `/api/cases/${encodeURIComponent(caseId)}/assign`,
+        caseCommandVersionEnvelopeSchema,
+        {
+          method: "POST",
+          body: { expected_version: caseVersion },
+        },
+      );
+      caseVersion = assignment.data.case.version;
+      caseUpdated = true;
+    }
+
+    const investigation = await apiRequest(
+      `/api/cases/${encodeURIComponent(caseId)}/status`,
+      caseCommandVersionEnvelopeSchema,
+      {
+        method: "POST",
+        body: {
+          expected_version: caseVersion,
+          status: "investigating",
+        },
+      },
+    );
+    caseVersion = investigation.data.case.version;
+    caseUpdated = true;
+
+    const response = await requestDecisionBrief(caseId, caseVersion);
+    revalidateCase(caseId);
+    return decisionBriefCommandResult(response, currentProposalVersion, true);
+  } catch (error) {
+    if (caseUpdated) revalidateCase(caseId);
+    const failure = commandFailure(error);
+    return caseUpdated
+      ? {
+          ...failure,
+          message:
+            "Work on the case started, but the analysis did not finish. Select Analyze case to try again.",
+        }
+      : failure;
+  }
+}
+
 export async function submitCaseReview(
   caseId: string,
   proposalVersion: number,
@@ -228,41 +356,9 @@ export async function prepareCaseDecisionBrief(
   void _previousState;
   void _formData;
   try {
-    const response = await apiRequest(
-      `/api/cases/${encodeURIComponent(caseId)}/proposals`,
-      decisionBriefCommandEnvelopeSchema,
-      {
-        method: "POST",
-        body: { expected_case_version: expectedCaseVersion },
-      },
-    );
-    revalidatePath(`/cases/${caseId}`);
-    revalidatePath("/cases");
-
-    if (response.data.proposal.version === currentProposalVersion) {
-      return commandSuccess("The decision brief is already up to date.");
-    }
-    if (response.data.analysis.status === "abstained") {
-      return commandWarning(
-        "The brief needs more verified information before a resolution can be prepared.",
-      );
-    }
-    const aiDraft = response.data.checkpoints.find(
-      (checkpoint) => checkpoint.step === "ai_narrative",
-    );
-    if (aiDraft?.status === "completed") {
-      return commandSuccess(
-        "Decision brief updated. AI drafted the wording; checks and approval rules stayed unchanged.",
-      );
-    }
-    if (aiDraft?.status === "abstained") {
-      return commandWarning(
-        "Decision brief updated with the built-in backup draft because AI was unavailable.",
-      );
-    }
-    return commandSuccess(
-      "Decision brief updated from the current facts and policies.",
-    );
+    const response = await requestDecisionBrief(caseId, expectedCaseVersion);
+    revalidateCase(caseId);
+    return decisionBriefCommandResult(response, currentProposalVersion, false);
   } catch (error) {
     return commandFailure(error);
   }

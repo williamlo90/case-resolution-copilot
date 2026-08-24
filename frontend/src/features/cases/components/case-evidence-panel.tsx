@@ -6,6 +6,19 @@ import type { CaseWorkspace } from "@/domain/cases/case";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { CaseEvidenceRecordForm } from "./case-evidence-record-form";
 
+function riskExplanation(
+  workspace: CaseWorkspace,
+  risk: CaseWorkspace["risks"][number],
+): string {
+  if (
+    workspace.proposal?.state === "information_needed" &&
+    risk.label === "Human authority"
+  ) {
+    return "No approval is needed to request information. Review rules apply before any later customer-impacting action.";
+  }
+  return risk.explanation;
+}
+
 export function CaseEvidencePanel({
   workspace,
   addEvidenceAction,
@@ -74,7 +87,8 @@ export function CaseEvidencePanel({
                   </blockquote>
                   <p className="mt-3 text-xs leading-5 text-secondary">
                     <strong className="text-primary">Why it applies:</strong>{" "}
-                    {item.applicability}
+                    Matched to this case&apos;s type, region, contact channel,
+                    and customer tier.
                   </p>
                 </article>
               ))}
@@ -122,7 +136,7 @@ export function CaseEvidencePanel({
                     </p>
                   </div>
                   <p className="mt-2 text-xs leading-5 text-secondary">
-                    {risk.explanation}
+                    {riskExplanation(workspace, risk)}
                   </p>
                 </li>
               ))}

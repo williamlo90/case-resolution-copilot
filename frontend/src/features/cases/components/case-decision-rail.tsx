@@ -12,7 +12,6 @@ import type { CaseWorkflowMode } from "@/features/cases/case-workflow";
 import {
   Clock3,
   MessageCircleQuestion,
-  Play,
   RefreshCw,
   Send,
   ShieldCheck,
@@ -72,7 +71,8 @@ function humanReviewPresentation(
       }
     : {
         label: "No human review needed",
-        description: "The suggested action is within the current operator's authority.",
+        description:
+          "The suggested action is within the current operator's authority.",
         required: false,
       };
 }
@@ -124,10 +124,10 @@ function PrepareBriefControl({
             className={pending ? "animate-spin" : undefined}
           />
           {pending
-            ? "Preparing brief..."
+            ? "Analyzing..."
             : isRefresh
-              ? "Refresh brief"
-              : "Prepare brief"}
+              ? "Update analysis"
+              : "Analyze case"}
         </button>
       </form>
       <CommandStatus state={state} />
@@ -141,53 +141,64 @@ function CaseWorkflowControl({ control }: { control: WorkflowControl }) {
     initialCommandState,
   );
   const investigation = control.mode !== "request_information";
-  const Icon = investigation ? Play : MessageCircleQuestion;
+  const Icon =
+    control.mode === "start_investigation"
+      ? Sparkles
+      : control.mode === "resume_investigation"
+        ? RefreshCw
+        : MessageCircleQuestion;
   const label =
     control.mode === "start_investigation"
-      ? "Start investigation"
+      ? "Analyze case"
       : control.mode === "resume_investigation"
-        ? "Resume investigation"
-        : "Ask for information";
+        ? "Analyze new information"
+        : "Mark as waiting";
   const pendingLabel =
     control.mode === "start_investigation"
-      ? "Starting..."
+      ? "Analyzing..."
       : control.mode === "resume_investigation"
-        ? "Resuming..."
+        ? "Updating analysis..."
         : "Updating...";
   const guidance =
     control.mode === "start_investigation"
       ? {
-          label: "Start with the investigation",
+          label: "Analyze this case",
           description:
-            "Review the case evidence before preparing a decision brief.",
+            "Check the current records and policy, then prepare the decision brief and response in one step.",
         }
       : control.mode === "resume_investigation"
         ? {
             label: "New information is ready",
             description:
-              "Resume the investigation now so the decision can be updated.",
+              "Analyze it now to update the decision brief and response.",
           }
         : {
-            label: "More information is required",
+            label: "The information request is ready",
             description:
-              "Request the missing evidence before choosing a final action.",
+              "After recording the customer reply, mark the case as waiting for information.",
           };
 
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-sm font-medium text-primary">{guidance.label}</p>
-        <p className="mt-1 text-xs leading-5 text-secondary">
-          {guidance.description}
-        </p>
-      </div>
+      {control.mode !== "start_investigation" ? (
+        <div>
+          <p className="text-sm font-medium text-primary">{guidance.label}</p>
+          <p className="mt-1 text-xs leading-5 text-secondary">
+            {guidance.description}
+          </p>
+        </div>
+      ) : null}
       <form action={formAction}>
         <button
           type="submit"
           disabled={pending}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-primary hover:bg-[#f3f6f6] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Icon aria-hidden="true" size={16} />
+          <Icon
+            aria-hidden="true"
+            size={16}
+            className={pending && investigation ? "animate-spin" : undefined}
+          />
           {pending ? pendingLabel : label}
         </button>
       </form>
@@ -227,37 +238,39 @@ export function CaseDecisionRail({
       className="border-t border-border bg-[#fbfcfc] xl:border-l xl:border-t-0"
     >
       <div className="xl:sticky xl:top-[60px]">
-        <section className="border-b border-border px-5 py-6 lg:px-7">
-          <p className="text-xs font-semibold uppercase text-muted">
-            Suggested resolution
-          </p>
-          <h2 className="mt-3 text-lg font-semibold text-primary">
-            {proposal?.outcome ?? "Resolution not prepared"}
-          </h2>
-          {proposal?.impact ? (
-            <p className="mt-3 text-[28px] font-semibold leading-none text-success">
-              {formatMoney(
-                proposal.impact.amount,
-                proposal.impact.currency,
-                presentation,
+        {proposal ? (
+          <>
+            <section className="border-b border-border px-5 py-6 lg:px-7">
+              <p className="text-xs font-semibold uppercase text-muted">
+                Suggested resolution
+              </p>
+              <h2 className="mt-3 text-lg font-semibold text-primary">
+                {proposal.outcome}
+              </h2>
+              {proposal.impact ? (
+                <p className="mt-3 text-[28px] font-semibold leading-none text-success">
+                  {formatMoney(
+                    proposal.impact.amount,
+                    proposal.impact.currency,
+                    presentation,
+                  )}
+                  <span className="ml-2 text-xs font-normal text-secondary">
+                    estimated impact
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-3 text-sm text-secondary">
+                  {proposal.state === "information_needed"
+                    ? "No financial action proposed yet"
+                    : "No direct financial impact recorded"}
+                </p>
               )}
-              <span className="ml-2 text-xs font-normal text-secondary">
-                estimated impact
-              </span>
-            </p>
-          ) : (
-            <p className="mt-3 text-sm text-secondary">
-              No direct financial impact recorded
-            </p>
-          )}
-        </section>
+            </section>
 
-        <section className="border-b border-border px-5 py-6 lg:px-7">
-          <h2 className="text-base font-semibold text-primary">
-            What remains uncertain
-          </h2>
-          {proposal ? (
-            <>
+            <section className="border-b border-border px-5 py-6 lg:px-7">
+              <h2 className="text-base font-semibold text-primary">
+                What remains uncertain
+              </h2>
               <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold capitalize text-warning">
                 <span className="size-2.5 rounded-full bg-warning" />
                 {proposal.confidence} confidence
@@ -265,37 +278,47 @@ export function CaseDecisionRail({
               <p className="mt-3 text-sm leading-6 text-secondary">
                 {proposal.uncertainty}
               </p>
-            </>
-          ) : (
-            <p className="mt-3 text-sm leading-6 text-secondary">
-              Investigation and policy checks must finish before a resolution
-              can be reviewed.
-            </p>
-          )}
-        </section>
+            </section>
 
-        <section className="border-b border-border px-5 py-6 lg:px-7">
-          <h2 className="text-base font-semibold text-primary">Human review</h2>
-          <div className="mt-4 flex items-start gap-3">
-            <span
-              className={`grid size-8 shrink-0 place-items-center rounded-full border ${
-                humanReview.required
-                  ? "border-warning/40 text-warning"
-                  : "border-info/40 text-info"
-              }`}
-            >
-              <ShieldCheck aria-hidden="true" size={17} />
-            </span>
-            <div>
-              <p className="text-sm font-medium text-primary">
-                {humanReview.label}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-secondary">
-                {humanReview.description}
-              </p>
-            </div>
-          </div>
-        </section>
+            <section className="border-b border-border px-5 py-6 lg:px-7">
+              <h2 className="text-base font-semibold text-primary">
+                Human review
+              </h2>
+              <div className="mt-4 flex items-start gap-3">
+                <span
+                  className={`grid size-8 shrink-0 place-items-center rounded-full border ${
+                    humanReview.required
+                      ? "border-warning/40 text-warning"
+                      : "border-info/40 text-info"
+                  }`}
+                >
+                  <ShieldCheck aria-hidden="true" size={17} />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-primary">
+                    {humanReview.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-secondary">
+                    {humanReview.description}
+                  </p>
+                </div>
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="border-b border-border px-5 py-6 lg:px-7">
+            <p className="text-xs font-semibold uppercase text-muted">
+              Next step
+            </p>
+            <h2 className="mt-3 text-lg font-semibold text-primary">
+              Analyze case
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-secondary">
+              Check the current records and policy, then prepare the decision
+              brief and response in one step.
+            </p>
+          </section>
+        )}
 
         <div className="space-y-3 px-5 py-6 lg:px-7">
           {waitingForInformation ? (
@@ -330,13 +353,13 @@ export function CaseDecisionRail({
                 <div>
                   <p className="text-sm font-medium text-primary">
                     {proposal
-                      ? "Decision brief needs an update"
-                      : "Decision brief is the next step"}
+                      ? "New information changed the case"
+                      : "Analysis is the next step"}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-secondary">
                     {proposal
-                      ? "The case changed after this brief was prepared. Refresh it before choosing the next action."
-                      : "Prepare it to identify verified facts, missing information, and the next safe action."}
+                      ? "Update the analysis before choosing the next action."
+                      : "Analyze the current records and policy before choosing the next action."}
                   </p>
                 </div>
               </div>

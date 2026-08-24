@@ -41,9 +41,7 @@ describe("frontend generic cutover", () => {
       join(process.cwd(), "src/app/(operations)/_actions/cases.ts"),
       "utf8",
     );
-    expect(source).toContain(
-      "/proposals/${proposalVersion}/reviews",
-    );
+    expect(source).toContain("/proposals/${proposalVersion}/reviews");
     expect(source).not.toContain(
       "/api/cases/${encodeURIComponent(caseId)}/reviews",
     );
@@ -67,9 +65,7 @@ describe("frontend generic cutover", () => {
 
     expect(source).toContain("await Promise.all([");
     expect(source).toContain("repository.listCases(options)");
-    expect(source).toContain(
-      "administrationRepository.getSessionContext()",
-    );
+    expect(source).toContain("administrationRepository.getSessionContext()");
   });
 
   it("runs server rendering next to the Singapore backend and database", () => {
@@ -80,9 +76,7 @@ describe("frontend generic cutover", () => {
       regions?: string[];
     };
 
-    expect(configuration.$schema).toBe(
-      "https://openapi.vercel.sh/vercel.json",
-    );
+    expect(configuration.$schema).toBe("https://openapi.vercel.sh/vercel.json");
     expect(configuration.regions).toEqual(["sin1"]);
   });
 
@@ -94,7 +88,7 @@ describe("frontend generic cutover", () => {
 
     expect(source).toContain('permissions.includes("case:manage")');
     expect(source).toContain(
-      "connected && canManageCase && inboxCase && workspace.responseDraft",
+      "connected && canManageCase && inboxCase && savedResponseDraft",
     );
     expect(source).toContain(
       "initialDraftDelivery={canManageCase ? latestDraftDelivery : null}",

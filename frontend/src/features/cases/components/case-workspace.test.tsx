@@ -17,10 +17,18 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Issue summary" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Verified facts" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Information needed" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Reverse duplicate charge" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Issue summary" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Verified facts" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Information needed" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Reverse duplicate charge" }),
+    ).toBeVisible();
     expect(
       screen.getByText("Human review required before execution"),
     ).toBeVisible();
@@ -43,18 +51,24 @@ describe("CaseWorkspace", () => {
       />,
     );
     fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
-    expect(await screen.findByRole("heading", { name: "Customer conversation" })).toBeVisible();
-    expect(screen.getByRole("textbox", { name: "Response draft" })).toBeVisible();
     expect(
-      screen.getByText(
-        /I was charged twice for the same monthly subscription/,
-      ),
+      await screen.findByRole("heading", { name: "Customer conversation" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("textbox", { name: "Response draft" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/I was charged twice for the same monthly subscription/),
     ).toBeVisible();
     fireEvent.click(screen.getByRole("tab", { name: "Evidence" }));
-    expect(await screen.findByRole("heading", { name: "Policy guidance" })).toBeVisible();
+    expect(
+      await screen.findByRole("heading", { name: "Policy guidance" }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Risk checks" })).toBeVisible();
     fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
-    expect(await screen.findByRole("heading", { name: "Case activity" })).toBeVisible();
+    expect(
+      await screen.findByRole("heading", { name: "Case activity" }),
+    ).toBeVisible();
     const auditButton = screen.getByRole("button", { name: "Download audit" });
     expect(auditButton.closest("form")).toHaveAttribute(
       "action",
@@ -71,6 +85,7 @@ describe("CaseWorkspace", () => {
           proposal: {
             ...primaryCaseWorkspaceFixture.proposal!,
             state: "information_needed",
+            impact: null,
           },
           proposedActions: [
             {
@@ -81,6 +96,10 @@ describe("CaseWorkspace", () => {
               reviewRequired: false,
             },
           ],
+          responseDraft: {
+            ...primaryCaseWorkspaceFixture.responseDraft!,
+            status: "blocked",
+          },
         }}
       />,
     );
@@ -99,6 +118,9 @@ describe("CaseWorkspace", () => {
     expect(
       screen.queryByRole("button", { name: "Submit for review" }),
     ).not.toBeInTheDocument();
+    expect(screen.getByText("No financial action proposed yet")).toBeVisible();
+    expect(screen.getByText("Ready to request information")).toBeVisible();
+    expect(screen.queryByText("blocked")).not.toBeInTheDocument();
   });
 
   it("does not present a legacy placeholder as a customer response", async () => {
@@ -180,7 +202,9 @@ describe("CaseWorkspace", () => {
       target: { value: "account" },
     });
     expect(screen.getByLabelText("Identity check")).toBeVisible();
-    expect(screen.queryByLabelText("Amount (required)")).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Amount (required)"),
+    ).not.toBeInTheDocument();
   });
 
   it("supports arrow-key navigation for workspace and composer tabs", async () => {
@@ -314,9 +338,15 @@ describe("CaseWorkspace", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
     expect(
-      await screen.findByRole("button", { name: "Add reply" }),
+      await screen.findByRole("button", { name: "Record reply" }),
     ).toBeEnabled();
-    fireEvent.click(screen.getByRole("button", { name: "Add reply" }));
+    expect(screen.getByText("AI suggestion")).toBeVisible();
+    expect(
+      screen.getByText(
+        "This records the reply in the case. It does not send an email.",
+      ),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Record reply" }));
     expect(
       await screen.findByText("The reply was added to the case conversation."),
     ).toBeVisible();
@@ -326,7 +356,9 @@ describe("CaseWorkspace", () => {
       target: { value: "Customer identity was verified by phone." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Add internal note" }));
-    expect(await screen.findByText("The internal note was added.")).toBeVisible();
+    expect(
+      await screen.findByText("The internal note was added."),
+    ).toBeVisible();
   });
 
   it("does not show write controls to a read-only case viewer", async () => {
@@ -359,7 +391,7 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Ask for information" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark as waiting" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "waiting for more information",
     );
@@ -371,6 +403,13 @@ describe("CaseWorkspace", () => {
         workspace={{
           ...primaryCaseWorkspaceFixture,
           case: { ...primaryCaseWorkspaceFixture.case, status: "new" },
+          facts: [],
+          missingInformation: [],
+          evidence: [],
+          risks: [],
+          proposal: null,
+          responseDraft: null,
+          proposedActions: [],
         }}
         workflowActions={[
           {
@@ -386,8 +425,8 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    expect(screen.getByText("Start with the investigation")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "Start investigation" }));
+    expect(screen.getByRole("heading", { name: "Analyze case" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Analyze case" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "now under investigation",
     );
@@ -420,8 +459,11 @@ describe("CaseWorkspace", () => {
     expect(screen.getByText("New information is ready")).toBeVisible();
     expect(
       screen.getByText(
-        "Resume the investigation now so the decision can be updated.",
+        "Analyze it now to update the decision brief and response.",
       ),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Analyze new information" }),
     ).toBeVisible();
   });
 
@@ -445,10 +487,10 @@ describe("CaseWorkspace", () => {
       ),
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Resume investigation" }),
+      screen.queryByRole("button", { name: "Analyze new information" }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Refresh brief" }),
+      screen.queryByRole("button", { name: "Update analysis" }),
     ).not.toBeInTheDocument();
   });
 
@@ -466,8 +508,12 @@ describe("CaseWorkspace", () => {
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
-    expect(await screen.findByRole("heading", { name: "Case activity" })).toBeVisible();
-    expect(screen.queryByRole("link", { name: "Download audit" })).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Case activity" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: "Download audit" }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not expose an approval action that is unavailable", async () => {
@@ -484,13 +530,11 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    expect(screen.getByText("Decision brief needs an update")).toBeVisible();
+    expect(screen.getByText("New information changed the case")).toBeVisible();
     expect(
-      screen.getByText(
-        "The case changed after this brief was prepared. Refresh it before choosing the next action.",
-      ),
+      screen.getByText("Update the analysis before choosing the next action."),
     ).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "Refresh brief" }));
+    fireEvent.click(screen.getByRole("button", { name: "Update analysis" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Decision brief updated",
     );
@@ -512,7 +556,13 @@ describe("CaseWorkspace", () => {
       />,
     );
 
-    expect(screen.getByText("Decision brief is the next step")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Prepare brief" })).toBeVisible();
+    expect(screen.getByText("Analysis is the next step")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Analyze case" })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Verified facts" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Human review" }),
+    ).not.toBeInTheDocument();
   });
 });

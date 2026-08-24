@@ -9,8 +9,7 @@ const { apiRequestMock, redirectMock, revalidatePathMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/data/api/api-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/data/api/api-client")>();
+  const actual = await importOriginal<typeof import("@/data/api/api-client")>();
   return {
     ...actual,
     apiRequest: apiRequestMock,
@@ -34,10 +33,7 @@ import {
   updateCaseWorkflow,
 } from "./_actions/cases";
 import { markNotificationRead } from "./_actions/notifications";
-import {
-  createPolicy,
-  runPolicyLifecycleCommand,
-} from "./_actions/policies";
+import { createPolicy, runPolicyLifecycleCommand } from "./_actions/policies";
 import { revokeInvitation } from "./_actions/team";
 
 function decisionBriefResponse({
@@ -113,7 +109,7 @@ describe("prepareCaseDecisionBrief", () => {
     expect(result).toMatchObject({
       status: "success",
       tone: "warning",
-      message: expect.stringContaining("backup draft"),
+      message: expect.stringContaining("backup wording"),
     });
   });
 
@@ -130,7 +126,7 @@ describe("prepareCaseDecisionBrief", () => {
       new FormData(),
     );
 
-    expect(result.message).toBe("The decision brief is already up to date.");
+    expect(result.message).toBe("The analysis is already up to date.");
   });
 
   it("returns a useful API error with its support reference", async () => {
@@ -276,10 +272,7 @@ describe("case conversation commands", () => {
       total: 2,
     });
 
-    const result = await loadCaseConversationHistory(
-      "CS-2048",
-      "older page",
-    );
+    const result = await loadCaseConversationHistory("CS-2048", "older page");
 
     expect(apiRequestMock).toHaveBeenCalledWith(
       "/api/cases/CS-2048/conversation/history?cursor=older+page&limit=50",
@@ -303,10 +296,7 @@ describe("case conversation commands", () => {
       ),
     );
 
-    const result = await loadCaseActivityHistory(
-      "CS-2048",
-      "activity-cursor",
-    );
+    const result = await loadCaseActivityHistory("CS-2048", "activity-cursor");
 
     expect(result).toEqual({
       status: "error",
@@ -485,9 +475,7 @@ describe("policy commands", () => {
         }),
       }),
     );
-    expect(redirectMock).toHaveBeenCalledWith(
-      "/policies/POL-CANCELLATION",
-    );
+    expect(redirectMock).toHaveBeenCalledWith("/policies/POL-CANCELLATION");
   });
 
   it("publishes the exact policy version", async () => {

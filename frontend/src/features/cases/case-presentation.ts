@@ -1,5 +1,9 @@
 import type { PresentationPreferences } from "@/components/providers/presentation-provider";
-import type { CaseCategory, CaseStatus } from "@/domain/cases/case";
+import type {
+  CaseCategory,
+  CaseStatus,
+  CaseWorkspace,
+} from "@/domain/cases/case";
 import { formatCurrency, formatDateTime } from "@/lib/presentation-format";
 
 export const caseCategoryLabels: Record<CaseCategory, string> = {
@@ -21,6 +25,24 @@ export const caseStatusPresentation: Record<
   in_progress: { label: "In progress", tone: "info" },
   completed: { label: "Completed", tone: "success" },
 };
+
+export function responseDraftPresentation(
+  workspace: Pick<CaseWorkspace, "proposal" | "responseDraft">,
+): {
+  label: string;
+  tone: "neutral" | "warning" | "info" | "success";
+} {
+  if (workspace.proposal?.state === "information_needed") {
+    return { label: "Ready to request information", tone: "info" };
+  }
+  if (workspace.responseDraft?.status === "ready") {
+    return { label: "Ready for review", tone: "success" };
+  }
+  if (workspace.responseDraft?.status === "draft") {
+    return { label: "Saved draft", tone: "neutral" };
+  }
+  return { label: "Needs attention", tone: "warning" };
+}
 
 export function formatSla(minutes: number) {
   if (minutes < 60) return `${minutes}m left`;

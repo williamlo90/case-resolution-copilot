@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import {
   addCaseEvidence,
   addCaseConversationEntry,
+  analyzeCase,
   loadCaseActivityHistory,
   loadCaseConversationHistory,
   prepareCaseDecisionBrief,
@@ -25,7 +26,11 @@ import {
   reconcileResponseDraft,
 } from "../../_actions/inbox-drafts";
 
-export default async function CaseWorkspacePage({ params }: { params: Promise<{ caseId: string }> }) {
+export default async function CaseWorkspacePage({
+  params,
+}: {
+  params: Promise<{ caseId: string }>;
+}) {
   const { caseId } = await params;
   const repository = getCaseRepository();
   const connected = repository.source === "api";
@@ -61,12 +66,21 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
   const workflowActions: WorkflowControl[] = connected
     ? caseWorkflowModes(workspace.availableCommands).map((mode) => ({
         mode,
-        action: updateCaseWorkflow.bind(
-          null,
-          workspace.case.id,
-          workspace.case.version,
-          caseWorkflowTarget(mode),
-        ),
+        action:
+          mode === "request_information"
+            ? updateCaseWorkflow.bind(
+                null,
+                workspace.case.id,
+                workspace.case.version,
+                caseWorkflowTarget(mode),
+              )
+            : analyzeCase.bind(
+                null,
+                workspace.case.id,
+                workspace.case.version,
+                workspace.proposal?.version ?? 0,
+                workspace.case.owner === null,
+              ),
       }))
     : [];
   return (

@@ -2,6 +2,7 @@
 
 import { usePresentationPreferences } from "@/components/providers/presentation-provider";
 import { CommandStatus } from "@/components/ui/command-status";
+import { StatusLabel } from "@/components/ui/status-label";
 import type { ConversationHistoryAction } from "@/app/(operations)/_actions/cases";
 import {
   initialCommandState,
@@ -11,8 +12,11 @@ import type {
   CaseConversationMessage,
   CaseWorkspace,
 } from "@/domain/cases/case";
-import { caseCategoryLabels } from "@/features/cases/case-presentation";
-import { ChevronUp, NotebookPen, Save, Send } from "lucide-react";
+import {
+  caseCategoryLabels,
+  responseDraftPresentation,
+} from "@/features/cases/case-presentation";
+import { ChevronUp, NotebookPen, Save, Send, Sparkles } from "lucide-react";
 import {
   useActionState,
   useRef,
@@ -41,7 +45,7 @@ function EntryControl({
     initialCommandState,
   );
   const Icon = mode === "reply" ? Send : NotebookPen;
-  const label = mode === "reply" ? "Add reply" : "Add internal note";
+  const label = mode === "reply" ? "Record reply" : "Add internal note";
 
   return (
     <div>
@@ -53,7 +57,7 @@ function EntryControl({
           className="inline-flex h-9 items-center gap-2 rounded-md bg-action px-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Icon aria-hidden="true" size={15} />
-          {pending ? "Adding..." : label}
+          {pending ? (mode === "reply" ? "Recording..." : "Adding...") : label}
         </button>
       </form>
       <CommandStatus state={state} />
@@ -101,6 +105,7 @@ export function CaseConversationPanel({
     workspace.responseDraft?.source === "placeholder"
       ? null
       : workspace.responseDraft;
+  const responseStatus = responseDraftPresentation(workspace);
   const [draft, setDraft] = useState(initialDraft?.body ?? "");
   const [note, setNote] = useState("");
   const [subject, setSubject] = useState(
@@ -139,9 +144,7 @@ export function CaseConversationPanel({
     initialCommandState,
   );
   const customerInitials = initials(workspace.case.customer.name);
-  const canWrite = Boolean(
-    saveDraftAction || addReplyAction || addNoteAction,
-  );
+  const canWrite = Boolean(saveDraftAction || addReplyAction || addNoteAction);
 
   function loadEarlierMessages() {
     if (!loadHistoryAction || !historyCursor) return;
@@ -254,130 +257,154 @@ export function CaseConversationPanel({
         </div>
 
         {canWrite ? (
-        <div className="mt-8 border border-border bg-surface">
-          <div
-            role="tablist"
-            aria-label="Conversation composer"
-            className="flex h-11 items-center gap-5 border-b border-border px-4 text-xs font-semibold"
-          >
-            <button
-              ref={(element) => {
-                composerTabRefs.current[0] = element;
-              }}
-              id="composer-tab-reply"
-              type="button"
-              role="tab"
-              aria-selected={mode === "reply"}
-              aria-controls="composer-panel-reply"
-              tabIndex={mode === "reply" ? 0 : -1}
-              onClick={() => setMode("reply")}
-              onKeyDown={(event) => handleComposerTabKey(event, 0)}
-              className={`flex h-11 items-center border-b-2 ${
-                mode === "reply"
-                  ? "border-action text-action"
-                  : "border-transparent text-secondary"
-              }`}
-            >
-              Reply
-            </button>
-            <button
-              ref={(element) => {
-                composerTabRefs.current[1] = element;
-              }}
-              id="composer-tab-note"
-              type="button"
-              role="tab"
-              aria-selected={mode === "note"}
-              aria-controls="composer-panel-note"
-              tabIndex={mode === "note" ? 0 : -1}
-              onClick={() => setMode("note")}
-              onKeyDown={(event) => handleComposerTabKey(event, 1)}
-              className={`flex h-11 items-center border-b-2 ${
-                mode === "note"
-                  ? "border-action text-action"
-                  : "border-transparent text-secondary"
-              }`}
-            >
-              Internal note
-            </button>
-          </div>
-
-          {mode === "reply" ? (
+          <div className="mt-8 border border-border bg-surface">
             <div
-              id="composer-panel-reply"
-              role="tabpanel"
-              aria-labelledby="composer-tab-reply"
+              role="tablist"
+              aria-label="Conversation composer"
+              className="flex h-11 items-center gap-5 border-b border-border px-4 text-xs font-semibold"
             >
-              <form action={saveDraftFormAction}>
-                <label className="block border-b border-border px-4 py-3">
-                  <span className="sr-only">Response subject</span>
-                  <input
-                    name="subject"
-                    value={subject}
-                    onChange={(event) => setSubject(event.target.value)}
-                    className="w-full text-sm font-semibold text-primary outline-none"
+              <button
+                ref={(element) => {
+                  composerTabRefs.current[0] = element;
+                }}
+                id="composer-tab-reply"
+                type="button"
+                role="tab"
+                aria-selected={mode === "reply"}
+                aria-controls="composer-panel-reply"
+                tabIndex={mode === "reply" ? 0 : -1}
+                onClick={() => setMode("reply")}
+                onKeyDown={(event) => handleComposerTabKey(event, 0)}
+                className={`flex h-11 items-center border-b-2 ${
+                  mode === "reply"
+                    ? "border-action text-action"
+                    : "border-transparent text-secondary"
+                }`}
+              >
+                Reply
+              </button>
+              <button
+                ref={(element) => {
+                  composerTabRefs.current[1] = element;
+                }}
+                id="composer-tab-note"
+                type="button"
+                role="tab"
+                aria-selected={mode === "note"}
+                aria-controls="composer-panel-note"
+                tabIndex={mode === "note" ? 0 : -1}
+                onClick={() => setMode("note")}
+                onKeyDown={(event) => handleComposerTabKey(event, 1)}
+                className={`flex h-11 items-center border-b-2 ${
+                  mode === "note"
+                    ? "border-action text-action"
+                    : "border-transparent text-secondary"
+                }`}
+              >
+                Internal note
+              </button>
+            </div>
+
+            {mode === "reply" ? (
+              <div
+                id="composer-panel-reply"
+                role="tabpanel"
+                aria-labelledby="composer-tab-reply"
+              >
+                <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
+                  {initialDraft ? (
+                    <>
+                      <Sparkles
+                        aria-hidden="true"
+                        size={15}
+                        className="text-info"
+                      />
+                      <span className="text-xs font-semibold text-primary">
+                        AI suggestion
+                      </span>
+                      <StatusLabel tone={responseStatus.tone}>
+                        {responseStatus.label}
+                      </StatusLabel>
+                    </>
+                  ) : (
+                    <span className="text-xs font-semibold text-primary">
+                      New reply
+                    </span>
+                  )}
+                </div>
+                <form action={saveDraftFormAction}>
+                  <label className="block border-b border-border px-4 py-3">
+                    <span className="sr-only">Response subject</span>
+                    <input
+                      name="subject"
+                      value={subject}
+                      onChange={(event) => setSubject(event.target.value)}
+                      className="w-full text-sm font-semibold text-primary outline-none"
+                    />
+                  </label>
+                  <textarea
+                    name="body"
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    aria-label="Response draft"
+                    className="min-h-40 w-full resize-y px-4 py-4 text-sm leading-6 text-primary outline-none"
                   />
-                </label>
+                  <div className="flex items-center justify-between border-t border-border px-3 py-3">
+                    <span className="text-xs text-muted">
+                      Customer-facing reply
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={!saveDraftAction || savingDraft}
+                      className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-xs font-semibold text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Save aria-hidden="true" size={15} />
+                      {savingDraft ? "Saving..." : "Save draft"}
+                    </button>
+                  </div>
+                </form>
+                <div className="flex flex-wrap items-start justify-between gap-3 border-t border-border px-3 py-3">
+                  <p className="max-w-lg text-xs leading-5 text-muted">
+                    This records the reply in the case. It does not send an
+                    email.
+                  </p>
+                  <EntryControl
+                    action={addReplyAction}
+                    body={draft}
+                    mode="reply"
+                  />
+                </div>
+                <div className="px-3 pb-3">
+                  <CommandStatus state={draftState} />
+                </div>
+              </div>
+            ) : (
+              <div
+                id="composer-panel-note"
+                role="tabpanel"
+                aria-labelledby="composer-tab-note"
+              >
                 <textarea
-                  name="body"
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  aria-label="Response draft"
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  aria-label="Internal note"
+                  placeholder="Add context for other workspace members"
                   className="min-h-40 w-full resize-y px-4 py-4 text-sm leading-6 text-primary outline-none"
                 />
-                <div className="flex items-center justify-between border-t border-border px-3 py-3">
-                  <span className="text-xs text-muted">Customer-facing reply</span>
-                  <button
-                    type="submit"
-                    disabled={!saveDraftAction || savingDraft}
-                    className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-xs font-semibold text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Save aria-hidden="true" size={15} />
-                    {savingDraft ? "Saving..." : "Save draft"}
-                  </button>
+                <div className="flex flex-wrap items-start justify-between gap-3 border-t border-border px-3 py-3">
+                  <p className="max-w-lg text-xs leading-5 text-muted">
+                    Internal notes are visible to workspace members, not
+                    customers.
+                  </p>
+                  <EntryControl
+                    action={addNoteAction}
+                    body={note}
+                    mode="note"
+                  />
                 </div>
-              </form>
-              <div className="flex flex-wrap items-start justify-between gap-3 border-t border-border px-3 py-3">
-                <p className="max-w-lg text-xs leading-5 text-muted">
-                  Adding a reply records it in this case. Delivery to an external
-                  support tool depends on its connection.
-                </p>
-                <EntryControl
-                  action={addReplyAction}
-                  body={draft}
-                  mode="reply"
-                />
               </div>
-              <div className="px-3 pb-3">
-                <CommandStatus state={draftState} />
-              </div>
-            </div>
-          ) : (
-            <div
-              id="composer-panel-note"
-              role="tabpanel"
-              aria-labelledby="composer-tab-note"
-            >
-              <textarea
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                aria-label="Internal note"
-                placeholder="Add context for other workspace members"
-                className="min-h-40 w-full resize-y px-4 py-4 text-sm leading-6 text-primary outline-none"
-              />
-              <div className="flex flex-wrap items-start justify-between gap-3 border-t border-border px-3 py-3">
-                <p className="max-w-lg text-xs leading-5 text-muted">
-                  Internal notes are visible to workspace members, not customers.
-                </p>
-                <EntryControl
-                  action={addNoteAction}
-                  body={note}
-                  mode="note"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         ) : (
           <p className="mt-8 border border-border bg-canvas/45 px-4 py-4 text-sm text-secondary">
             You can read this conversation, but your role cannot add replies,
