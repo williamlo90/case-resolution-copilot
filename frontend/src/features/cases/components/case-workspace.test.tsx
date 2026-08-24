@@ -96,6 +96,9 @@ describe("CaseWorkspace", () => {
     expect(
       screen.queryByText("Supervisor review required"),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Submit for review" }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not present a legacy placeholder as a customer response", async () => {
@@ -407,7 +410,7 @@ describe("CaseWorkspace", () => {
     expect(screen.queryByRole("link", { name: "Download audit" })).not.toBeInTheDocument();
   });
 
-  it("lets an operator refresh the decision brief without changing approval controls", async () => {
+  it("does not expose an approval action that is unavailable", async () => {
     render(
       <CaseWorkspace
         workspace={primaryCaseWorkspaceFixture}
@@ -426,7 +429,9 @@ describe("CaseWorkspace", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Decision brief updated",
     );
-    expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Submit for review" }),
+    ).not.toBeInTheDocument();
   });
 
   it("uses a clear prepare label when no decision brief exists", () => {

@@ -294,16 +294,7 @@ export function CaseDecisionRail({
           ) : null}
           {canSubmit && submitReviewAction ? (
             <SubmitReviewControl action={submitReviewAction} />
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-action px-4 text-sm font-semibold text-white opacity-50"
-            >
-              <Send aria-hidden="true" size={16} />
-              Submit for review
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
     </aside>
