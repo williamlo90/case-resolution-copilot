@@ -180,6 +180,7 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
     app = create_app(Settings(environment="test", database_url=test_database_url, _env_file=None))
 
     with TestClient(app) as client:
+        initial = client.get("/api/cases/CS-2048", headers=SPECIALIST)
         listed = client.get(
             "/api/cases",
             headers={**SPECIALIST, "X-Organization-ID": "ORG-0002"},
@@ -230,7 +231,7 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
             "/api/cases/CS-2048/draft",
             headers=SPECIALIST,
             json={
-                "expected_version": 1,
+                "expected_version": 0,
                 "subject": "Billing review update",
                 "body": "We are reviewing the duplicate charge.",
             },
@@ -252,6 +253,8 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         )
         conversation = client.get("/api/cases/CS-2048/conversation", headers=SPECIALIST)
 
+    assert initial.status_code == 200
+    assert initial.json()["data"]["response_draft"] is None
     assert listed.status_code == 200
     assert listed.json()["total"] == 3
     assert {item["id"] for item in listed.json()["items"]} == {
@@ -279,7 +282,7 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         for context in evidence_added.json()["data"]["business_contexts"]
     )
     assert drafted.status_code == 200
-    assert drafted.json()["data"]["response_draft"]["version"] == 2
+    assert drafted.json()["data"]["response_draft"]["version"] == 1
     assert transitioned.status_code == 200
     assert transitioned.json()["data"]["case"]["status"] == "investigating"
     assert transitioned.json()["data"]["case"]["version"] == 5
@@ -301,9 +304,7 @@ def test_generic_case_workflow_is_tenant_scoped_and_versioned(
         assert note_event.actor_id == "USR-0001"
         assert "body" not in note_event.data
         evidence_event = session.scalar(
-            select(AuditEventModel).where(
-                AuditEventModel.event_type == "case.evidence_added"
-            )
+            select(AuditEventModel).where(AuditEventModel.event_type == "case.evidence_added")
         )
         assert evidence_event is not None
         assert evidence_event.actor_id == "USR-0001"

@@ -29,6 +29,7 @@ from app.domain.cases import (
     CaseQueueSummaryRecord,
     CaseWorkspaceRecord,
     ConversationMessageRecord,
+    ResponseDraftRecord,
 )
 from app.domain.policies import PolicyEvidenceBundle
 from app.services.case_history_service import (
@@ -36,6 +37,26 @@ from app.services.case_history_service import (
     encode_case_history_cursor,
 )
 from app.services.case_workspace_query import CaseWorkspaceProjection
+
+_LEGACY_PLACEHOLDER_ENDINGS = (
+    "We received your request and are reviewing the available information.",
+    "We received your message and are reviewing the available information.",
+)
+
+
+def _is_legacy_placeholder(
+    draft: ResponseDraftRecord | None,
+    *,
+    case_public_id: str,
+) -> bool:
+    """Recognize placeholders created before suggestions and saved drafts were separated."""
+    return bool(
+        draft is not None
+        and draft.public_id == f"DFT-{case_public_id}"
+        and draft.version == 1
+        and draft.status == "draft"
+        and any(draft.body.endswith(ending) for ending in _LEGACY_PLACEHOLDER_ENDINGS)
+    )
 
 
 def present_case_queue_summary(
@@ -224,6 +245,38 @@ def present_case_workspace(
         if projection.brief is not None
         else None
     )
+    legacy_placeholder = _is_legacy_placeholder(
+        draft,
+        case_public_id=workspace.case.public_id,
+    )
+    if draft is not None and not legacy_placeholder:
+        response_draft = ResponseDraftResponse(
+            id=draft.public_id,
+            version=draft.version,
+            source="saved",
+            edit_version=draft.version,
+            subject=draft.subject,
+            body=draft.body,
+            status=draft.status,
+            updated_at=draft.updated_at,
+        )
+    elif decision is not None:
+        response_draft = decision.response_draft.model_copy(
+            update={"edit_version": draft.version if draft is not None else 0}
+        )
+    elif draft is not None:
+        response_draft = ResponseDraftResponse(
+            id=draft.public_id,
+            version=draft.version,
+            source="placeholder",
+            edit_version=draft.version,
+            subject=draft.subject,
+            body=draft.body,
+            status=draft.status,
+            updated_at=draft.updated_at,
+        )
+    else:
+        response_draft = None
     return CaseWorkspaceResponse(
         case=present_case_summary(workspace, organization_id=organization_id),
         request=CaseRequestResponse(
@@ -268,18 +321,7 @@ def present_case_workspace(
         evidence=[present_policy_evidence(item) for item in projection.evidence],
         risks=decision.risks if decision is not None else [],
         proposal=decision.proposal if decision is not None else None,
-        response_draft=(
-            ResponseDraftResponse(
-                id=draft.public_id,
-                version=draft.version,
-                subject=draft.subject,
-                body=draft.body,
-                status=draft.status,
-                updated_at=draft.updated_at,
-            )
-            if draft is not None
-            else (decision.response_draft if decision is not None else None)
-        ),
+        response_draft=response_draft,
         proposed_actions=decision.proposed_actions if decision is not None else [],
         activity=[present_case_activity(activity) for activity in workspace.activity],
         collections=CaseWorkspaceCollectionsResponse(

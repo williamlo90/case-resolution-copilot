@@ -61,6 +61,38 @@ describe("CaseWorkspace", () => {
     expect(auditButton.closest("form")).toHaveAttribute("method", "post");
   });
 
+  it("does not present a legacy placeholder as a customer response", async () => {
+    const placeholderBody =
+      "We received your request and are reviewing the available information.";
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          proposal: null,
+          responseDraft: {
+            ...primaryCaseWorkspaceFixture.responseDraft!,
+            source: "placeholder",
+            editVersion: 1,
+            body: placeholderBody,
+            status: "draft",
+          },
+        }}
+        saveDraftAction={async () => ({
+          status: "success",
+          message: "Draft saved.",
+          correlationId: null,
+          retryAfterSeconds: null,
+        })}
+      />,
+    );
+
+    expect(screen.queryByText(placeholderBody)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Conversation" }));
+    expect(
+      await screen.findByRole("textbox", { name: "Response draft" }),
+    ).toHaveValue("");
+  });
+
   it("collects checked records with fields that match the selected record type", async () => {
     const addEvidence = vi.fn(async () => ({
       status: "success" as const,

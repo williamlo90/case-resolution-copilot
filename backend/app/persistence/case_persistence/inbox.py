@@ -16,8 +16,6 @@ from app.persistence.models import (
     CaseModel,
     CaseRequestModel,
     ConversationThreadModel,
-    ResponseDraftModel,
-    utc_now,
 )
 
 from ._base import CaseRepositoryBase
@@ -79,7 +77,6 @@ class CaseInboxWriter(CaseRepositoryBase):
         thread_id = uuid4()
         local_message_id = uuid4()
         case_public_id = f"CS-EMAIL-{source_digest[:12].upper()}"
-        now = utc_now()
         case = CaseModel(
             id=case_id,
             public_id=case_public_id,
@@ -136,22 +133,9 @@ class CaseInboxWriter(CaseRepositoryBase):
             thread_id=thread_id,
             message=first,
         )
-        draft = ResponseDraftModel(
-            public_id=f"DFT-{case_public_id}",
-            organization_id=organization_id,
-            case_id=case_id,
-            subject=f"Re: {first.subject}"[:300],
-            body=(
-                f"Hello {customer.name},\n\n"
-                "We received your message and are reviewing the available information."
-            ),
-            status="draft",
-            version=1,
-            updated_at=now,
-        )
         self._session.add(case)
         self._session.flush()
-        self._session.add_all([request, customer, conversation, draft])
+        self._session.add_all([request, customer, conversation])
         self._session.flush()
         self._session.add(local_message)
         self._audit(

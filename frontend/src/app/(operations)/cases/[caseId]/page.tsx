@@ -39,12 +39,16 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
   const canManageCase =
     sessionContext?.actor.permissions.includes("case:manage") ?? false;
   const inboxCase = workspace.case.sourceId.startsWith("inbox:");
+  const savedResponseDraft =
+    workspace.responseDraft?.source === "saved"
+      ? workspace.responseDraft
+      : null;
   let latestDraftDelivery: InboxDraftDelivery | null = null;
-  if (connected && canManageCase && inboxCase && workspace.responseDraft) {
+  if (connected && canManageCase && inboxCase && savedResponseDraft) {
     try {
       latestDraftDelivery = await apiInboxDraftRepository.getLatest(
         workspace.case.id,
-        workspace.responseDraft.version,
+        savedResponseDraft.version,
       );
     } catch (error) {
       if (!(error instanceof ApiClientError)) throw error;
@@ -94,7 +98,7 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
           ? saveCaseDraft.bind(
               null,
               workspace.case.id,
-              workspace.responseDraft?.version ?? 0,
+              workspace.responseDraft?.editVersion ?? 0,
             )
           : undefined
       }
@@ -140,16 +144,16 @@ export default async function CaseWorkspacePage({ params }: { params: Promise<{ 
           : undefined
       }
       deliverDraftAction={
-        connected && canManageCase && inboxCase && workspace.responseDraft
+        connected && canManageCase && inboxCase && savedResponseDraft
           ? deliverResponseDraft.bind(
               null,
               workspace.case.id,
-              workspace.responseDraft.version,
+              savedResponseDraft.version,
             )
           : undefined
       }
       reconcileDraftAction={
-        connected && canManageCase && inboxCase && workspace.responseDraft
+        connected && canManageCase && inboxCase && savedResponseDraft
           ? reconcileResponseDraft
           : undefined
       }

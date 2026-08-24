@@ -1273,10 +1273,24 @@
               "title": "Body",
               "type": "string"
             },
+            "edit_version": {
+              "minimum": 0,
+              "title": "Edit Version",
+              "type": "integer"
+            },
             "id": {
               "maxLength": 64,
               "minLength": 1,
               "title": "Id",
+              "type": "string"
+            },
+            "source": {
+              "enum": [
+                "suggested",
+                "saved",
+                "placeholder"
+              ],
+              "title": "Source",
               "type": "string"
             },
             "status": {
@@ -1308,6 +1322,8 @@
           "required": [
             "id",
             "version",
+            "source",
+            "edit_version",
             "subject",
             "body",
             "status",

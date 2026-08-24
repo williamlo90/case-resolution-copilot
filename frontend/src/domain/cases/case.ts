@@ -75,6 +75,8 @@ export const CaseProposalSchema = z.object({
 export const CaseResponseDraftSchema = z.object({
   id: z.string().min(1),
   version: z.number().int().positive(),
+  source: z.enum(["suggested", "saved", "placeholder"]),
+  editVersion: z.number().int().nonnegative(),
   subject: z.string().min(1),
   body: z.string().min(1),
   status: z.enum(["draft", "ready", "blocked"]),

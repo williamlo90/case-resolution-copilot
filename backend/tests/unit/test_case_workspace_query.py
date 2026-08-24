@@ -112,8 +112,69 @@ def test_workspace_presentation_keeps_a_manually_saved_draft_authoritative() -> 
 
     assert response.response_draft is not None
     assert response.response_draft.id == "DFT-MANUAL-0001"
+    assert response.response_draft.source == "saved"
+    assert response.response_draft.edit_version == 3
     assert response.response_draft.body == ("This wording was reviewed and saved by the operator.")
     assert response.response_draft.body != generated.response_draft.body
+
+
+def test_workspace_presentation_uses_generated_suggestion_when_no_draft_is_saved() -> None:
+    workspace = valid_case_workspace()
+    generated = valid_decision_brief()
+
+    response = present_case_workspace(
+        CaseWorkspaceProjection(
+            workspace=workspace,
+            brief=generated,
+            evidence=(),
+            available_commands=(),
+        ),
+        organization_id="ORG-NORTHSTAR",
+    )
+
+    assert response.response_draft is not None
+    assert response.response_draft.source == "suggested"
+    assert response.response_draft.edit_version == 0
+    assert response.response_draft.body == generated.response_draft.body
+
+
+def test_workspace_presentation_replaces_legacy_placeholder_with_suggestion() -> None:
+    workspace = valid_case_workspace()
+    workspace = workspace.model_copy(
+        update={
+            "draft": ResponseDraftRecord(
+                id=uuid4(),
+                public_id=f"DFT-{workspace.case.public_id}",
+                organization_id=workspace.case.organization_id,
+                case_id=workspace.case.id,
+                subject="Re: Duplicate subscription charge",
+                body=(
+                    "Hello Maya Chen,\n\n"
+                    "We received your request and are reviewing the available information."
+                ),
+                status="draft",
+                version=1,
+                updated_at=NOW,
+            )
+        }
+    )
+    generated = valid_decision_brief()
+
+    response = present_case_workspace(
+        CaseWorkspaceProjection(
+            workspace=workspace,
+            brief=generated,
+            evidence=(),
+            available_commands=(),
+        ),
+        organization_id="ORG-NORTHSTAR",
+    )
+
+    assert response.response_draft is not None
+    assert response.response_draft.source == "suggested"
+    assert response.response_draft.edit_version == 1
+    assert response.response_draft.body == generated.response_draft.body
+    assert "We received your request" not in response.response_draft.body
 
 
 def test_workspace_hides_review_submission_when_case_changed_after_brief() -> None:

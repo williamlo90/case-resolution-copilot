@@ -116,6 +116,8 @@ def present_decision_brief(
         response_draft=ResponseDraftResponse(
             id=brief.response_draft.public_id,
             version=brief.response_draft.version,
+            source="suggested",
+            edit_version=0,
             subject=brief.response_draft.subject,
             body=brief.response_draft.body,
             status=brief.response_draft.status.value,

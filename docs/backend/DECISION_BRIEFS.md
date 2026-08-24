@@ -48,6 +48,10 @@ Each response contains:
   labels or premature promises;
 - ordered business-safe checkpoints.
 
+AI suggestions and operator-saved drafts remain separate. New cases start without a persisted
+response draft; the latest evidence-aware suggestion fills the composer until an operator saves
+wording. A saved draft remains authoritative across later brief refreshes.
+
 `completed` means the deterministic analysis ran with relevant governed policy. It does not mean the
 action is approved. `abstained` means usable policy authority was unavailable. A proposal is
 `ready_for_review` only when required context is present and current; otherwise it is

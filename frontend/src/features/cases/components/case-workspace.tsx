@@ -201,7 +201,7 @@ export function CaseWorkspace({
               addNoteAction={addNoteAction}
               loadHistoryAction={loadConversationHistoryAction}
             />
-            {workspace.responseDraft &&
+            {workspace.responseDraft?.source === "saved" &&
             (deliverDraftAction || reconcileDraftAction || initialDraftDelivery) ? (
               <GmailDraftControl
                 draftVersion={workspace.responseDraft.version}

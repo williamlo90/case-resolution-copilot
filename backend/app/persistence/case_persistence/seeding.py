@@ -20,7 +20,6 @@ from app.persistence.models import (
     ConversationMessageModel,
     ConversationThreadModel,
     OrganizationModel,
-    ResponseDraftModel,
 )
 
 from ._base import CaseRepositoryBase
@@ -175,19 +174,6 @@ class CaseSeedRepository(CaseRepositoryBase):
             version=1,
             created_at=command.request.received_at,
         )
-        draft = ResponseDraftModel(
-            public_id=f"DFT-{command.public_id}",
-            organization_id=organization_id,
-            case_id=case_uuid,
-            subject=f"Re: {command.issue}"[:300],
-            body=(
-                f"Hello {command.customer.name},\n\n"
-                "We received your request and are reviewing the available information."
-            ),
-            status="draft",
-            version=1,
-            updated_at=command.request.received_at,
-        )
         business_objects = [
             BusinessObjectSnapshotModel(
                 public_id=context.public_id,
@@ -209,7 +195,7 @@ class CaseSeedRepository(CaseRepositoryBase):
         # Persist the tenant-scoped parent before unrelated ORM mappers reference its composite key.
         self._session.add(case)
         self._session.flush()
-        self._session.add_all([request, customer, thread, draft, *business_objects])
+        self._session.add_all([request, customer, thread, *business_objects])
         self._session.flush()
         self._session.add(initial_message)
         self._session.flush()

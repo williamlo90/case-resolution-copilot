@@ -110,6 +110,8 @@ export const primaryCaseWorkspaceFixture: CaseWorkspace = CaseWorkspaceSchema.pa
   responseDraft: {
     id: "DFT-2048",
     version: 1,
+    source: "saved",
+    editVersion: 1,
     subject: "Duplicate subscription charge",
     body: "Hi Maya, we verified the duplicate USD 99.00 subscription charge. We are checking whether an automatic reversal is already pending and have prepared the adjustment for supervisor review. We will confirm the final outcome once that review is complete.",
     status: "ready",

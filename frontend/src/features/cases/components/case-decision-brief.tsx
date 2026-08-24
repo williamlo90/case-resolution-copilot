@@ -174,7 +174,8 @@ export function CaseDecisionBrief({ workspace }: { workspace: CaseWorkspace }) {
         </p>
       </section>
 
-      {workspace.responseDraft ? (
+      {workspace.responseDraft?.source !== "placeholder" &&
+      workspace.responseDraft ? (
         <details className="group border border-border bg-surface">
           <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 text-sm font-semibold text-primary">
             <MessageSquareText

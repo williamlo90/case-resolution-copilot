@@ -148,6 +148,7 @@ def test_connected_inbox_workflow_is_replay_safe_and_retains_imported_evidence(
             )
         assert workspace is not None
         assert len(workspace.messages) == 2
+        assert workspace.draft is None
     finally:
         runtime.close()
 

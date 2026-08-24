@@ -200,6 +200,8 @@ const apiCaseWorkspaceSchema = z.object({
     .object({
       id: z.string().min(1),
       version: z.number().int().positive(),
+      source: z.enum(["suggested", "saved", "placeholder"]),
+      edit_version: z.number().int().nonnegative(),
       subject: z.string().min(1),
       body: z.string().min(1),
       status: z.enum(["draft", "ready", "blocked"]),
@@ -378,6 +380,8 @@ function mapWorkspace(
       ? {
           id: raw.response_draft.id,
           version: raw.response_draft.version,
+          source: raw.response_draft.source,
+          editVersion: raw.response_draft.edit_version,
           subject: raw.response_draft.subject,
           body: raw.response_draft.body,
           status: raw.response_draft.status,

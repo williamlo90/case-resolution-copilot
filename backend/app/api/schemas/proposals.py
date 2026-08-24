@@ -33,6 +33,8 @@ class ProposedActionResponse(ApiSchema):
 class ResponseDraftResponse(ApiSchema):
     id: PublicId
     version: Version
+    source: Literal["suggested", "saved", "placeholder"]
+    edit_version: int = Field(ge=0)
     subject: str = Field(min_length=1, max_length=300)
     body: str = Field(min_length=1)
     status: Literal["draft", "ready", "blocked"]

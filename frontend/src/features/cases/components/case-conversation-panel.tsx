@@ -97,10 +97,14 @@ export function CaseConversationPanel({
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [historyPending, startHistoryTransition] = useTransition();
   const composerTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [draft, setDraft] = useState(workspace.responseDraft?.body ?? "");
+  const initialDraft =
+    workspace.responseDraft?.source === "placeholder"
+      ? null
+      : workspace.responseDraft;
+  const [draft, setDraft] = useState(initialDraft?.body ?? "");
   const [note, setNote] = useState("");
   const [subject, setSubject] = useState(
-    workspace.responseDraft?.subject ?? `${workspace.case.id} support update`,
+    initialDraft?.subject ?? `${workspace.case.id} support update`,
   );
   const composerModes = ["reply", "note"] as const;
 
