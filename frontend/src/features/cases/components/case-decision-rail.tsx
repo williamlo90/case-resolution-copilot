@@ -24,6 +24,58 @@ export type WorkflowControl = {
   action: ServerCommand;
 };
 
+type HumanReviewPresentation = {
+  label: string;
+  description: string;
+  required: boolean;
+};
+
+function humanReviewPresentation(
+  workspace: CaseWorkspace,
+): HumanReviewPresentation {
+  if (!workspace.proposal) {
+    return {
+      label: "Review check pending",
+      description: "Prepare the brief to check whether a reviewer is needed.",
+      required: false,
+    };
+  }
+
+  if (workspace.proposedActions.some((action) => action.reviewRequired)) {
+    return {
+      label: "Human review required before execution",
+      description:
+        "An authorized reviewer must approve this exact version before the proposed action can run.",
+      required: true,
+    };
+  }
+
+  if (workspace.proposal.state === "information_needed") {
+    return {
+      label: "No approval needed to request information",
+      description:
+        "Human review applies later, before any financial or customer-impacting action can run.",
+      required: false,
+    };
+  }
+
+  const laterReviewRequired = workspace.risks.some(
+    (risk) => risk.outcome === "requires_review",
+  );
+  return laterReviewRequired
+    ? {
+        label: "No approval needed for this step",
+        description:
+          "Human review applies before a later financial or customer-impacting action can run.",
+        required: false,
+      }
+    : {
+        label: "No human review needed",
+        description: "The suggested action is within the current operator's authority.",
+        required: false,
+      };
+}
+
 function SubmitReviewControl({ action }: { action: ServerCommand }) {
   const [state, formAction, pending] = useActionState(
     action,
@@ -135,6 +187,7 @@ export function CaseDecisionRail({
   const canSubmit =
     proposal !== null &&
     workspace.availableCommands.includes("submit_for_review");
+  const humanReview = humanReviewPresentation(workspace);
 
   return (
     <aside
@@ -192,16 +245,21 @@ export function CaseDecisionRail({
         <section className="border-b border-border px-5 py-6 lg:px-7">
           <h2 className="text-base font-semibold text-primary">Human review</h2>
           <div className="mt-4 flex items-start gap-3">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full border border-warning/40 text-warning">
+            <span
+              className={`grid size-8 shrink-0 place-items-center rounded-full border ${
+                humanReview.required
+                  ? "border-warning/40 text-warning"
+                  : "border-info/40 text-info"
+              }`}
+            >
               <ShieldCheck aria-hidden="true" size={17} />
             </span>
             <div>
               <p className="text-sm font-medium text-primary">
-                Supervisor review required
+                {humanReview.label}
               </p>
               <p className="mt-1 text-xs leading-5 text-secondary">
-                The proposed action cannot run until an authorized reviewer
-                approves this exact version.
+                {humanReview.description}
               </p>
             </div>
           </div>

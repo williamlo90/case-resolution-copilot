@@ -21,7 +21,9 @@ describe("CaseWorkspace", () => {
     expect(screen.getByRole("heading", { name: "Verified facts" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Information needed" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Reverse duplicate charge" })).toBeVisible();
-    expect(screen.getByText("Supervisor review required")).toBeVisible();
+    expect(
+      screen.getByText("Human review required before execution"),
+    ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Submit for review" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "submitted for review",
@@ -59,6 +61,41 @@ describe("CaseWorkspace", () => {
       "/cases/CS-2048/audit",
     );
     expect(auditButton.closest("form")).toHaveAttribute("method", "post");
+  });
+
+  it("separates information requests from later human approval", () => {
+    render(
+      <CaseWorkspace
+        workspace={{
+          ...primaryCaseWorkspaceFixture,
+          proposal: {
+            ...primaryCaseWorkspaceFixture.proposal!,
+            state: "information_needed",
+          },
+          proposedActions: [
+            {
+              ...primaryCaseWorkspaceFixture.proposedActions[0],
+              type: "request_information",
+              label: "Request the missing information",
+              impact: null,
+              reviewRequired: false,
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByText("No approval needed to request information"),
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "Human review applies later, before any financial or customer-impacting action can run.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.queryByText("Supervisor review required"),
+    ).not.toBeInTheDocument();
   });
 
   it("does not present a legacy placeholder as a customer response", async () => {
