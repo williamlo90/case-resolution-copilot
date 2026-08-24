@@ -3,6 +3,7 @@ import {
   assertProviderAuthenticationConfigured,
   providerAuthenticationEnabled,
 } from "@/config/authentication";
+import { headers as incomingRequestHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z, type ZodType } from "zod";
@@ -78,6 +79,38 @@ function apiBaseUrl(): string {
   return (
     process.env.SUPPORT_COPILOT_API_INTERNAL_URL ?? "http://127.0.0.1:8000"
   ).replace(/\/+$/, "");
+}
+
+function vercelProtectionOidcEnabled(): boolean {
+  return process.env.SUPPORT_COPILOT_VERCEL_PROTECTION_OIDC_ENABLED === "true";
+}
+
+async function applyVercelProtectionOidc(headers: Headers): Promise<void> {
+  if (!vercelProtectionOidcEnabled()) return;
+
+  const backendUrl = new URL(apiBaseUrl());
+  if (
+    backendUrl.protocol !== "https:" ||
+    !backendUrl.hostname.endsWith(".vercel.app")
+  ) {
+    throw new ApiClientError(
+      "Protected backend access is misconfigured.",
+      503,
+      "backend_protection_misconfigured",
+      "unavailable",
+    );
+  }
+
+  const token = (await incomingRequestHeaders()).get("x-vercel-oidc-token");
+  if (!token) {
+    throw new ApiClientError(
+      "Protected backend access is temporarily unavailable.",
+      503,
+      "backend_protection_token_unavailable",
+      "unavailable",
+    );
+  }
+  headers.set("x-vercel-trusted-oidc-idp-token", token);
 }
 
 function developmentActorId(): string {
@@ -185,6 +218,7 @@ export async function apiRequest<T>(
   headers.set("Accept", "application/json");
   try {
     await applyAuthentication(headers);
+    await applyVercelProtectionOidc(headers);
   } catch (error) {
     redirectReadAccessError(error, init);
     throw error;
