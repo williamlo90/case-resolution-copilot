@@ -657,6 +657,77 @@ def test_retrieval_uses_bounded_lexical_fallback_when_vector_score_is_low() -> N
     assert store.bindings[0].retrieval_score > 0.01
 
 
+def test_retrieval_prefers_matching_refund_clause_within_policy() -> None:
+    candidate = _candidate("POL-BILLING")
+    version = candidate.version.model_copy(
+        update={"case_categories": [CaseCategory.REFUND_REQUEST.value]}
+    )
+    duplicate_clause = candidate.clauses[0].model_copy(
+        update={"policy_version_id": version.id}
+    )
+    refund_text = (
+        "An unused service order may be refunded when delivery has not started and no "
+        "non-refundable commitment is recorded. Human review is required before execution."
+    )
+    refund_clause = duplicate_clause.model_copy(
+        update={
+            "id": uuid4(),
+            "public_id": f"POLC-{uuid4().hex[:12].upper()}",
+            "sequence": 2,
+            "heading": "Refund eligibility",
+            "text": refund_text,
+            "applies_when": "Refund request cases.",
+            "content_hash": "c" * 64,
+            "embedding": embed(refund_text),
+        }
+    )
+    candidates = [
+        PolicyCandidateRecord(
+            policy=candidate.policy,
+            version=version,
+            clauses=[duplicate_clause],
+        ),
+        PolicyCandidateRecord(
+            policy=candidate.policy,
+            version=version,
+            clauses=[refund_clause],
+        ),
+    ]
+    workspace = _case_workspace()
+    workspace = workspace.model_copy(
+        update={
+            "case": workspace.case.model_copy(
+                update={
+                    "category": CaseCategory.REFUND_REQUEST,
+                    "issue": "Enterprise customer requests a refund for an unused setup",
+                }
+            ),
+            "request": workspace.request.model_copy(
+                update={
+                    "summary": "Refund request for an unused order before delivery started."
+                }
+            ),
+        }
+    )
+    store = EvidencePolicyStore(candidates, retrieval_score=0.9)
+    service = PolicyEvidenceService(
+        cast(PolicyEvidenceStore, store),
+        cast(CaseEvidenceStore, FixedCaseStore(workspace)),
+    )
+
+    result = service.refresh_for_case(
+        actor=DeterministicAuthProvider().authenticate("USR-0001"),
+        case_id="CS-2048",
+        correlation_id="corr-refund-clause",
+        as_of=NOW,
+    )
+
+    assert result.status is EvidenceRetrievalStatus.RELEVANT
+    assert len(result.evidence) == 1
+    assert result.evidence[0].clause.heading == "Refund eligibility"
+    assert store.bindings[0].clause.public_id == refund_clause.public_id
+
+
 def test_retrieval_reports_stale_without_recording_evidence() -> None:
     service, store = _evidence_service(
         [_candidate("POL-FUTURE", effective_from=NOW + timedelta(days=1))]

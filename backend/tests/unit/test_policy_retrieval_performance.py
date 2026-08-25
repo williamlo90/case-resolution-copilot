@@ -16,5 +16,6 @@ def test_governed_retrieval_architecture_remains_filtered_ranked_and_bounded() -
     assert "category_match" in repository_source
     assert "applicability_match" in repository_source
     assert "effective_match" in repository_source
+    assert "seen_policies" not in repository_source
     assert "list_candidates" not in service_source
     assert "_cosine_similarity" not in service_source

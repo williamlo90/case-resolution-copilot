@@ -270,22 +270,17 @@ class PolicyQueryRepository(PolicyRepositoryBase):
             )
             .limit(candidate_limit)
         ).all()
-        candidates: list[RankedPolicyCandidateRecord] = []
-        seen_policies = set()
-        for policy, active_version, clause, score in clause_rows:
-            if policy.id in seen_policies:
-                continue
-            seen_policies.add(policy.id)
-            candidates.append(
-                RankedPolicyCandidateRecord(
-                    candidate=PolicyCandidateRecord(
-                        policy=PolicyRecord.model_validate(policy),
-                        version=GovernedPolicyVersionRecord.model_validate(active_version),
-                        clauses=[GovernedPolicyClauseRecord.model_validate(clause)],
-                    ),
-                    retrieval_score=max(-1.0, min(1.0, float(score))),
-                )
+        candidates = [
+            RankedPolicyCandidateRecord(
+                candidate=PolicyCandidateRecord(
+                    policy=PolicyRecord.model_validate(policy),
+                    version=GovernedPolicyVersionRecord.model_validate(active_version),
+                    clauses=[GovernedPolicyClauseRecord.model_validate(clause)],
+                ),
+                retrieval_score=max(-1.0, min(1.0, float(score))),
             )
+            for policy, active_version, clause, score in clause_rows
+        ]
         return PolicyRetrievalCandidatePage(
             category_matches=category_matches,
             applicable_matches=applicable_matches,

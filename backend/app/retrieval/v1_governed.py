@@ -130,33 +130,37 @@ def _bindings(
     *,
     query_text: str,
 ) -> list[PolicyEvidenceBinding]:
-    bindings: list[PolicyEvidenceBinding] = []
+    ranked_bindings: dict[
+        str,
+        tuple[tuple[bool, float, float, int], PolicyEvidenceBinding],
+    ] = {}
     for ranked in search.candidates:
         candidate = ranked.candidate
-        if not candidate.clauses:
-            continue
-        clause = candidate.clauses[0]
-        retrieval_score = max(
-            ranked.retrieval_score,
-            lexical_relevance(query_text, clause.text),
-        )
-        if retrieval_score < RETRIEVAL_SCORE_THRESHOLD:
-            continue
-        applicability = context_label(context, candidate.version.decision_scope)
-        fingerprint = sha256(
-            "|".join(
-                [
-                    workspace.case.public_id,
-                    candidate.policy.public_id,
-                    str(candidate.version.version),
-                    candidate.version.content_hash,
-                    clause.content_hash,
-                    applicability,
-                ]
-            ).encode()
-        ).hexdigest()
-        bindings.append(
-            PolicyEvidenceBinding(
+        for clause in candidate.clauses:
+            lexical_score = lexical_relevance(query_text, clause.text)
+            retrieval_score = max(ranked.retrieval_score, lexical_score)
+            if retrieval_score < RETRIEVAL_SCORE_THRESHOLD:
+                continue
+            preference = (
+                lexical_score >= RETRIEVAL_SCORE_THRESHOLD,
+                lexical_score,
+                ranked.retrieval_score,
+                -clause.sequence,
+            )
+            applicability = context_label(context, candidate.version.decision_scope)
+            fingerprint = sha256(
+                "|".join(
+                    [
+                        workspace.case.public_id,
+                        candidate.policy.public_id,
+                        str(candidate.version.version),
+                        candidate.version.content_hash,
+                        clause.content_hash,
+                        applicability,
+                    ]
+                ).encode()
+            ).hexdigest()
+            binding = PolicyEvidenceBinding(
                 policy=candidate.policy,
                 version=candidate.version,
                 clause=clause,
@@ -164,9 +168,11 @@ def _bindings(
                 applicability=applicability,
                 fingerprint=fingerprint,
             )
-        )
+            current = ranked_bindings.get(candidate.policy.public_id)
+            if current is None or preference > current[0]:
+                ranked_bindings[candidate.policy.public_id] = (preference, binding)
     return sorted(
-        bindings,
+        (item[1] for item in ranked_bindings.values()),
         key=lambda binding: (
             -binding.retrieval_score,
             binding.policy.public_id,
