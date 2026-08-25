@@ -1,0 +1,31 @@
+{
+  "date": "2026-08-25",
+  "scope": "controlled_pilot_operational_readiness",
+  "migration": {
+    "status": "passed",
+    "head": "20260813_0024",
+    "bases": 1,
+    "heads": 1,
+    "revisions": 24,
+    "postgresql_version": "18.6",
+    "pgvector_active": true
+  },
+  "verification": {
+    "backend_focused_total_passed": 79,
+    "backend_unit_and_contract_passed": 73,
+    "postgresql_integration_passed": 3,
+    "provider_simulator_passed": 4,
+    "frontend_recovery_passed": 35
+  },
+  "hosted_readiness": {
+    "route": "/cases",
+    "authenticated": true,
+    "warm_primary_content_ready_ms": 375,
+    "gate_ms": 2500,
+    "passed": true,
+    "runtime_errors": 0,
+    "exact_lcp_claimed": false
+  },
+  "hosted_identity_boundary": "clerk_development_instance",
+  "verdict": "passed_for_controlled_pilot"
+}

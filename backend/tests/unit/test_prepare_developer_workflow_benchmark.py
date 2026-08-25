@@ -14,7 +14,7 @@ def _write_target(
     path.write_text(
         "\n".join(
             [
-                f"TEST_DATABASE_URL=postgresql://user:secret@{host}/app?sslmode=require",
+                f"TEST_DATABASE_URL=postgresql://user:example@{host}/app?sslmode=require",
                 "TEST_DATABASE_SCOPE=disposable",
                 f"TEST_DATABASE_ENDPOINT_ID={endpoint_id}",
             ]

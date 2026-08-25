@@ -116,6 +116,9 @@ requires the new revision to be deployed. This deferral does not count hosted be
 Phase 3 remains **implementation complete, hosted acceptance pending** until Phase 8 records the
 connect, import, and replay evidence.
 
+Closeout note (2026-08-25): Phase 8 subsequently passed the hosted connection journey and the
+guarded PostgreSQL import/replay, disconnect/reconnect, retained-evidence, and audit checks.
+
 ## Phase 4 - Governed RAG V2
 
 The RAG corpus contains only official policies and procedures. Emails, invoices, and payment proofs
@@ -172,6 +175,9 @@ Evidence and limits are recorded in
 Gmail draft creation remains a single bounded hosted acceptance step in Phase 8; it is not implied
 by this synthetic local result.
 
+Closeout note (2026-08-25): the bounded hosted Gmail step subsequently passed with one persisted
+draft, no automatic send operation, and no repeat create command after reload.
+
 Hardening note (2026-08-23): approval now publishes the immutable proposal response into the
 case-level ready draft. Gmail delivery compares a content fingerprint against that approved proposal
 before provider or credential access. A later edit returns the draft to `draft` status and requires a
@@ -214,11 +220,11 @@ lane passed `46` tests. The narrative gateway now rejects inputs above 24,000 ch
 provider access and caps output at 1,200 tokens. The API key was detected only as a boolean
 configuration state and was not printed, copied, or persisted. Sanitized evidence is in
 [`backend/evaluations/openai_activation`](../../backend/evaluations/openai_activation/README.md).
-The runtime default remains deterministic until Phase 8; token usage and cost-per-case measurement
-remain explicit Phase 7 work. Project budget controls are user-managed and were reported configured,
-not independently inspected by this repository gate. The final serial backend gate passed `389`
-unit/contract tests; Ruff, strict Mypy across `425` Python files, JSON validation, secret scanning,
-and diff validation also passed.
+The runtime default remained deterministic until the later activation gate; token usage and
+cost-per-case measurement were explicit Phase 7 work. Project budget controls are user-managed and
+were reported configured, not independently inspected by this repository gate. The final serial
+backend gate passed `389` unit/contract tests; Ruff, strict Mypy across `425` Python files, JSON
+validation, secret scanning, and diff validation also passed.
 
 ## Phase 7 - Verification And Evaluation
 
@@ -240,7 +246,8 @@ Initial targets:
 - Unsafe automatic action: `0`.
 - Duplicate case or draft on replay: `0`.
 - Approval correctness for critical cases: `100%`.
-- Warm authenticated UI LCP: no more than `2.5s`.
+- Warm authenticated primary-content readiness: no more than `2.5s`; publish exact LCP only when
+  `PerformanceObserver` or production Web Vitals telemetry is available.
 - Cost per case is measured rather than guessed.
 
 Completion note (2026-08-19): the local Phase 7 gate passed. Network-free verification passed `331`
@@ -260,12 +267,12 @@ calls and control preservation `1.000`. The provider reported `1,017` input and 
 at the official price checked on 2026-08-18, total cost was `$0.000537`, or `$0.000179` per evaluated
 case. Sanitized evidence is in
 [`backend/evaluations/phase7_verification`](../../backend/evaluations/phase7_verification/README.md).
-Hosted Gmail acceptance, role journeys, warm authenticated UI LCP, and the timed operator benchmark
-remain explicit Phase 8 work.
+Hosted Gmail acceptance, role journeys, authenticated UI readiness, and the timed operator
+benchmark became explicit Phase 8 work and were closed in the Phase 8 evidence record below.
 
 ## Phase 8 - Deployment And Operational Readiness
 
-Status on 2026-08-23: **core connected journey passed; operational edge cases and impact benchmark remain open**.
+Status on 2026-08-25: **complete for controlled-pilot operational readiness**.
 
 Completed against the hosted current-source deployment:
 
@@ -279,23 +286,36 @@ Completed against the hosted current-source deployment:
 
 The sanitized record is
 [`docs/evidence/hosted-connected-draft-acceptance/2026-08-23`](../evidence/hosted-connected-draft-acceptance/2026-08-23/README.md).
-Phase 8 is not complete until the timed benchmark, warm authenticated LCP measurement, and hosted
-connection/provider failure paths below are executed.
+The disposable hosted benchmark environment, Specialist identity, and three Product B workspaces
+also passed a non-mutating preflight on revision `5d16c3a`; see the
+[sanitized preflight record](../evidence/developer-workflow-benchmark/HOSTED_PREFLIGHT_2026-08-24.md).
+The six-case developer-operated synthetic benchmark is complete: Copilot produced `3/3` complete
+safe workflow outcomes versus `0/3` manually, with raw median elapsed time of `95 s` versus `582 s`.
+The result, persisted-state snapshot, scoring boundary, and limitations are recorded in the
+[benchmark report](../evidence/developer-workflow-benchmark/REPORT.md).
 
-- Apply migrations to the intended Neon environment.
-- Deploy with new feature flags disabled.
-- Add Vercel environment variables at the final activation gate.
-- Activate only one test inbox initially.
-- Complete the deferred Phase 3 gate: connect the test inbox, import one allowlisted synthetic
-  thread, repeat the import, and prove that only one case, external thread, and message set exist.
-- Verify the hosted connection states and audit trail for connect, sync, needs-attention, disconnect,
-  and reconnect behavior.
-- Test disconnect, token expiry, rate limits, timeouts, and provider outages.
-- Prepare kill switches, replay tooling, retention rules, and credential rotation.
-- Capture screenshots and benchmark evidence for the portfolio.
-- Execute the six-case timed operator benchmark without opening its answer key early.
-- Verify warm authenticated UI LCP is no more than `2.5s` with one bounded browser scenario.
-- Make claims only from tests that were actually executed.
+The closeout gate then passed on the current worktree:
+
+- the migration graph reported one base, one head (`20260813_0024`), and 24 revisions;
+- the guarded disposable Neon branch accepted the migration rehearsal with PostgreSQL 18.6 and
+  pgvector active;
+- connect, import replay, sync replay, pause, resume, disconnect, reconnect, retained evidence, and
+  lifecycle audit correlations passed in PostgreSQL;
+- provider duplicate, timeout, outage, rate-limit, expiry, unknown-outcome, and reconciliation paths
+  passed through deterministic fault injection;
+- tenant-scoped operational controls and frontend recovery states passed focused verification;
+- the hosted authenticated `Cases` route reached visible primary content in 375 ms on a bounded warm
+  reload against the 2,500 ms pilot gate, with no application runtime error.
+
+The browser surface does not expose `PerformanceObserver`, so 375 ms is recorded as primary-content
+readiness rather than published as exact W3C LCP. Destructive live-provider faults were not induced
+against Gmail; the real provider boundary is covered by the hosted journey and failure behavior by
+controlled adapters. Exact Web Vitals telemetry, a production Clerk instance, distributed rate
+limiting, centralized alerting, and a production restore drill remain promotion work beyond the
+controlled-pilot boundary.
+
+The full closeout matrix is in
+[`docs/evidence/phase8-operational-readiness/2026-08-25`](../evidence/phase8-operational-readiness/2026-08-25/README.md).
 
 ## Responsibility Split
 

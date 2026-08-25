@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
+from sqlalchemy import select
 
 from app.config import Settings
 from app.domain.cases import CaseCategory, CaseRisk, CaseUrgency
@@ -10,7 +11,7 @@ from app.domain.inbox import InboxAuthorizationError, InboxConflict
 from app.domain.inbox.external import SelectedThreadImportCommand
 from app.persistence.case_repository import CaseRepository
 from app.persistence.database import Database
-from app.persistence.models import MembershipModel, OrganizationModel
+from app.persistence.models import AuditEventModel, MembershipModel, OrganizationModel
 from app.runtime.inbox import build_inbox_runtime
 from app.security.authentication import DeterministicAuthProvider
 
@@ -149,6 +150,45 @@ def test_connected_inbox_workflow_is_replay_safe_and_retains_imported_evidence(
         assert workspace is not None
         assert len(workspace.messages) == 2
         assert workspace.draft is None
+
+        reconnect_started = runtime.authorization.start(
+            actor=admin,
+            include_drafts=False,
+            return_path="/connections",
+            login_hint=None,
+        )
+        reconnect_state = parse_qs(urlsplit(reconnect_started.authorization_url).query)[
+            "state"
+        ][0]
+        reconnected = runtime.authorization.complete(
+            actor=admin,
+            state=reconnect_state,
+            code="deterministic-code",
+            correlation_id="phase7-reconnect",
+        )
+        assert reconnected.connection_public_id == connected.connection_public_id
+        assert runtime.browse.list_threads(
+            actor=specialist,
+            connection_id=reconnected.connection_public_id,
+            page_token=None,
+            limit=10,
+        ).items
+
+        with database.session() as session:
+            audit_events = session.scalars(
+                select(AuditEventModel)
+                .where(AuditEventModel.subject_id == connected.connection_public_id)
+                .order_by(AuditEventModel.occurred_at)
+            ).all()
+        assert [event.event_type for event in audit_events].count("inbox.connected") == 2
+        assert [event.event_type for event in audit_events].count("inbox.disconnected") == 1
+        assert {
+            "phase7-connect",
+            "phase7-pause",
+            "phase7-resume",
+            "phase7-disconnect",
+            "phase7-reconnect",
+        }.issubset({event.correlation_id for event in audit_events})
     finally:
         runtime.close()
 

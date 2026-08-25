@@ -3,9 +3,15 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from inspect import getsource
 
+import httpx
 import pytest
 
-from app.domain.inbox import AccessCredential, AuthorizationRequest, InboxProviderUnavailable
+from app.domain.inbox import (
+    AccessCredential,
+    AuthorizationRequest,
+    InboxAuthorizationError,
+    InboxProviderUnavailable,
+)
 from app.integrations.gmail import (
     GmailAuthorizationAdapter,
     GmailDraftAdapter,
@@ -189,6 +195,48 @@ def test_gmail_transport_rejects_non_allowlisted_credential_endpoints(
                 access_token=None if authorization_request else "access-token",
                 data={"refresh_token": "refresh-token"} if authorization_request else None,
                 authorization_request=authorization_request,
+            )
+    finally:
+        transport.close()
+
+
+@pytest.mark.parametrize("status_code", [429, 503])
+def test_gmail_transport_fails_closed_for_rate_limit_and_provider_outage(
+    monkeypatch: pytest.MonkeyPatch,
+    status_code: int,
+) -> None:
+    transport = GmailTransport(timeout_seconds=1)
+    monkeypatch.setattr(
+        transport._client,
+        "request",
+        lambda *args, **kwargs: httpx.Response(status_code, json={}),
+    )
+    try:
+        with pytest.raises(InboxProviderUnavailable, match=f"status {status_code}"):
+            transport.request_json(
+                "GET",
+                "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+                access_token="access-token",
+            )
+    finally:
+        transport.close()
+
+
+def test_gmail_transport_requests_reauthorization_for_expired_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    transport = GmailTransport(timeout_seconds=1)
+    monkeypatch.setattr(
+        transport._client,
+        "request",
+        lambda *args, **kwargs: httpx.Response(401, json={}),
+    )
+    try:
+        with pytest.raises(InboxAuthorizationError, match="no longer valid"):
+            transport.request_json(
+                "GET",
+                "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+                access_token="expired-access-token",
             )
     finally:
         transport.close()

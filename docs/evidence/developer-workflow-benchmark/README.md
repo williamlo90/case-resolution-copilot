@@ -9,16 +9,19 @@ not pass.
 
 ## Current Status
 
-- Six matched synthetic cases are defined: three Manual A variants and three Copilot B variants.
+- The six-case timed run is complete: three Manual A variants and three Copilot B variants.
 - The answer key is stored locally under `withheld/` and ignored by Git.
 - `frozen-manifest.json` commits SHA-256 hashes for the public fixtures and the withheld answer key
   before any timed run is recorded.
-- The manual five-view browser workspace and guarded Product B seed script are ready.
-- The six rows in `raw-results.csv` are prefilled in the frozen run order.
-- The scorer refuses incomplete sessions and opens the withheld answer key only after all six rows
-  pass completeness checks.
-- The result sheet and report remain unexecuted. No timed benchmark has been run and no time-saving
-  claim is supported yet.
+- The manual five-view browser workspace and guarded Product B seed script were used as defined.
+- Hosted Preview preflight passed for all three Product B workspaces on revision `5d16c3a`; see
+  [the sanitized preflight record](HOSTED_PREFLIGHT_2026-08-24.md).
+- Final observable workflow result: Copilot `3/3`; manual `0/3`.
+- Raw median elapsed time: Copilot `95 s`; manual `582 s`.
+- The current Copilot state was re-read from the disposable Neon branch without exporting secrets.
+- Three targeted safety and recovery tests passed in one serial Pytest process.
+
+See [REPORT.md](REPORT.md) for interpretation and claim boundaries.
 
 ## Benchmark Lanes
 
@@ -57,6 +60,9 @@ developer-workflow-benchmark/
 |-- product-fixtures/
 |-- withheld/answer-key.json
 |-- raw-results.csv
+|-- observable-results.csv
+|-- strict-diagnostic-results.csv
+|-- copilot-state-snapshot.json
 `-- REPORT.md
 ```
 
@@ -75,29 +81,36 @@ This validates the six public fixtures against the real `CaseCreate` model, chec
 complexity, verifies answer leakage is absent, and confirms Lane B selectors still exist. It starts
 no browser, server, database, container, or provider call.
 
-## Run Later
+## Reproduce Final Scoring
 
-Start with [OPERATOR_RUNBOOK.md](OPERATOR_RUNBOOK.md), then use [PROTOCOL.md](PROTOCOL.md) when a
-rule needs clarification. Do not open `withheld/answer-key.json` until all six timed runs are
-recorded. Product fixture seeding requires an explicitly approved non-production database and is
-intentionally not part of local validation.
-
-After all six rows are complete, run the scorer from `backend/`:
+The run is already complete. With the same disposable validation database available through
+`.env.test.local`, regenerate the final local evidence from `backend/`:
 
 ```powershell
-uv run python -m scripts.score_developer_workflow_benchmark `
+uv run python -m scripts.finalize_developer_workflow_benchmark `
   --product-commit <tested-commit> `
   --benchmark-commit <benchmark-commit> `
-  --browser "Microsoft Edge" `
-  --deployment "https://your-deployment.example" `
+  --browser "Codex in-app browser" `
+  --deployment "benchmark-validation Vercel preview" `
   --seed-target "approved-non-production-branch"
 ```
 
-This generates `scored-results.csv` and replaces the report template with a scored report.
+This regenerates `observable-results.csv`, `copilot-state-snapshot.json`, and `REPORT.md`. The
+original exact-ID scorer output remains as `strict-diagnostic-results.csv`; it is an
+instrumentation diagnostic, not the final workflow result.
+
+## Final Scoring Contract
+
+- Evidence uses source references visible to an operator, such as invoice and payment references.
+- UI labels are normalized to their canonical safe actions.
+- Approval checks the human-review boundary; the active settings may route a case to a stronger
+  reviewer role.
+- Copilot results must also match the state persisted in the disposable database.
+- Unsupported consequential claims or unsafe execution attempts fail a case.
 
 ## Claim Boundary
 
-After execution, report correctness before timing and retain this limitation:
+Report correctness before timing and retain this limitation:
 
 > This developer-operated benchmark uses matched synthetic cases. It measures repeatable workflow
 > performance by the product builder, not production-user productivity or customer impact.

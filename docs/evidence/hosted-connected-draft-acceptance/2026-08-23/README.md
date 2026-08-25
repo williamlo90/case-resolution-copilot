@@ -96,3 +96,7 @@ email addresses are not included.
 - Exercise hosted disconnect, reconnect, expiry, rate-limit, timeout, and ambiguous-provider recovery paths.
 - Run the planned usability study before claiming that operators find the terminology intuitive.
 - The source case continues to display `Needs review` after approval while the unsent external draft remains pending. The immutable review and Gmail authorization are correct, but the label is a non-blocking usability gap.
+
+These items describe the boundary on 2026-08-23. The timed benchmark, operational fault matrix, and
+bounded authenticated performance check were later closed in the
+[Phase 8 operational-readiness record](../../phase8-operational-readiness/2026-08-25/README.md).

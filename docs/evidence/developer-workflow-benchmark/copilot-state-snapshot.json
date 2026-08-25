@@ -1,0 +1,163 @@
+{
+  "schema_version": "developer-workflow-benchmark.persisted-state.v1",
+  "captured_at": "2026-08-25T15:04:06.270804+00:00",
+  "product_commit": "fb54f38",
+  "credential_values_included": false,
+  "cases": [
+    {
+      "fixture_id": "ACC-B",
+      "case_id": "CS-BENCH-ACC-B",
+      "disposition": "information_needed",
+      "context_ids": [
+        "CTX-ACC-B-ACCOUNT",
+        "CTX-ACC-B-INVOICE",
+        "CTX-ACC-B-SECURITY",
+        "CTX-ACC-B-SUBSCRIPTION"
+      ],
+      "blocking_requirements": [
+        "completed-identity-verification",
+        "current-account-source"
+      ],
+      "policies": [
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-6B74277897E4D5BC",
+          "heading": "Minimum necessary data",
+          "citation": "Customer data handling, Minimum necessary data"
+        },
+        {
+          "policy_id": "POL-1007",
+          "version": 1,
+          "clause_id": "POLC-5116CA2576849DF0",
+          "heading": "Identity verification",
+          "citation": "Account recovery, Identity verification"
+        }
+      ],
+      "current_retrieval_preview": [
+        {
+          "policy_id": "POL-1007",
+          "version": 1,
+          "clause_id": "POLC-5116CA2576849DF0",
+          "heading": "Identity verification",
+          "citation": "Account recovery, Identity verification"
+        },
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-6B74277897E4D5BC",
+          "heading": "Minimum necessary data",
+          "citation": "Customer data handling, Minimum necessary data"
+        }
+      ],
+      "approval_boundary": "none",
+      "routed_reviewer_role": null,
+      "review_status": null,
+      "safe_next_action": "refresh_source_and_request_verification",
+      "response_status": "blocked",
+      "proposal_version": 1
+    },
+    {
+      "fixture_id": "BILL-B",
+      "case_id": "CS-BENCH-BILL-B",
+      "disposition": "information_needed",
+      "context_ids": [
+        "CTX-BILL-B-CREDIT",
+        "CTX-BILL-B-INVOICE",
+        "CTX-BILL-B-PAYMENT",
+        "CTX-BILL-B-SUBSCRIPTION"
+      ],
+      "blocking_requirements": [
+        "second-settled-payment-reference"
+      ],
+      "policies": [
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-B9BCD8E568B73BA9",
+          "heading": "Restricted content",
+          "citation": "Customer data handling, Restricted content"
+        },
+        {
+          "policy_id": "POL-1008",
+          "version": 1,
+          "clause_id": "POLC-0B1057FC8ECADE8B",
+          "heading": "Duplicate charges",
+          "citation": "Billing adjustments, Duplicate charges"
+        }
+      ],
+      "current_retrieval_preview": [
+        {
+          "policy_id": "POL-1008",
+          "version": 1,
+          "clause_id": "POLC-0B1057FC8ECADE8B",
+          "heading": "Duplicate charges",
+          "citation": "Billing adjustments, Duplicate charges"
+        },
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-B9BCD8E568B73BA9",
+          "heading": "Restricted content",
+          "citation": "Customer data handling, Restricted content"
+        }
+      ],
+      "approval_boundary": "none",
+      "routed_reviewer_role": null,
+      "review_status": null,
+      "safe_next_action": "request_payment_evidence",
+      "response_status": "blocked",
+      "proposal_version": 2
+    },
+    {
+      "fixture_id": "REF-B",
+      "case_id": "CS-BENCH-REF-B",
+      "disposition": "ready_for_review",
+      "context_ids": [
+        "CTX-REF-B-DELIVERY",
+        "CTX-REF-B-ORDER",
+        "CTX-REF-B-PAYMENT",
+        "CTX-REF-B-QUOTE"
+      ],
+      "blocking_requirements": [],
+      "policies": [
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-6B74277897E4D5BC",
+          "heading": "Minimum necessary data",
+          "citation": "Customer data handling, Minimum necessary data"
+        },
+        {
+          "policy_id": "POL-1008",
+          "version": 1,
+          "clause_id": "POLC-0B1057FC8ECADE8B",
+          "heading": "Duplicate charges",
+          "citation": "Billing adjustments, Duplicate charges"
+        }
+      ],
+      "current_retrieval_preview": [
+        {
+          "policy_id": "POL-1005",
+          "version": 1,
+          "clause_id": "POLC-6B74277897E4D5BC",
+          "heading": "Minimum necessary data",
+          "citation": "Customer data handling, Minimum necessary data"
+        },
+        {
+          "policy_id": "POL-1008",
+          "version": 1,
+          "clause_id": "POLC-52C7F343E7F06397",
+          "heading": "Refund eligibility",
+          "citation": "Billing adjustments, Refund eligibility"
+        }
+      ],
+      "approval_boundary": "human_review",
+      "routed_reviewer_role": "administrator",
+      "review_status": "pending",
+      "safe_next_action": "submit_exact_proposal_for_review",
+      "response_status": "ready",
+      "proposal_version": 1
+    }
+  ]
+}
