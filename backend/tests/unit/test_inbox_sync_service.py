@@ -49,6 +49,7 @@ class _JobStore:
         self.work = work
         self.claimed = False
         self.claim_scope: tuple[str | None, str | None] | None = None
+        self.lease_seconds: int | None = None
         self.failure: tuple[UUID, str, str, bool] | None = None
 
     def enqueue(
@@ -70,7 +71,8 @@ class _JobStore:
         organization_public_id: str | None = None,
         connection_public_id: str | None = None,
     ) -> list[InboxSyncWorkRecord]:
-        del worker_id, limit, now, lease_seconds
+        del worker_id, limit, now
+        self.lease_seconds = lease_seconds
         self.claim_scope = (organization_public_id, connection_public_id)
         if self.claimed:
             return []
@@ -79,6 +81,32 @@ class _JobStore:
 
     def get(self, *, job_id: UUID) -> InboxSyncJobRecord | None:
         return self.work.job if job_id == self.work.job.id else None
+
+    def get_by_public_id(
+        self, *, organization_public_id: str, job_public_id: str
+    ) -> InboxSyncJobRecord | None:
+        return (
+            self.work.job
+            if organization_public_id == self.work.organization_public_id
+            and job_public_id == self.work.job.public_id
+            else None
+        )
+
+    def reprocess(self, *, organization_public_id: str, job_public_id: str) -> InboxSyncJobRecord:
+        if (
+            organization_public_id != self.work.organization_public_id
+            or job_public_id != self.work.job.public_id
+        ):
+            raise LookupError("The inbox sync job was not found.")
+        if self.work.job.status == SyncJobStatus.DEAD:
+            self.work = self.work.model_copy(
+                update={
+                    "job": self.work.job.model_copy(
+                        update={"status": SyncJobStatus.PENDING, "attempt_count": 0}
+                    )
+                }
+            )
+        return self.work.job
 
     def complete(
         self,
@@ -153,6 +181,7 @@ def test_credential_failure_releases_the_job_for_reauthorization() -> None:
         unit_of_work=_Factory(jobs),
         gateways=cast(InboxReadGatewayResolver, _UnusedGateways()),
         access=cast(InboxAccessProvider, _UnavailableAccess()),
+        lease_seconds=150,
     )
 
     result = service.drain(
@@ -166,9 +195,39 @@ def test_credential_failure_releases_the_job_for_reauthorization() -> None:
     assert result.completed_jobs == 0
     assert result.failed_jobs == 1
     assert jobs.claim_scope == (actor.organization_id, "CON-INBOX-UNIT")
+    assert jobs.lease_seconds == 150
     assert jobs.failure == (
         work.job.id,
         "worker-unit",
         "credential_unavailable",
         True,
     )
+
+
+def test_dead_job_reprocessing_is_idempotent() -> None:
+    actor = DeterministicAuthProvider().authenticate("USR-0003")
+    work = InboxSyncWorkRecord(
+        job=_job().model_copy(update={"status": SyncJobStatus.DEAD, "attempt_count": 3}),
+        organization_public_id=actor.organization_id,
+        connection_public_id="CON-INBOX-UNIT",
+        committed_history_id="history-1",
+    )
+    jobs = _JobStore(work)
+    service = InboxSyncService(
+        unit_of_work=_Factory(jobs),
+        gateways=cast(InboxReadGatewayResolver, _UnusedGateways()),
+        access=cast(InboxAccessProvider, _UnavailableAccess()),
+    )
+
+    first = service.reprocess(
+        organization_public_id=work.organization_public_id,
+        job_public_id=work.job.public_id,
+    )
+    duplicate = service.reprocess(
+        organization_public_id=work.organization_public_id,
+        job_public_id=work.job.public_id,
+    )
+
+    assert first.status == SyncJobStatus.PENDING
+    assert first.attempt_count == 0
+    assert duplicate == first

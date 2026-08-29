@@ -22,6 +22,21 @@ services:
       retries: 20
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    profiles: ["async"]
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - case-resolution-copilot-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
   api:
     build:
       context: ./backend
@@ -52,6 +67,59 @@ services:
       timeout: 3s
       retries: 20
       start_period: 5s
+    restart: unless-stopped
+
+  worker:
+    profiles: ["async"]
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    command:
+      [
+        ".venv/bin/celery",
+        "-A",
+        "app.async_jobs.celery_worker:app",
+        "worker",
+        "--loglevel=INFO",
+        "--concurrency=2",
+        "--prefetch-multiplier=1",
+      ]
+    environment:
+      SUPPORT_COPILOT_ENVIRONMENT: development
+      SUPPORT_COPILOT_DATABASE_URL: postgresql+psycopg://${SUPPORT_COPILOT_POSTGRES_USER:-support_copilot}:${SUPPORT_COPILOT_POSTGRES_PASSWORD:-support_copilot}@postgres:5432/${SUPPORT_COPILOT_POSTGRES_DB:-support_copilot}
+      SUPPORT_COPILOT_ASYNC_BROKER_URL: redis://redis:6379/0
+      SUPPORT_COPILOT_ASYNC_RESULT_BACKEND_URL: redis://redis:6379/1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  scheduler:
+    profiles: ["async"]
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    command:
+      [
+        ".venv/bin/celery",
+        "-A",
+        "app.async_jobs.celery_worker:app",
+        "beat",
+        "--loglevel=INFO",
+        "--schedule=/tmp/celerybeat-schedule",
+      ]
+    environment:
+      SUPPORT_COPILOT_ENVIRONMENT: development
+      SUPPORT_COPILOT_DATABASE_URL: postgresql+psycopg://${SUPPORT_COPILOT_POSTGRES_USER:-support_copilot}:${SUPPORT_COPILOT_POSTGRES_PASSWORD:-support_copilot}@postgres:5432/${SUPPORT_COPILOT_POSTGRES_DB:-support_copilot}
+      SUPPORT_COPILOT_ASYNC_BROKER_URL: redis://redis:6379/0
+      SUPPORT_COPILOT_ASYNC_RESULT_BACKEND_URL: redis://redis:6379/1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -88,3 +156,4 @@ services:
 
 volumes:
   case-resolution-copilot-postgres-data:
+  case-resolution-copilot-redis-data:

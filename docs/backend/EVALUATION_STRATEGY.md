@@ -25,6 +25,13 @@ The workflow evaluator compares observed transitions with a versioned golden spe
 verifies behavior such as required approvals, immutable review decisions, idempotent action
 execution, and recovery from an unknown provider outcome.
 
+### Wave 1 governed RAG gate
+
+The credential-free Wave 1 evaluator runs the production governed V2 resolver against a bounded
+in-memory adapter. Representative synthetic cases assert expected clause sources, retrieval status,
+hit@3, recall@3, p50/p95 latency, and visible runtime failures. Sanitized JSONL events exclude raw
+queries, policy text, credentials, customer content, and exception messages.
+
 ### Public benchmark
 
 The public benchmark pipeline transforms externally sourced support-like records into a documented

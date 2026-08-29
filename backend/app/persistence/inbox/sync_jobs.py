@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, or_, select
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql import Select
+from sqlalchemy import select
 
 from app.domain.inbox import (
     InboxSyncJobRecord,
@@ -22,8 +20,8 @@ from app.persistence.models import (
 )
 
 from ._base import InboxRepositoryBase
-
-MAX_SYNC_ATTEMPTS = 3
+from .sync_claim import MAX_SYNC_ATTEMPTS, exhausted_lease_statement
+from .sync_claim import claim_statement as _claim_statement
 
 
 class InboxSyncJobRepository(InboxRepositoryBase):
@@ -114,6 +112,27 @@ class InboxSyncJobRepository(InboxRepositoryBase):
             )
             organization_id = connection.organization_id
             connection_id = connection.id
+        exhausted = self._session.scalars(
+            exhausted_lease_statement(
+                now=now,
+                limit=limit,
+                organization_id=organization_id,
+                connection_id=connection_id,
+            )
+        )
+        for job in exhausted:
+            job.status = SyncJobStatus.DEAD.value
+            job.last_error_code = "worker_lost"
+            job.lease_owner = None
+            job.lease_expires_at = None
+            job.updated_at = now
+            checkpoint = self._checkpoint(job.organization_id, job.connection_id)
+            checkpoint.status = "failed"
+            checkpoint.consecutive_failures += 1
+            checkpoint.last_attempt_at = now
+            checkpoint.last_error_code = "worker_lost"
+            checkpoint.version += 1
+            checkpoint.updated_at = now
         jobs = list(
             self._session.scalars(
                 _claim_statement(
@@ -156,6 +175,56 @@ class InboxSyncJobRepository(InboxRepositoryBase):
     def get(self, *, job_id: UUID) -> InboxSyncJobRecord | None:
         job = self._session.get(InboxSyncJobModel, job_id)
         return InboxSyncJobRecord.model_validate(job) if job is not None else None
+
+    def get_by_public_id(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord | None:
+        job = self._session.scalar(
+            select(InboxSyncJobModel)
+            .join(OrganizationModel, OrganizationModel.id == InboxSyncJobModel.organization_id)
+            .where(
+                OrganizationModel.public_id == organization_public_id,
+                InboxSyncJobModel.public_id == job_public_id,
+            )
+        )
+        return InboxSyncJobRecord.model_validate(job) if job is not None else None
+
+    def reprocess(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord:
+        job = self._session.scalar(
+            select(InboxSyncJobModel)
+            .join(OrganizationModel, OrganizationModel.id == InboxSyncJobModel.organization_id)
+            .where(
+                OrganizationModel.public_id == organization_public_id,
+                InboxSyncJobModel.public_id == job_public_id,
+            )
+            .with_for_update()
+        )
+        if job is None:
+            raise LookupError("The inbox sync job was not found.")
+        if job.status != SyncJobStatus.DEAD.value:
+            return InboxSyncJobRecord.model_validate(job)
+        now = utc_now()
+        job.status = SyncJobStatus.PENDING.value
+        job.attempt_count = 0
+        job.available_at = now
+        job.lease_owner = None
+        job.lease_expires_at = None
+        job.completed_at = None
+        job.updated_at = now
+        checkpoint = self._checkpoint(job.organization_id, job.connection_id)
+        checkpoint.status = "delayed"
+        checkpoint.version += 1
+        checkpoint.updated_at = now
+        self._session.flush()
+        return InboxSyncJobRecord.model_validate(job)
 
     def complete(
         self,
@@ -253,6 +322,7 @@ class InboxSyncJobRepository(InboxRepositoryBase):
                 InboxSyncJobModel.id == job_id,
                 InboxSyncJobModel.status == "running",
                 InboxSyncJobModel.lease_owner == worker_id,
+                InboxSyncJobModel.lease_expires_at > datetime.now(UTC),
             )
             .with_for_update()
         )
@@ -276,80 +346,3 @@ class InboxSyncJobRepository(InboxRepositoryBase):
         if checkpoint is None:
             raise LookupError("The inbox sync checkpoint was not found.")
         return checkpoint
-
-
-def _claim_statement(
-    *,
-    now: datetime,
-    limit: int,
-    organization_id: UUID | None = None,
-    connection_id: UUID | None = None,
-) -> Select[tuple[InboxSyncJobModel]]:
-    active_job = aliased(InboxSyncJobModel)
-    active_lease_exists = (
-        select(active_job.id)
-        .where(
-            active_job.organization_id == InboxSyncJobModel.organization_id,
-            active_job.connection_id == InboxSyncJobModel.connection_id,
-            active_job.status == SyncJobStatus.RUNNING.value,
-            active_job.lease_expires_at.is_not(None),
-            active_job.lease_expires_at > now,
-        )
-        .correlate(InboxSyncJobModel)
-        .exists()
-    )
-    eligible = or_(
-        InboxSyncJobModel.status.in_([SyncJobStatus.PENDING.value, SyncJobStatus.FAILED.value]),
-        (
-            (InboxSyncJobModel.status == SyncJobStatus.RUNNING.value)
-            & (InboxSyncJobModel.lease_expires_at <= now)
-        ),
-    )
-    filters = [
-        eligible,
-        InboxSyncJobModel.available_at <= now,
-        InboxSyncJobModel.attempt_count < MAX_SYNC_ATTEMPTS,
-        ~active_lease_exists,
-    ]
-    if organization_id is not None and connection_id is not None:
-        filters.extend(
-            [
-                InboxSyncJobModel.organization_id == organization_id,
-                InboxSyncJobModel.connection_id == connection_id,
-            ]
-        )
-    ranked = (
-        select(
-            InboxSyncJobModel.id.label("job_id"),
-            func.row_number()
-            .over(
-                partition_by=(
-                    InboxSyncJobModel.organization_id,
-                    InboxSyncJobModel.connection_id,
-                ),
-                order_by=(
-                    InboxSyncJobModel.available_at,
-                    InboxSyncJobModel.created_at,
-                ),
-            )
-            .label("connection_rank"),
-        )
-        .where(*filters)
-        .subquery("ranked_inbox_sync_jobs")
-    )
-    return (
-        select(InboxSyncJobModel)
-        .join(ranked, ranked.c.job_id == InboxSyncJobModel.id)
-        .join(
-            ConnectionModel,
-            (ConnectionModel.organization_id == InboxSyncJobModel.organization_id)
-            & (ConnectionModel.id == InboxSyncJobModel.connection_id),
-        )
-        .where(ranked.c.connection_rank == 1)
-        .order_by(InboxSyncJobModel.available_at, InboxSyncJobModel.created_at)
-        .with_for_update(
-            of=(InboxSyncJobModel, ConnectionModel),
-            skip_locked=True,
-        )
-        .limit(limit)
-    )

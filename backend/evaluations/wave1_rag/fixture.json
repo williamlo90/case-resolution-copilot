@@ -1,0 +1,244 @@
+{
+  "version": "wave1-rag-fixture-v1",
+  "source": "synthetic_credential_free_corpus",
+  "sources": [
+    {
+      "public_id": "POL-W1-BILLING",
+      "title": "Billing adjustments",
+      "decision_scope": "billing_adjustment",
+      "case_categories": ["billing_dispute", "refund_request"],
+      "effective_from": "2026-01-01T00:00:00Z",
+      "clauses": [
+        {
+          "public_id": "POLC-W1-BILL-DUPLICATE",
+          "heading": "Duplicate charges",
+          "text": "A duplicate invoice charge may be reversed only after both invoice and settled payment references are confirmed."
+        },
+        {
+          "public_id": "POLC-W1-BILL-REFUND",
+          "heading": "Refund eligibility",
+          "text": "An unused service order may be refunded when delivery has not started and no non-refundable commitment is recorded."
+        }
+      ]
+    },
+    {
+      "public_id": "POL-W1-ACCOUNT",
+      "title": "Account recovery",
+      "decision_scope": "account_recovery",
+      "case_categories": ["account_access"],
+      "effective_from": "2026-01-01T00:00:00Z",
+      "clauses": [
+        {
+          "public_id": "POLC-W1-ACCOUNT-IDENTITY",
+          "heading": "Identity verification",
+          "text": "Account recovery requires a verified ownership check before a recovery channel or multi-factor authentication setting is changed."
+        },
+        {
+          "public_id": "POLC-W1-ACCOUNT-UNSAFE",
+          "heading": "Unsafe recovery",
+          "text": "Recovery must stop and move to specialist review when ownership evidence is missing or conflicts with the account record."
+        }
+      ]
+    },
+    {
+      "public_id": "POL-W1-SERVICE",
+      "title": "Service exceptions",
+      "decision_scope": "service_exception",
+      "case_categories": ["service_exception"],
+      "effective_from": "2026-01-01T00:00:00Z",
+      "clauses": [
+        {
+          "public_id": "POLC-W1-SERVICE-FAILURE",
+          "heading": "Service failure",
+          "text": "A service exception may be resolved only after the order or delivery record confirms the failed outcome and customer impact."
+        },
+        {
+          "public_id": "POLC-W1-SERVICE-AUTHORITY",
+          "heading": "Escalation authority",
+          "text": "A consequential correction requires specialist review when the provider outcome is unknown or the proposed change exceeds agent authority."
+        }
+      ]
+    },
+    {
+      "public_id": "POL-W1-PRIVACY",
+      "title": "Customer data handling",
+      "decision_scope": "privacy_handling",
+      "case_categories": ["all"],
+      "effective_from": "2026-01-01T00:00:00Z",
+      "clauses": [
+        {
+          "public_id": "POLC-W1-PRIVACY-MINIMUM",
+          "heading": "Minimum necessary data",
+          "text": "Case evidence and audit records must contain only the customer data required to explain and authorize the support decision."
+        },
+        {
+          "public_id": "POLC-W1-PRIVACY-RESTRICTED",
+          "heading": "Restricted content",
+          "text": "Secrets, raw provider payloads, and private reasoning must not be copied into customer messages or business audit records."
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "RAG2-101",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "billing_dispute",
+      "issue": "The same invoice charge appears twice after settlement.",
+      "request_summary": "Confirm both invoice and settled payment references before reversing the duplicate charge.",
+      "products": ["support-plan"],
+      "region": "sg",
+      "channel": "email",
+      "customer_tier": "enterprise",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-BILL-DUPLICATE"]
+    },
+    {
+      "id": "RAG2-102",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "refund_request",
+      "issue": "The customer wants a refund for an unused service order.",
+      "request_summary": "Delivery has not started and no non-refundable supplier commitment is recorded.",
+      "products": ["service-order"],
+      "region": "sg",
+      "channel": "chat",
+      "customer_tier": "standard",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-BILL-REFUND"]
+    },
+    {
+      "id": "RAG2-103",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "account_access",
+      "issue": "The account owner changed phones and cannot use the recovery channel.",
+      "request_summary": "Verify ownership before changing the recovery channel or multi-factor authentication setting.",
+      "products": ["customer-account"],
+      "region": "sg",
+      "channel": "phone",
+      "customer_tier": "vip",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-ACCOUNT-IDENTITY"]
+    },
+    {
+      "id": "RAG2-104",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "account_access",
+      "issue": "Ownership evidence conflicts with the account record.",
+      "request_summary": "Stop recovery and send the conflicting ownership evidence to specialist review.",
+      "products": ["customer-account"],
+      "region": "sg",
+      "channel": "email",
+      "customer_tier": "standard",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-ACCOUNT-UNSAFE"]
+    },
+    {
+      "id": "RAG2-105",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "service_exception",
+      "issue": "A delivery failed and the requested correction needs evidence.",
+      "request_summary": "Use the order or delivery record to confirm the failed outcome and customer impact.",
+      "products": ["managed-delivery"],
+      "region": "id",
+      "channel": "webhook",
+      "customer_tier": "enterprise",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-SERVICE-FAILURE"]
+    },
+    {
+      "id": "RAG2-106",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "service_exception",
+      "issue": "The proposed consequential correction exceeds agent authority.",
+      "request_summary": "Escalate to specialist review because the provider outcome remains unknown.",
+      "products": ["managed-delivery"],
+      "region": "id",
+      "channel": "email",
+      "customer_tier": "vip",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-SERVICE-AUTHORITY"]
+    },
+    {
+      "id": "RAG2-107",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "billing_dispute",
+      "issue": "A draft includes secrets and a raw provider payload.",
+      "request_summary": "Remove secrets, raw provider payloads, and private reasoning from customer messages and audit records.",
+      "products": ["support-plan"],
+      "region": "sg",
+      "channel": "email",
+      "customer_tier": "enterprise",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-PRIVACY-RESTRICTED"]
+    },
+    {
+      "id": "RAG2-108",
+      "lane": "release_corpus",
+      "organization_public_id": "ORG-WAVE1",
+      "category": "service_exception",
+      "issue": "The case evidence contains unnecessary customer data.",
+      "request_summary": "Keep only customer data required to explain and authorize the support decision in evidence and audit records.",
+      "products": ["managed-delivery"],
+      "region": "id",
+      "channel": "chat",
+      "customer_tier": "standard",
+      "as_of": "2026-08-01T00:00:00Z",
+      "expected_status": "relevant",
+      "expected_source_ids": ["POLC-W1-PRIVACY-MINIMUM"]
+    },
+    {
+      "id": "RAG2-109",
+      "lane": "guard_contract",
+      "organization_public_id": "ORG-WAVE1-MISSING",
+      "category": "billing_dispute",
+      "issue": "No published policy covers this synthetic category scope.",
+      "request_summary": "Fail closed without returning an unsupported source.",
+      "products": ["unknown-product"],
+      "region": "sg",
+      "channel": "email",
+      "customer_tier": "standard",
+      "as_of": "2026-08-01T00:00:00Z",
+      "guard_scope": {
+        "index_ready": true,
+        "category_matches": 0,
+        "applicable_matches": 0,
+        "active_matches": 0
+      },
+      "expected_status": "missing"
+    },
+    {
+      "id": "RAG2-110",
+      "lane": "guard_contract",
+      "organization_public_id": "ORG-WAVE1-INDEXING",
+      "category": "account_access",
+      "issue": "The policy index is not ready for retrieval.",
+      "request_summary": "Fail closed while indexing is incomplete.",
+      "products": ["customer-account"],
+      "region": "sg",
+      "channel": "email",
+      "customer_tier": "standard",
+      "as_of": "2026-08-01T00:00:00Z",
+      "guard_scope": {
+        "index_ready": false,
+        "category_matches": 1,
+        "applicable_matches": 1,
+        "active_matches": 1
+      },
+      "expected_status": "missing"
+    }
+  ]
+}

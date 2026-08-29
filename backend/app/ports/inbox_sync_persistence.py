@@ -33,6 +33,20 @@ class InboxSyncJobStore(Protocol):
 
     def get(self, *, job_id: UUID) -> InboxSyncJobRecord | None: ...
 
+    def get_by_public_id(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord | None: ...
+
+    def reprocess(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord: ...
+
     def complete(
         self,
         *,

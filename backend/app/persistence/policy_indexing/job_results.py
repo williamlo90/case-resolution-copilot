@@ -27,7 +27,7 @@ def persist_page(
 ) -> PolicyIndexJobRecord:
     if len(vectors) != len(work.clauses):
         raise ValueError("The embedding response count does not match the clause page.")
-    job = _leased_job(session, work)
+    job = _leased_job(session, work, now=now)
     indexed = skipped = 0
     for clause, vector in zip(work.clauses, vectors, strict=True):
         if len(vector) != work.profile.dimensions or not all(
@@ -59,7 +59,7 @@ def fail(
     now: datetime,
     max_attempts: int,
 ) -> PolicyIndexJobRecord:
-    job = _leased_job(session, work)
+    job = _leased_job(session, work, now=now)
     job.status = "dead" if job.attempt_count >= max_attempts else "failed"
     job.last_error_code = error_code[:100]
     job.available_at = now + timedelta(minutes=min(2**job.attempt_count, 60))
@@ -77,9 +77,7 @@ def _upsert_embedding(
     vector: list[float],
     now: datetime,
 ) -> None:
-    request_fingerprint = sha256(
-        f"{work.profile.profile_key}|{content_hash}".encode()
-    ).hexdigest()
+    request_fingerprint = sha256(f"{work.profile.profile_key}|{content_hash}".encode()).hexdigest()
     clause = next(item for item in work.clauses if item.id == clause_id)
     session.execute(
         insert(GovernedPolicyClauseEmbeddingV2Model)
@@ -107,7 +105,12 @@ def _upsert_embedding(
     )
 
 
-def _leased_job(session: Session, work: PolicyIndexWorkItem) -> PolicyIndexJobModel:
+def _leased_job(
+    session: Session,
+    work: PolicyIndexWorkItem,
+    *,
+    now: datetime,
+) -> PolicyIndexJobModel:
     job = session.scalar(
         select(PolicyIndexJobModel)
         .where(
@@ -116,6 +119,7 @@ def _leased_job(session: Session, work: PolicyIndexWorkItem) -> PolicyIndexJobMo
             PolicyIndexJobModel.status == "running",
             PolicyIndexJobModel.lease_owner == work.job.lease_owner,
             PolicyIndexJobModel.attempt_count == work.job.attempt_count,
+            PolicyIndexJobModel.lease_expires_at > now,
         )
         .with_for_update()
     )
@@ -154,20 +158,23 @@ def _finish_page(
 def _remaining_clause_count(session: Session, job: PolicyIndexJobModel) -> int:
     clause = GovernedPolicyClauseModel
     embedding = GovernedPolicyClauseEmbeddingV2Model
-    return session.scalar(
-        select(func.count(clause.id))
-        .outerjoin(
-            embedding,
-            and_(
-                embedding.organization_id == clause.organization_id,
-                embedding.clause_id == clause.id,
-                embedding.profile_id == job.profile_id,
-                embedding.source_content_hash == clause.content_hash,
-            ),
+    return (
+        session.scalar(
+            select(func.count(clause.id))
+            .outerjoin(
+                embedding,
+                and_(
+                    embedding.organization_id == clause.organization_id,
+                    embedding.clause_id == clause.id,
+                    embedding.profile_id == job.profile_id,
+                    embedding.source_content_hash == clause.content_hash,
+                ),
+            )
+            .where(
+                clause.organization_id == job.organization_id,
+                clause.policy_version_id == job.policy_version_id,
+                embedding.id.is_(None),
+            )
         )
-        .where(
-            clause.organization_id == job.organization_id,
-            clause.policy_version_id == job.policy_version_id,
-            embedding.id.is_(None),
-        )
-    ) or 0
+        or 0
+    )

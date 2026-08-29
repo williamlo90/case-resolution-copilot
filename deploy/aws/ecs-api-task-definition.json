@@ -1,0 +1,78 @@
+{
+  "family": "case-resolution-copilot-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "REPLACE_WITH_ECS_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "REPLACE_WITH_API_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "REPLACE_WITH_ECR_IMAGE_DIGEST",
+      "essential": true,
+      "command": [
+        ".venv/bin/uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "2",
+        "--proxy-headers"
+      ],
+      "portMappings": [
+        {
+          "name": "http",
+          "containerPort": 8000,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "environment": [
+        {"name": "SUPPORT_COPILOT_ENVIRONMENT", "value": "production"},
+        {"name": "SUPPORT_COPILOT_AUTH_MODE", "value": "provider"},
+        {"name": "SUPPORT_COPILOT_LOG_LEVEL", "value": "INFO"},
+        {"name": "SUPPORT_COPILOT_DEV_MIGRATE", "value": "false"},
+        {"name": "SUPPORT_COPILOT_DEV_SEED", "value": "false"},
+        {"name": "SUPPORT_COPILOT_CORS_ORIGINS", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"},
+        {"name": "SUPPORT_COPILOT_CLERK_AUTHORIZED_PARTIES", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"}
+      ],
+      "secrets": [
+        {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_SECRET_KEY", "valueFrom": "REPLACE_WITH_CLERK_SECRET_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_JWT_KEY", "valueFrom": "REPLACE_WITH_CLERK_JWT_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_OPENAI_API_KEY", "valueFrom": "REPLACE_WITH_OPENAI_API_KEY_ARN"}
+      ],
+      "readonlyRootFilesystem": true,
+      "user": "10001",
+      "linuxParameters": {"initProcessEnabled": true},
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=2)\" || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/case-resolution-copilot/api",
+          "awslogs-region": "REPLACE_WITH_AWS_REGION",
+          "awslogs-stream-prefix": "api",
+          "mode": "non-blocking",
+          "max-buffer-size": "4m"
+        }
+      },
+      "stopTimeout": 30
+    }
+  ],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GetEcrAuthorizationToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "PushApplicationImage",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "REPLACE_WITH_ECR_REPOSITORY_ARN"
+    },
+    {
+      "Sid": "RegisterAndReadTaskDefinitions",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeServices",
+        "ecs:DescribeTaskDefinition",
+        "ecs:RegisterTaskDefinition"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DeployNamedServices",
+      "Effect": "Allow",
+      "Action": ["ecs:UpdateService"],
+      "Resource": [
+        "REPLACE_WITH_API_SERVICE_ARN",
+        "REPLACE_WITH_WORKER_SERVICE_ARN",
+        "REPLACE_WITH_SCHEDULER_SERVICE_ARN"
+      ]
+    },
+    {
+      "Sid": "RunAndInspectMigration",
+      "Effect": "Allow",
+      "Action": ["ecs:DescribeTasks", "ecs:RunTask"],
+      "Resource": "*",
+      "Condition": {
+        "ArnLike": {
+          "ecs:cluster": "REPLACE_WITH_ECS_CLUSTER_ARN"
+        }
+      }
+    },
+    {
+      "Sid": "PassOnlyApplicationRoles",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "REPLACE_WITH_ECS_EXECUTION_ROLE_ARN",
+        "REPLACE_WITH_API_TASK_ROLE_ARN",
+        "REPLACE_WITH_WORKER_TASK_ROLE_ARN",
+        "REPLACE_WITH_SCHEDULER_TASK_ROLE_ARN",
+        "REPLACE_WITH_MIGRATION_TASK_ROLE_ARN"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

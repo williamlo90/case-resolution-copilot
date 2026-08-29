@@ -58,6 +58,16 @@ Case intake -> Triage -> Evidence and policy review -> Decision Brief
 - **Actions** use idempotency, durable receipts, unknown-outcome handling, and reconciliation.
 - **Policies and Quality** govern what the system may rely on and how behavior is evaluated.
 
+Wave 1 adds portfolio-focused backend depth without changing the product boundary:
+
+- Celery and Redis deliver inbox-sync and policy-index jobs while PostgreSQL retains durable status,
+  leases, retry limits, duplicate protection, and reprocessing authority.
+- A credential-free governed RAG V2 evaluator checks expected sources, retrieval status, latency,
+  and sanitized failure events across representative synthetic cases.
+- An [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
+  worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, ElastiCache Redis,
+  S3, Secrets Manager, CloudWatch, and least-privilege IAM. It is not a claim of AWS deployment.
+
 ## Product Tour
 
 <table>
@@ -123,6 +133,9 @@ flowchart LR
     CLERK["Clerk identity"] --> CASES
     DB["PostgreSQL"] --> CASES
     DB --> POLICY
+    REDIS["Redis delivery"] --> WORKER["Celery ingestion worker"]
+    WORKER --> DB
+    WORKER --> POLICY
 ```
 
 The stack is Next.js, TypeScript, FastAPI, PostgreSQL/pgvector, Clerk, and an optional OpenAI
@@ -203,6 +216,9 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [Engineering case study](docs/portfolio/CASE_STUDY.md)
 - [API conventions](docs/api/CONVENTIONS.md)
 - [Evaluation strategy](docs/backend/EVALUATION_STRATEGY.md)
+- [Wave 1 governed RAG evaluation](backend/evaluations/wave1_rag/README.md)
+- [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md)
+- [AWS deployment operations runbook](docs/runbooks/AWS_DEPLOYMENT_OPERATIONS.md)
 - [Controlled pilot runbook](docs/pilot/PILOT_RUNBOOK.md)
 - [Security hardening](docs/runbooks/SECURITY_HARDENING.md)
 - [Post-environment verification](docs/runbooks/POST_ENV_VERIFICATION.md)

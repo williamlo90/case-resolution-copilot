@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.domain.policy_indexing import PolicyIndexWorkItem
 from app.domain.retrieval_v2 import PolicyIndexJobRecord
 
-from .job_queue import claim, enqueue_missing
+from .job_queue import claim, enqueue_missing, get_by_public_id, reprocess
 from .job_results import fail, persist_page
 
 
@@ -34,6 +34,7 @@ class PolicyIndexRepository:
         worker_id: str,
         now: datetime,
         lease_seconds: int,
+        max_attempts: int,
     ) -> PolicyIndexWorkItem | None:
         return claim(
             self._session,
@@ -41,6 +42,31 @@ class PolicyIndexRepository:
             worker_id=worker_id,
             now=now,
             lease_seconds=lease_seconds,
+            max_attempts=max_attempts,
+        )
+
+    def get_by_public_id(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> PolicyIndexJobRecord | None:
+        return get_by_public_id(
+            self._session,
+            organization_public_id=organization_public_id,
+            job_public_id=job_public_id,
+        )
+
+    def reprocess(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> PolicyIndexJobRecord:
+        return reprocess(
+            self._session,
+            organization_public_id=organization_public_id,
+            job_public_id=job_public_id,
         )
 
     def persist_page(

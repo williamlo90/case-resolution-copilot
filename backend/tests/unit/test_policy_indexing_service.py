@@ -107,17 +107,40 @@ class _Store:
         self.claimed = False
         self.persisted_vectors: tuple[list[float], ...] | None = None
         self.failed = False
+        self.claim_values: dict[str, object] | None = None
 
     def enqueue_missing(self, **values: object) -> int:
         del values
         return 1
 
     def claim(self, **values: object) -> PolicyIndexWorkItem | None:
-        del values
+        self.claim_values = values
         if self.claimed:
             return None
         self.claimed = True
         return self.work
+
+    def get_by_public_id(
+        self, *, organization_public_id: str, job_public_id: str
+    ) -> PolicyIndexJobRecord | None:
+        return (
+            self.work.job
+            if organization_public_id == "ORG-0001" and job_public_id == self.work.job.public_id
+            else None
+        )
+
+    def reprocess(self, *, organization_public_id: str, job_public_id: str) -> PolicyIndexJobRecord:
+        if organization_public_id != "ORG-0001" or job_public_id != self.work.job.public_id:
+            raise LookupError("The policy index job was not found.")
+        if self.work.job.status == PolicyIndexJobStatus.DEAD:
+            self.work = self.work.model_copy(
+                update={
+                    "job": self.work.job.model_copy(
+                        update={"status": PolicyIndexJobStatus.PENDING, "attempt_count": 0}
+                    )
+                }
+            )
+        return self.work.job
 
     def persist_page(
         self,
@@ -195,6 +218,7 @@ def test_index_provider_runs_outside_the_database_unit_of_work() -> None:
         profile_key=DETERMINISTIC_POLICY_PROFILE,
         job_limit=2,
         page_budget=1,
+        lease_seconds=150,
     )
 
     result = service.drain(worker_id="worker-unit")
@@ -204,5 +228,40 @@ def test_index_provider_runs_outside_the_database_unit_of_work() -> None:
     assert result.indexed_clauses == 1
     assert provider.calls == 1
     assert store.persisted_vectors is not None
+    assert store.claim_values is not None
+    assert store.claim_values["lease_seconds"] == 150
+    assert store.claim_values["max_attempts"] == 3
     assert not store.failed
     assert factory.active == 0
+
+
+def test_dead_policy_job_reprocessing_is_idempotent() -> None:
+    base = _work()
+    work = base.model_copy(
+        update={
+            "job": base.job.model_copy(
+                update={"status": PolicyIndexJobStatus.DEAD, "attempt_count": 3}
+            )
+        }
+    )
+    store = _Store(work)
+    service = PolicyIndexingService(
+        unit_of_work=_Factory(store),
+        embedding_provider=_ObservedProvider(_Factory(store)),
+        profile_key=DETERMINISTIC_POLICY_PROFILE,
+        job_limit=1,
+        page_budget=1,
+    )
+
+    first = service.reprocess(
+        organization_public_id="ORG-0001",
+        job_public_id=work.job.public_id,
+    )
+    duplicate = service.reprocess(
+        organization_public_id="ORG-0001",
+        job_public_id=work.job.public_id,
+    )
+
+    assert first.status == PolicyIndexJobStatus.PENDING
+    assert first.attempt_count == 0
+    assert duplicate == first

@@ -1,0 +1,81 @@
+{
+  "family": "case-resolution-copilot-scheduler",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "REPLACE_WITH_ECS_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "REPLACE_WITH_SCHEDULER_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "scheduler",
+      "image": "REPLACE_WITH_ECR_IMAGE_DIGEST",
+      "essential": true,
+      "command": [
+        ".venv/bin/celery",
+        "--app",
+        "app.async_jobs.celery_worker:app",
+        "beat",
+        "--loglevel=INFO",
+        "--schedule=/tmp/celerybeat-schedule",
+        "--pidfile=/tmp/celerybeat.pid"
+      ],
+      "environment": [
+        {"name": "SUPPORT_COPILOT_ENVIRONMENT", "value": "production"},
+        {"name": "SUPPORT_COPILOT_AUTH_MODE", "value": "provider"},
+        {"name": "SUPPORT_COPILOT_LOG_LEVEL", "value": "INFO"},
+        {"name": "SUPPORT_COPILOT_DEV_MIGRATE", "value": "false"},
+        {"name": "SUPPORT_COPILOT_DEV_SEED", "value": "false"},
+        {"name": "SUPPORT_COPILOT_CLERK_AUTHORIZED_PARTIES", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"},
+        {"name": "SUPPORT_COPILOT_INBOX_CONNECTIONS_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_GMAIL_ADAPTER_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_INBOX_SCHEDULED_SYNC_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_REDIRECT_URI", "value": "REPLACE_WITH_HTTPS_GMAIL_CALLBACK"},
+        {"name": "SUPPORT_COPILOT_POLICY_INDEXING_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_POLICY_V2_EMBEDDING_PROVIDER", "value": "openai"},
+        {"name": "SUPPORT_COPILOT_POLICY_V2_PROFILE_KEY", "value": "openai-text-embedding-3-small-v2-d512"}
+      ],
+      "secrets": [
+        {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_SECRET_KEY", "valueFrom": "REPLACE_WITH_CLERK_SECRET_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_JWT_KEY", "valueFrom": "REPLACE_WITH_CLERK_JWT_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_OPENAI_API_KEY", "valueFrom": "REPLACE_WITH_OPENAI_API_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_CLIENT_ID", "valueFrom": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID_ARN"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_CLIENT_SECRET", "valueFrom": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_CREDENTIAL_VAULT_KEY", "valueFrom": "REPLACE_WITH_CREDENTIAL_VAULT_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_INBOX_SCHEDULER_SECRET", "valueFrom": "REPLACE_WITH_INBOX_SCHEDULER_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_POLICY_INDEX_SCHEDULER_SECRET", "valueFrom": "REPLACE_WITH_POLICY_INDEX_SCHEDULER_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_ASYNC_BROKER_URL", "valueFrom": "REPLACE_WITH_REDIS_BROKER_URL_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_ASYNC_RESULT_BACKEND_URL", "valueFrom": "REPLACE_WITH_REDIS_RESULT_URL_SECRET_ARN"}
+      ],
+      "readonlyRootFilesystem": true,
+      "mountPoints": [
+        {
+          "sourceVolume": "scheduler-tmp",
+          "containerPath": "/tmp",
+          "readOnly": false
+        }
+      ],
+      "user": "10001",
+      "linuxParameters": {"initProcessEnabled": true},
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/case-resolution-copilot/scheduler",
+          "awslogs-region": "REPLACE_WITH_AWS_REGION",
+          "awslogs-stream-prefix": "scheduler",
+          "mode": "non-blocking",
+          "max-buffer-size": "2m"
+        }
+      },
+      "stopTimeout": 30
+    }
+  ],
+  "volumes": [
+    {"name": "scheduler-tmp"}
+  ],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}

@@ -26,6 +26,7 @@ contracts and operating material used to build and evaluate the application.
 - [Actions and connections](backend/ACTIONS_AND_CONNECTIONS.md)
 - [Operational controls](backend/OPERATIONAL_CONTROLS.md)
 - [Evaluation strategy](backend/EVALUATION_STRATEGY.md)
+- [AWS-ready deployment architecture](architecture/AWS_READY_DEPLOYMENT.md)
 - [Frontend-backend handoff](frontend/BACKEND_HANDOFF_CONTRACT.md)
 
 ## Performance And Delivery
@@ -39,6 +40,7 @@ contracts and operating material used to build and evaluate the application.
 - [Connected Inbox and RAG V2 activation](runbooks/CONNECTED_INBOX_AND_RAG_V2_ACTIVATION.md)
 - [Post-environment verification](runbooks/POST_ENV_VERIFICATION.md)
 - [Deployment and rollback](runbooks/DEPLOYMENT_AND_ROLLBACK.md)
+- [AWS deployment operations](runbooks/AWS_DEPLOYMENT_OPERATIONS.md)
 
 ## Security And Operations
 
@@ -54,6 +56,7 @@ contracts and operating material used to build and evaluate the application.
 - [Engineering case study](portfolio/CASE_STUDY.md)
 - [Three-minute demo](portfolio/DEMO_SCRIPT.md)
 - [Frozen Governed RAG V2 benchmark](../backend/evaluations/retrieval_v2/README.md)
+- [Wave 1 credential-free RAG evaluation](../backend/evaluations/wave1_rag/README.md)
 - [Phase 5 Decision and Draft gate](../backend/evaluations/decision_draft/README.md)
 - [Phase 6 OpenAI activation evidence](../backend/evaluations/openai_activation/README.md)
 - [Hosted product walkthrough](evidence/production-demo/README.md)

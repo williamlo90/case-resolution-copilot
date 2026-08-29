@@ -47,6 +47,7 @@ def build_inbox_runtime(
     *,
     database: Database | None,
     settings: Settings,
+    sync_lease_seconds: int = 60,
 ) -> InboxRuntime | None:
     if database is None or not settings.inbox_connections_enabled:
         return None
@@ -102,6 +103,7 @@ def build_inbox_runtime(
             page_limit=5,
             item_limit=settings.inbox_sync_message_limit,
             manual_item_limit=settings.inbox_initial_item_limit,
+            lease_seconds=sync_lease_seconds,
         ),
         drafts=InboxDraftDeliveryService(
             unit_of_work=SqlAlchemyInboxDraftUnitOfWorkFactory(database),

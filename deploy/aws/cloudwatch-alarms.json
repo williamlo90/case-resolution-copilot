@@ -1,0 +1,85 @@
+{
+  "status": "suggested-initial-thresholds-not-production-evidence",
+  "alarms": [
+    {
+      "name": "api-alb-5xx-rate",
+      "metric": "AWS/ApplicationELB HTTPCode_Target_5XX_Count",
+      "period_seconds": 300,
+      "evaluation_periods": 2,
+      "threshold": 5,
+      "comparison": "GreaterThanOrEqualToThreshold"
+    },
+    {
+      "name": "api-target-response-time-p95",
+      "metric": "AWS/ApplicationELB TargetResponseTime p95",
+      "period_seconds": 300,
+      "evaluation_periods": 3,
+      "threshold_seconds": 1.5,
+      "comparison": "GreaterThanThreshold"
+    },
+    {
+      "name": "api-unhealthy-hosts",
+      "metric": "AWS/ApplicationELB UnHealthyHostCount",
+      "period_seconds": 60,
+      "evaluation_periods": 2,
+      "threshold": 1,
+      "comparison": "GreaterThanOrEqualToThreshold"
+    },
+    {
+      "name": "worker-no-running-tasks",
+      "metric": "ECS/ContainerInsights RunningTaskCount",
+      "period_seconds": 60,
+      "evaluation_periods": 2,
+      "threshold": 1,
+      "comparison": "LessThanThreshold"
+    },
+    {
+      "name": "redis-memory-pressure",
+      "metric": "AWS/ElastiCache DatabaseMemoryUsagePercentage",
+      "period_seconds": 300,
+      "evaluation_periods": 3,
+      "threshold": 75,
+      "comparison": "GreaterThanThreshold"
+    },
+    {
+      "name": "redis-evictions",
+      "metric": "AWS/ElastiCache Evictions",
+      "period_seconds": 300,
+      "evaluation_periods": 1,
+      "threshold": 0,
+      "comparison": "GreaterThanThreshold"
+    },
+    {
+      "name": "rds-free-storage-low",
+      "metric": "AWS/RDS FreeStorageSpace",
+      "period_seconds": 300,
+      "evaluation_periods": 3,
+      "threshold_bytes": 10737418240,
+      "comparison": "LessThanThreshold"
+    },
+    {
+      "name": "rds-connections-high",
+      "metric": "AWS/RDS DatabaseConnections",
+      "period_seconds": 300,
+      "evaluation_periods": 3,
+      "threshold": "REPLACE_WITH_80_PERCENT_OF_SAFE_CONNECTION_LIMIT",
+      "comparison": "GreaterThanThreshold"
+    },
+    {
+      "name": "celery-queue-age",
+      "metric": "CaseResolutionCopilot/Ingestion OldestQueuedJobAgeSeconds",
+      "period_seconds": 60,
+      "evaluation_periods": 5,
+      "threshold_seconds": 300,
+      "comparison": "GreaterThanThreshold"
+    },
+    {
+      "name": "celery-terminal-failures",
+      "metric": "CaseResolutionCopilot/Ingestion TerminalFailures",
+      "period_seconds": 300,
+      "evaluation_periods": 1,
+      "threshold": 0,
+      "comparison": "GreaterThanThreshold"
+    }
+  ]
+}

@@ -17,6 +17,7 @@ from app.persistence.models import (
     GovernedPolicyClauseEmbeddingV2Model,
     GovernedPolicyClauseModel,
     GovernedPolicyVersionModel,
+    OrganizationModel,
     PolicyEmbeddingProfileModel,
     PolicyIndexJobModel,
     utc_now,
@@ -47,8 +48,7 @@ def enqueue_missing(
                 select(existing.id).where(
                     existing.profile_id == profile.id,
                     existing.policy_version_id == GovernedPolicyVersionModel.id,
-                    existing.source_content_fingerprint
-                    == GovernedPolicyVersionModel.content_hash,
+                    existing.source_content_fingerprint == GovernedPolicyVersionModel.content_hash,
                 )
             ),
         )
@@ -124,13 +124,33 @@ def claim(
     worker_id: str,
     now: datetime,
     lease_seconds: int,
+    max_attempts: int,
 ) -> PolicyIndexWorkItem | None:
     profile = required_profile(session, profile_key)
+    exhausted = session.scalar(
+        select(PolicyIndexJobModel)
+        .where(
+            PolicyIndexJobModel.profile_id == profile.id,
+            PolicyIndexJobModel.status == PolicyIndexJobStatus.RUNNING.value,
+            PolicyIndexJobModel.lease_expires_at < now,
+            PolicyIndexJobModel.attempt_count >= max_attempts,
+        )
+        .order_by(PolicyIndexJobModel.lease_expires_at)
+        .with_for_update(skip_locked=True)
+    )
+    if exhausted is not None:
+        exhausted.status = PolicyIndexJobStatus.DEAD.value
+        exhausted.last_error_code = "worker_lost"
+        exhausted.lease_owner = None
+        exhausted.lease_expires_at = None
+        exhausted.updated_at = now
+        refresh_profile_counts(session, profile)
     job = session.scalar(
         select(PolicyIndexJobModel)
         .where(
             PolicyIndexJobModel.profile_id == profile.id,
             PolicyIndexJobModel.available_at <= now,
+            PolicyIndexJobModel.attempt_count < max_attempts,
             or_(
                 PolicyIndexJobModel.status.in_(["pending", "failed"]),
                 and_(
@@ -159,6 +179,54 @@ def claim(
     )
 
 
+def get_by_public_id(
+    session: Session,
+    *,
+    organization_public_id: str,
+    job_public_id: str,
+) -> PolicyIndexJobRecord | None:
+    job = session.scalar(
+        select(PolicyIndexJobModel)
+        .join(OrganizationModel, OrganizationModel.id == PolicyIndexJobModel.organization_id)
+        .where(
+            OrganizationModel.public_id == organization_public_id,
+            PolicyIndexJobModel.public_id == job_public_id,
+        )
+    )
+    return PolicyIndexJobRecord.model_validate(job) if job is not None else None
+
+
+def reprocess(
+    session: Session,
+    *,
+    organization_public_id: str,
+    job_public_id: str,
+) -> PolicyIndexJobRecord:
+    job = session.scalar(
+        select(PolicyIndexJobModel)
+        .join(OrganizationModel, OrganizationModel.id == PolicyIndexJobModel.organization_id)
+        .where(
+            OrganizationModel.public_id == organization_public_id,
+            PolicyIndexJobModel.public_id == job_public_id,
+        )
+        .with_for_update()
+    )
+    if job is None:
+        raise LookupError("The policy index job was not found.")
+    if job.status != PolicyIndexJobStatus.DEAD.value:
+        return PolicyIndexJobRecord.model_validate(job)
+    now = utc_now()
+    job.status = PolicyIndexJobStatus.PENDING.value
+    job.attempt_count = 0
+    job.available_at = now
+    job.lease_owner = None
+    job.lease_expires_at = None
+    job.completed_at = None
+    job.updated_at = now
+    session.flush()
+    return PolicyIndexJobRecord.model_validate(job)
+
+
 def required_profile(
     session: Session,
     profile_key: str,
@@ -185,8 +253,7 @@ def _pending_clauses(
             .outerjoin(
                 embedding,
                 and_(
-                    embedding.organization_id
-                    == GovernedPolicyClauseModel.organization_id,
+                    embedding.organization_id == GovernedPolicyClauseModel.organization_id,
                     embedding.clause_id == GovernedPolicyClauseModel.id,
                     embedding.profile_id == job.profile_id,
                 ),

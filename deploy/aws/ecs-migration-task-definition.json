@@ -1,0 +1,40 @@
+{
+  "family": "case-resolution-copilot-migration",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "REPLACE_WITH_ECS_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "REPLACE_WITH_MIGRATION_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "migration",
+      "image": "REPLACE_WITH_ECR_IMAGE_DIGEST",
+      "essential": true,
+      "command": [".venv/bin/alembic", "upgrade", "head"],
+      "environment": [
+        {"name": "SUPPORT_COPILOT_ENVIRONMENT", "value": "production"},
+        {"name": "SUPPORT_COPILOT_DEV_MIGRATE", "value": "false"},
+        {"name": "SUPPORT_COPILOT_DEV_SEED", "value": "false"}
+      ],
+      "secrets": [
+        {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"}
+      ],
+      "readonlyRootFilesystem": true,
+      "user": "10001",
+      "linuxParameters": {"initProcessEnabled": true},
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/case-resolution-copilot/migration",
+          "awslogs-region": "REPLACE_WITH_AWS_REGION",
+          "awslogs-stream-prefix": "migration"
+        }
+      }
+    }
+  ],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}

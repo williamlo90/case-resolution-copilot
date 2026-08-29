@@ -22,7 +22,22 @@ class PolicyIndexStore(Protocol):
         worker_id: str,
         now: datetime,
         lease_seconds: int,
+        max_attempts: int,
     ) -> PolicyIndexWorkItem | None: ...
+
+    def get_by_public_id(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> PolicyIndexJobRecord | None: ...
+
+    def reprocess(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> PolicyIndexJobRecord: ...
 
     def persist_page(
         self,

@@ -64,6 +64,12 @@ flowchart LR
 - Signed case-intake and controlled-action adapters with replay protection, idempotency,
   attributable receipts, and unknown-outcome reconciliation.
 - Structured correlated logs, health/readiness contracts, and a bounded pilot-SLO evaluator.
+- Celery/Redis async delivery for durable inbox and policy-index jobs, including finite retries,
+  status inspection, duplicate-safe execution, and explicit reprocessing.
+- A credential-free governed RAG evaluator with expected-source checks, latency metrics, and
+  sanitized failure events.
+- An AWS-ready ECS/Fargate deployment pack with RDS PostgreSQL/pgvector, ElastiCache Redis, S3,
+  Secrets Manager, CloudWatch, IAM, migration, and rollback guidance; no AWS deployment is claimed.
 
 ## Architecture
 

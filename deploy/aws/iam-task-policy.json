@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadIngestionArtifacts",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::REPLACE_WITH_PRIVATE_S3_BUCKET/ingestion/*"
+    },
+    {
+      "Sid": "WriteEvaluationArtifacts",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::REPLACE_WITH_PRIVATE_S3_BUCKET/evaluations/*"
+    },
+    {
+      "Sid": "UseApplicationDataKey",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt", "kms:GenerateDataKey"],
+      "Resource": "REPLACE_WITH_APPLICATION_KMS_KEY_ARN",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "s3.REPLACE_WITH_AWS_REGION.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

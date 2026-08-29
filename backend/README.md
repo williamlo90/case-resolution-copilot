@@ -26,6 +26,7 @@ change a policy result, or authorize a side effect.
 ```text
 app/
 |-- analysis/       deterministic and optional model-assisted decision logic
+|-- async_jobs/     Celery delivery over PostgreSQL-owned durable job queues
 |-- api/            routes, schemas, presenters, middleware, error envelopes
 |-- domain/         typed business records, states, and invariants
 |-- evaluation/     decision, workflow, benchmark, and SLO evaluators
@@ -77,6 +78,8 @@ Important groups:
   synchronization, and approved Gmail draft creation.
 - `SUPPORT_COPILOT_POLICY_*`: versioned 512-dimensional hybrid policy index and V1/V2 rollout
   controls.
+- `SUPPORT_COPILOT_ASYNC_*`: Redis broker, queue, bounded delivery retries, and task limits for
+  Celery workers.
 
 Production configuration fails closed when provider requirements are incomplete. Sensitive values
 are represented as secrets, omitted from safe log context, and covered by the repository scan.
@@ -142,6 +145,26 @@ The repository separates:
 See `../docs/backend/EVALUATION_STRATEGY.md` and `benchmarks/public/README.md`. Public benchmark data
 does not justify a claim of validation on complete real business cases.
 
+Run the credential-free governed RAG V2 source and latency gate with:
+
+```powershell
+uv run python -m scripts.run_wave1_rag_evaluation --require-gate
+```
+
+## Async Ingestion
+
+Celery delivers scheduled inbox-sync and policy-index work through Redis. PostgreSQL remains the
+source of truth for lifecycle state, attempts, leases, duplicate protection, and reprocessing.
+
+```powershell
+celery -A app.async_jobs.celery_worker:app worker --loglevel=INFO --concurrency=2
+celery -A app.async_jobs.celery_worker:app beat --loglevel=INFO
+celery -A app.async_jobs.celery_worker:app inspect ping
+```
+
+Run only one Beat scheduler. The root Compose stack keeps Redis, worker, and scheduler behind the
+opt-in `async` profile; container startup remains outside the default local verification gate.
+
 ## API Surface
 
 Primary route groups:
@@ -173,7 +196,9 @@ return internal exception details.
 ## Deployment
 
 `vercel.json` pins the serverless function region to Singapore. `Containerfile` and the root
-`compose.dev.yaml` provide an optional development stack, not a production architecture claim.
+`compose.dev.yaml` provide an optional development stack. The separate
+[AWS-ready architecture](../docs/architecture/AWS_READY_DEPLOYMENT.md) and deployment templates are
+reviewable preparation, not evidence that this application has been deployed to AWS.
 Container execution is excluded from the default local gate because it is comparatively expensive.
 
 ## Remaining External Gates

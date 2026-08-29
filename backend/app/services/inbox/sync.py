@@ -36,6 +36,7 @@ class InboxSyncService:
         page_limit: int = 5,
         item_limit: int = 50,
         manual_item_limit: int = 5,
+        lease_seconds: int = 60,
     ) -> None:
         self._unit_of_work = unit_of_work
         self._gateways = gateways
@@ -43,6 +44,7 @@ class InboxSyncService:
         self._page_limit = page_limit
         self._item_limit = item_limit
         self._manual_item_limit = manual_item_limit
+        self._lease_seconds = lease_seconds
 
     def request_manual(
         self,
@@ -106,6 +108,31 @@ class InboxSyncService:
                 ),
             )
 
+    def job_status(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord | None:
+        with self._unit_of_work() as uow:
+            return uow.jobs.get_by_public_id(
+                organization_public_id=organization_public_id,
+                job_public_id=job_public_id,
+            )
+
+    def reprocess(
+        self,
+        *,
+        organization_public_id: str,
+        job_public_id: str,
+    ) -> InboxSyncJobRecord:
+        """Requeue a dead job while making duplicate reprocess deliveries harmless."""
+        with self._unit_of_work() as uow:
+            return uow.jobs.reprocess(
+                organization_public_id=organization_public_id,
+                job_public_id=job_public_id,
+            )
+
     def drain(
         self,
         *,
@@ -119,6 +146,7 @@ class InboxSyncService:
                 worker_id=worker_id,
                 limit=limit,
                 now=datetime.now(UTC),
+                lease_seconds=self._lease_seconds,
                 organization_public_id=organization_id,
                 connection_public_id=connection_id,
             )
