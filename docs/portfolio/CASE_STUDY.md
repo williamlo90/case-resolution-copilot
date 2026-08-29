@@ -22,9 +22,11 @@ It is not designed to let an LLM make consequential decisions by itself.
 | **4** | Governed roles: Specialist, Supervisor, Administrator, and Auditor | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](../../backend/evaluations/workflow/traceability.json) |
+| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) |
 
-These figures describe governed workflow coverage and traceability. They are not usage, accuracy,
-or business-impact metrics.
+These figures describe governed workflow coverage, traceability, and bounded workflow timing. The
+time-saved figure is descriptive evidence from one operator and three matched synthetic cases per
+condition; it is not a population-level productivity or customer-impact claim.
 
 ## Users And Workflow
 
@@ -133,6 +135,14 @@ records Specialist submission, Supervisor approval, a completed controlled actio
 receipt, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It was
 captured from the predecessor hosted deployment and is not evidence that the reconstructed commit
 is currently deployed.
+
+### Developer-operated workflow benchmark
+
+In a matched synthetic benchmark, Case Resolution Copilot produced `3/3` complete safe workflow
+outcomes versus `0/3` manually under the same scoring boundary. Raw median elapsed time was `95 s`
+with Copilot versus `582 s` manually, which is `487 s` lower (`83.7%`, `6.1x`). See the
+[workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) for the scoring
+boundary and timing table.
 
 ### Historical benchmark evidence
 

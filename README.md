@@ -23,11 +23,15 @@ The hosted application is invite-only. The public walkthrough contains labelled 
 | **4** | Specialist, Supervisor, Administrator, and Auditor roles | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](backend/evaluations/workflow/traceability.json) |
+| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](docs/evidence/developer-workflow-benchmark/REPORT.md) |
 
 The separate [historical hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 shows the recorded synthetic workflow from Specialist submission through Supervisor approval,
 controlled execution, duplicate blocking, and Auditor inspection. These are engineering-coverage
 metrics and bounded product evidence, not customer-impact measurements.
+
+The time-saved figure is descriptive benchmark evidence from one operator and three matched
+synthetic cases per condition. It is not presented as a population-level productivity claim.
 
 ## Why It Exists
 
