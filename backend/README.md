@@ -32,6 +32,7 @@ app/
 |-- evaluation/     decision, workflow, benchmark, and SLO evaluators
 |-- integrations/   identity, signed webhooks, provider simulators, action gateways
 |-- persistence/    SQLAlchemy repositories and transaction boundaries
+|-- orchestrators/  LangGraph runtime, LangChain utilities, optional framework prototypes
 |-- retrieval/      policy ingestion, filtering, embeddings, and ranking
 |-- security/       authentication, authorization, review authority
 `-- services/       application use cases
@@ -150,6 +151,26 @@ Run the credential-free governed RAG V2 source and latency gate with:
 ```powershell
 uv run python -m scripts.run_wave1_rag_evaluation --require-gate
 ```
+
+Inspect the orchestrator roles without credentials or model calls:
+
+```powershell
+uv run python -m scripts.inspect_orchestrator_frameworks
+```
+
+LangGraph is the default runtime. LangChain Core supports bounded prompt/schema-formatting work.
+CrewAI and AutoGen live behind isolated prototype commands and are not application dependencies;
+see `../docs/architecture/ORCHESTRATOR_FRAMEWORKS.md`.
+
+Run the single-case live validation explicitly from the isolated prototype environment:
+
+```powershell
+uv run --with-requirements examples/orchestrator_prototypes/requirements.txt `
+  python -m scripts.run_framework_validation
+```
+
+This command makes bounded provider calls and writes sanitized evidence without generated narrative
+text or credentials. The recorded result is in `../docs/evidence/framework-validation.md`.
 
 ## Async Ingestion
 

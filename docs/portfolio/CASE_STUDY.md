@@ -70,6 +70,8 @@ flowchart LR
   sanitized failure events.
 - An AWS-ready ECS/Fargate deployment pack with RDS PostgreSQL/pgvector, ElastiCache Redis, S3,
   Secrets Manager, CloudWatch, IAM, migration, and rollback guidance; no AWS deployment is claimed.
+- A LangGraph production orchestration boundary and LangChain Core prompt/schema-format utility,
+  plus isolated CrewAI and AutoGen comparison prototypes that do not affect production behavior.
 
 ## Architecture
 
@@ -119,11 +121,11 @@ unrelated records into fictional complete business cases or report a misleading 
 
 | Evidence | Result |
 | --- | ---: |
-| Release-hardening static checks | Ruff, Mypy over 290 backend application files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 389 backend unit/contract tests and 160 frontend tests passed serially |
+| Release-hardening static checks | Ruff, Mypy over 470 backend files, TypeScript, and ESLint passed |
+| Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
+| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
 
-The full release verifier and guarded PostgreSQL integration suite have not been rerun for the
-reconstructed revision.
+The guarded PostgreSQL integration suite has not been rerun for the reconstructed revision.
 
 ### Baseline matrices
 

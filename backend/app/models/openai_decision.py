@@ -1,4 +1,3 @@
-import json
 from collections.abc import Callable
 from typing import Any, Protocol, cast
 
@@ -7,6 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from app.domain.decision_briefs import DecisionAnalysis
 from app.models.gateway import ModelGatewayTimeout, ModelGatewayUnavailable
 from app.models.provider_usage import ProviderTokenUsage
+from app.orchestrators.langchain_helpers import (
+    DecisionNarrativePromptTooLarge,
+    build_decision_narrative_messages,
+)
 
 OPENAI_DECISION_INSTRUCTIONS = """
 Draft clear support decision language from the supplied server-generated control record.
@@ -125,12 +128,16 @@ class OpenAIDecisionNarrativeGateway:
         )
 
     def refine(self, analysis: DecisionAnalysis) -> DecisionNarrative:
-        model_input = json.dumps(
-            _minimized_control_record(analysis),
-            sort_keys=True,
-            separators=(",", ":"),
-            default=str,
-        )
+        try:
+            messages = build_decision_narrative_messages(
+                decision_narrative_control_record(analysis)
+            )
+        except DecisionNarrativePromptTooLarge as exc:
+            raise ModelGatewayUnavailable(
+                "AI narrative generation input exceeded the configured safety limit."
+            ) from exc
+        model_instructions = str(messages[0].content)
+        model_input = str(messages[1].content)
         if len(model_input) > OPENAI_DECISION_MAX_INPUT_CHARS:
             raise ModelGatewayUnavailable(
                 "AI narrative generation input exceeded the configured safety limit."
@@ -138,7 +145,7 @@ class OpenAIDecisionNarrativeGateway:
         try:
             response = self._client_instance().responses.parse(
                 model=cast(Any, self.model_version),
-                instructions=OPENAI_DECISION_INSTRUCTIONS,
+                instructions=model_instructions,
                 input=model_input,
                 text_format=DecisionNarrative,
                 reasoning={"effort": "low"},
@@ -223,7 +230,11 @@ def _provider_token_usage(response: _ParsedResponse) -> ProviderTokenUsage | Non
     )
 
 
-def _minimized_control_record(analysis: DecisionAnalysis) -> dict[str, object]:
+def decision_narrative_control_record(
+    analysis: DecisionAnalysis,
+) -> dict[str, object]:
+    """Return the server-owned controls that narrative models may restate."""
+
     return {
         "proposal_state": analysis.state.value,
         "policy_status": analysis.policy_status.value,

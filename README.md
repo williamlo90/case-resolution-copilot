@@ -68,6 +68,16 @@ Wave 1 adds portfolio-focused backend depth without changing the product boundar
   worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, ElastiCache Redis,
   S3, Secrets Manager, CloudWatch, and least-privilege IAM. It is not a claim of AWS deployment.
 
+Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md):
+
+- LangGraph is the production/default checkpoint orchestrator around the governed decision engine.
+- LangChain Core supplies prompt templates and schema-format instructions on the optional OpenAI
+  narrative path.
+- CrewAI and AutoGen are isolated, opt-in comparison prototypes with shared input/output safety
+  contracts; neither is part of the hosted production path.
+- One bounded synthetic-case [live validation](docs/evidence/framework-validation.md) passed the
+  shared schema, fact, evidence, approval, and no-false-execution checks on all three paths.
+
 ## Product Tour
 
 <table>
@@ -138,9 +148,9 @@ flowchart LR
     WORKER --> POLICY
 ```
 
-The stack is Next.js, TypeScript, FastAPI, PostgreSQL/pgvector, Clerk, and an optional OpenAI
-narrative provider. It is a modular monolith, not a microservice system. Deterministic providers
-keep repository verification independent of paid credentials.
+The stack is Next.js, TypeScript, FastAPI, PostgreSQL/pgvector, Clerk, LangGraph, LangChain Core,
+and an optional OpenAI narrative provider. It is a modular monolith, not a microservice system.
+Deterministic providers keep repository verification independent of paid credentials.
 
 ## Verification Evidence
 
@@ -148,8 +158,9 @@ keep repository verification independent of paid credentials.
 
 | Evidence layer | Result |
 | --- | ---: |
-| Release-hardening static checks | Ruff, strict Mypy over 290 backend application files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 389 backend unit/contract tests and 160 frontend tests passed serially |
+| Release-hardening static checks | Ruff, strict Mypy over 470 backend files, TypeScript, and ESLint passed |
+| Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
+| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
 | Migration and secret safety | Full Alembic SQL generation passed through revision `0024`; repository secret scan found 0 findings |
 
 The guarded PostgreSQL integration suite has not been rerun for this reconstructed revision. Static
@@ -218,6 +229,8 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [Evaluation strategy](docs/backend/EVALUATION_STRATEGY.md)
 - [Wave 1 governed RAG evaluation](backend/evaluations/wave1_rag/README.md)
 - [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md)
+- [Orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md)
+- [Bounded live framework validation](docs/evidence/framework-validation.md)
 - [AWS deployment operations runbook](docs/runbooks/AWS_DEPLOYMENT_OPERATIONS.md)
 - [Controlled pilot runbook](docs/pilot/PILOT_RUNBOOK.md)
 - [Security hardening](docs/runbooks/SECURITY_HARDENING.md)

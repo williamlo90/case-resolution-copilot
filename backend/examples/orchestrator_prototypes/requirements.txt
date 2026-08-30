@@ -1,0 +1,4 @@
+# Deliberately isolated from the production backend dependency lock.
+autogen-agentchat>=0.7.5,<0.8
+autogen-ext[openai]>=0.7.5,<0.8
+crewai>=1.15.18,<2

@@ -13,6 +13,7 @@ dependencies = [
     "sqlalchemy>=2.0,<3",
     "uvicorn[standard]>=0.35,<1",
     "langgraph>=1.0.10,<2",
+    "langchain-core>=1.2,<2",
     "langgraph-checkpoint>=4.1.1,<5",
     "langgraph-checkpoint-postgres>=3.1,<4",
     "pgvector>=0.4,<1",
@@ -77,4 +78,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["celery", "celery.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "autogen_agentchat.*",
+    "autogen_core.*",
+    "autogen_ext.*",
+    "crewai",
+    "crewai.*",
+]
 ignore_missing_imports = true

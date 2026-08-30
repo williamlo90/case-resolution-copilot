@@ -27,6 +27,8 @@ contracts and operating material used to build and evaluate the application.
 - [Operational controls](backend/OPERATIONAL_CONTROLS.md)
 - [Evaluation strategy](backend/EVALUATION_STRATEGY.md)
 - [AWS-ready deployment architecture](architecture/AWS_READY_DEPLOYMENT.md)
+- [Orchestrator framework boundary](architecture/ORCHESTRATOR_FRAMEWORKS.md)
+- [Bounded live framework validation](evidence/framework-validation.md)
 - [Frontend-backend handoff](frontend/BACKEND_HANDOFF_CONTRACT.md)
 
 ## Performance And Delivery

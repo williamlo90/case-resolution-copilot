@@ -4,12 +4,14 @@ from app.analysis.ai_assisted_decision_engine import OpenAIAssistedDecisionEngin
 from app.analysis.deterministic_decision_engine import DeterministicDecisionEngine
 from app.config import Settings
 from app.main import create_app
+from app.orchestrators.langgraph_orchestrator import LangGraphDecisionOrchestrator
 
 
 def test_default_runtime_uses_deterministic_decision_controls() -> None:
     app = create_app(Settings(environment="test", _env_file=None))
 
-    assert isinstance(app.state.decision_engine, DeterministicDecisionEngine)
+    assert isinstance(app.state.decision_engine, LangGraphDecisionOrchestrator)
+    assert isinstance(app.state.decision_engine.delegate, DeterministicDecisionEngine)
 
 
 def test_openai_runtime_wraps_deterministic_decision_controls() -> None:
@@ -23,4 +25,5 @@ def test_openai_runtime_wraps_deterministic_decision_controls() -> None:
     )
 
     with TestClient(app):
-        assert isinstance(app.state.decision_engine, OpenAIAssistedDecisionEngine)
+        assert isinstance(app.state.decision_engine, LangGraphDecisionOrchestrator)
+        assert isinstance(app.state.decision_engine.delegate, OpenAIAssistedDecisionEngine)

@@ -49,6 +49,7 @@ from app.integrations.connection_activation import activate_runtime_connections
 from app.integrations.webhook_action_gateway import SignedWebhookActionGateway
 from app.logging import configure_logging
 from app.models.openai_decision import OpenAIDecisionNarrativeGateway
+from app.orchestrators.langgraph_orchestrator import LangGraphDecisionOrchestrator
 from app.persistence.database import Database
 from app.persistence.policy_indexing import SqlAlchemyPolicyIndexUnitOfWorkFactory
 from app.retrieval.embeddings import (
@@ -85,9 +86,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     webhook_action_gateway: SignedWebhookActionGateway | None = None
     decision_engine: DecisionEngine = baseline_decision_engine
     embedding_provider: EmbeddingProvider = DEFAULT_EMBEDDING_PROVIDER
-    policy_v2_embedding_provider: EmbeddingProvider = (
-        deterministic_policy_embedding_provider()
-    )
+    policy_v2_embedding_provider: EmbeddingProvider = deterministic_policy_embedding_provider()
     inbox_runtime = build_inbox_runtime(database=database, settings=runtime_settings)
     if runtime_settings.model_provider == "openai":
         openai_api_key = runtime_settings.openai_secret()
@@ -102,6 +101,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             baseline=baseline_decision_engine,
             narrative_gateway=openai_gateway,
         )
+    decision_engine = LangGraphDecisionOrchestrator(decision_engine)
     if runtime_settings.embedding_provider == "openai":
         openai_api_key = runtime_settings.openai_secret()
         assert openai_api_key is not None
