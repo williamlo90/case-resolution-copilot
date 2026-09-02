@@ -44,7 +44,6 @@ and receipt reconciliation without a second execute operation. See `safety-scena
 developer-workflow-benchmark/
 |-- README.md
 |-- PROTOCOL.md
-|-- OPERATOR_RUNBOOK.md
 |-- frozen-manifest.json
 |-- pair-manifest.json
 |-- safety-scenarios.json

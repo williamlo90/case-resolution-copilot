@@ -12,7 +12,7 @@ application controls and authorized people decide what may happen.
 
 [![Decision Brief workspace](docs/evidence/production-demo/02-decision-brief.png)](docs/evidence/production-demo/README.md)
 
-[Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md) | [Three-minute demo](docs/portfolio/DEMO_SCRIPT.md)
+[Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md)
 
 The hosted application is invite-only. The public walkthrough contains labelled demo data only.
 

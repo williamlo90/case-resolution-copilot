@@ -33,7 +33,6 @@ contracts and operating material used to build and evaluate the application.
 
 ## Performance And Delivery
 
-- [Connected workflow SDLC and canonical phase map](development/CONNECTED_WORKFLOW_SDLC.md)
 - [Full-stack performance boundaries](frontend/PERFORMANCE_OPTIMIZATION.md)
 - [Optional development containers](development/CONTAINERS.md)
 - [Database migrations](runbooks/DATABASE_MIGRATIONS.md)
@@ -56,7 +55,6 @@ contracts and operating material used to build and evaluate the application.
 ## Portfolio Evidence
 
 - [Engineering case study](portfolio/CASE_STUDY.md)
-- [Three-minute demo](portfolio/DEMO_SCRIPT.md)
 - [Frozen Governed RAG V2 benchmark](../backend/evaluations/retrieval_v2/README.md)
 - [Wave 1 credential-free RAG evaluation](../backend/evaluations/wave1_rag/README.md)
 - [Phase 5 Decision and Draft gate](../backend/evaluations/decision_draft/README.md)
