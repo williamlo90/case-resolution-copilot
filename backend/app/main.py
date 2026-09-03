@@ -282,8 +282,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 
 def _source_revision() -> str | None:
-    value = os.getenv("VERCEL_GIT_COMMIT_SHA", "").strip().lower()
-    return value if re.fullmatch(r"[0-9a-f]{40}", value) else None
+    for variable in ("SUPPORT_COPILOT_SOURCE_REVISION", "VERCEL_GIT_COMMIT_SHA"):
+        value = os.getenv(variable, "").strip().lower()
+        if re.fullmatch(r"[0-9a-f]{40}", value):
+            return value
+    return None
 
 
 app = create_app()

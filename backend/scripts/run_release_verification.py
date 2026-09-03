@@ -164,9 +164,15 @@ def default_checks() -> tuple[Check, ...]:
         Check("frontend_lint", (eslint, "."), FRONTEND_ROOT, 120),
         Check(
             "frontend_tests",
-            (vitest, "run", "--maxWorkers=1", "--no-file-parallelism"),
+            (
+                vitest,
+                "run",
+                "--pool=threads",
+                "--maxWorkers=1",
+                "--no-file-parallelism",
+            ),
             FRONTEND_ROOT,
-            180,
+            240,
         ),
     )
 

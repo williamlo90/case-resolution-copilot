@@ -60,13 +60,17 @@ Case intake -> Triage -> Evidence and policy review -> Decision Brief
 
 Wave 1 adds portfolio-focused backend depth without changing the product boundary:
 
-- Celery and Redis deliver inbox-sync and policy-index jobs while PostgreSQL retains durable status,
-  leases, retry limits, duplicate protection, and reprocessing authority.
+- Celery uses Redis locally and SQS in the AWS profile to deliver inbox-sync and policy-index jobs,
+  while PostgreSQL retains durable status, leases, retry limits, duplicate protection, and
+  reprocessing authority.
 - A credential-free governed RAG V2 evaluator checks expected sources, retrieval status, latency,
   and sanitized failure events across representative synthetic cases.
 - An [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
-  worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, ElastiCache Redis,
-  S3, Secrets Manager, CloudWatch, and least-privilege IAM. It is not a claim of AWS deployment.
+  worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, SQS, Lambda, S3,
+  Secrets Manager, CloudWatch, least-privilege IAM, and an AWS-side auto-destroy watchdog. An [executable CDK validation
+  environment](infra/aws/README.md) now represents that topology with cost-aware disposable defaults.
+  Static synth is covered; this is not yet a claim of live AWS deployment. The always-on demo remains
+  on Vercel with Neon, while AWS validation is designed to self-teardown after a bounded session.
 
 Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md):
 
@@ -143,7 +147,7 @@ flowchart LR
     CLERK["Clerk identity"] --> CASES
     DB["PostgreSQL"] --> CASES
     DB --> POLICY
-    REDIS["Redis delivery"] --> WORKER["Celery ingestion worker"]
+    BROKER["Redis local / SQS on AWS"] --> WORKER["Celery ingestion worker"]
     WORKER --> DB
     WORKER --> POLICY
 ```

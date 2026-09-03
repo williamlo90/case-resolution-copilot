@@ -17,6 +17,10 @@ class AsyncJobSettings(BaseSettings):
 
     broker_url: SecretStr = SecretStr("redis://127.0.0.1:6379/0")
     result_backend_url: SecretStr | None = None
+    sqs_queue_url: SecretStr | None = None
+    aws_region: str = Field(default="ap-southeast-1", pattern=r"^[a-z]{2}-[a-z]+-\d$")
+    sqs_visibility_timeout_seconds: int = Field(default=180, ge=60, le=43200)
+    sqs_polling_interval_seconds: float = Field(default=1.0, ge=0.1, le=10.0)
     queue_name: str = Field(
         default="case-resolution-ingestion",
         pattern=r"^[a-zA-Z0-9._-]+$",
@@ -32,12 +36,20 @@ class AsyncJobSettings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_transport(self) -> Self:
-        _require_redis_url(self.broker_url.get_secret_value(), field_name="broker URL")
+        broker = self.broker_url.get_secret_value()
+        _require_broker_url(broker)
         if self.result_backend_url is not None:
             _require_redis_url(
                 self.result_backend_url.get_secret_value(),
                 field_name="result backend URL",
             )
+        if urlsplit(broker).scheme == "sqs":
+            if self.sqs_queue_url is None or not _is_https_url(
+                self.sqs_queue_url.get_secret_value()
+            ):
+                raise ValueError("Celery SQS transport requires an HTTPS queue URL.")
+            if self.sqs_visibility_timeout_seconds <= self.lease_duration_seconds():
+                raise ValueError("SQS visibility timeout must outlive the durable job lease.")
         if self.task_soft_time_limit_seconds >= self.task_time_limit_seconds:
             raise ValueError("The Celery soft time limit must be lower than the hard limit.")
         return self
@@ -47,8 +59,22 @@ class AsyncJobSettings(BaseSettings):
 
     def result_backend(self) -> str | None:
         if self.result_backend_url is None:
+            if urlsplit(self.broker()).scheme == "sqs":
+                return None
             return self.broker()
         return self.result_backend_url.get_secret_value()
+
+    def broker_transport_options(self) -> dict[str, object]:
+        if urlsplit(self.broker()).scheme != "sqs":
+            return {}
+        if self.sqs_queue_url is None:
+            raise RuntimeError("Validated SQS settings must include a queue URL.")
+        return {
+            "region": self.aws_region,
+            "visibility_timeout": self.sqs_visibility_timeout_seconds,
+            "polling_interval": self.sqs_polling_interval_seconds,
+            "predefined_queues": {self.queue_name: {"url": self.sqs_queue_url.get_secret_value()}},
+        }
 
     def lease_duration_seconds(self) -> int:
         """Keep the durable lease alive beyond Celery's forced task termination."""
@@ -71,3 +97,15 @@ def _require_redis_url(value: str, *, field_name: str) -> None:
     parsed = urlsplit(value)
     if parsed.scheme not in {"redis", "rediss"} or not parsed.hostname:
         raise ValueError(f"Celery {field_name} must be a redis:// or rediss:// URL.")
+
+
+def _require_broker_url(value: str) -> None:
+    parsed = urlsplit(value)
+    if parsed.scheme == "sqs" and not parsed.netloc and not parsed.path:
+        return
+    _require_redis_url(value, field_name="broker URL")
+
+
+def _is_https_url(value: str) -> bool:
+    parsed = urlsplit(value)
+    return parsed.scheme == "https" and bool(parsed.netloc)

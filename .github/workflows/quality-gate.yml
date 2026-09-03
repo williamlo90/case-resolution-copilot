@@ -19,6 +19,7 @@ on:
       - "docs/runbooks/**"
       - "docs/architecture/**"
       - "deploy/aws/**"
+      - "infra/aws/**"
   workflow_dispatch:
 
 permissions:
@@ -69,6 +70,13 @@ jobs:
           node-version: "22"
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Validate AWS CDK infrastructure
+        working-directory: infra/aws
+        run: |
+          npm ci
+          npm run build
+          npm test
 
       - name: Install frontend dependencies
         working-directory: frontend

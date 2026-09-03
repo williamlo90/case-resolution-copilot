@@ -52,6 +52,19 @@ def test_health_exposes_the_deployed_source_revision(
     assert response.headers["X-Source-Revision"] == revision
 
 
+def test_health_prefers_the_platform_neutral_source_revision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    revision = "b" * 40
+    monkeypatch.setenv("SUPPORT_COPILOT_SOURCE_REVISION", revision)
+    monkeypatch.setenv("VERCEL_GIT_COMMIT_SHA", "a" * 40)
+
+    with make_client() as client:
+        response = client.get("/api/health/live")
+
+    assert response.headers["X-Source-Revision"] == revision
+
+
 def test_production_disables_api_docs_and_adds_json_csp() -> None:
     app = create_app(
         Settings(

@@ -5,8 +5,11 @@ backend/.benchmark-data/
 # Environment and secrets
 .env
 .env.*
+*.local.json
 !.env.example
 !**/.env.example
+!*.example.json
+!**/*.example.json
 
 # Frontend dependencies and build output
 node_modules/
@@ -14,6 +17,7 @@ node_modules/
 out/
 build/
 dist/
+cdk.out/
 *.tsbuildinfo
 next-env.d.ts
 

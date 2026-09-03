@@ -64,12 +64,15 @@ flowchart LR
 - Signed case-intake and controlled-action adapters with replay protection, idempotency,
   attributable receipts, and unknown-outcome reconciliation.
 - Structured correlated logs, health/readiness contracts, and a bounded pilot-SLO evaluator.
-- Celery/Redis async delivery for durable inbox and policy-index jobs, including finite retries,
+- Celery async delivery using Redis locally and SQS on AWS for durable inbox and policy-index jobs,
+  including a dead-letter queue, finite retries,
   status inspection, duplicate-safe execution, and explicit reprocessing.
 - A credential-free governed RAG evaluator with expected-source checks, latency metrics, and
   sanitized failure events.
-- An AWS-ready ECS/Fargate deployment pack with RDS PostgreSQL/pgvector, ElastiCache Redis, S3,
-  Secrets Manager, CloudWatch, IAM, migration, and rollback guidance; no AWS deployment is claimed.
+- An AWS-ready, disposable ECS/Fargate validation architecture with RDS PostgreSQL/pgvector, SQS and
+  a dead-letter queue, versioned S3 evidence, Lambda, CloudFront/ALB, least-privilege IAM,
+  CloudWatch, migrations, and an EventBridge Scheduler plus Step Functions auto-destroy watchdog.
+  It has not yet been live-validated or deployed on AWS.
 - A LangGraph production orchestration boundary and LangChain Core prompt/schema-format utility,
   plus isolated CrewAI and AutoGen comparison prototypes that do not affect production behavior.
 
@@ -90,6 +93,10 @@ flowchart TB
 The browser never owns role authority. FastAPI verifies the Clerk session subject, resolves the
 active internal membership, and authorizes every protected operation from server-owned
 permissions.
+
+The diagram above is the always-on hosted demo: Vercel plus Neon. AWS is a separate, short-lived
+validation target designed to prove ECS/Fargate, RDS/pgvector, SQS, S3/Lambda, CloudFront/ALB, IAM,
+CloudWatch, and automated teardown without maintaining a second always-on environment.
 
 ## Important Engineering Decisions
 

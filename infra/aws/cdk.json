@@ -1,0 +1,15 @@
+{
+  "app": "npx ts-node --transpile-only bin/app.ts",
+  "context": {
+    "projectName": "case-resolution-copilot",
+    "stage": "portfolio",
+    "frontendOrigin": "https://ai-support-escalation-copilot.vercel.app",
+    "cloudFrontPrefixListId": "pl-31a34658",
+    "includeRuntime": "false",
+    "imageDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "sourceRevision": "0000000000000000000000000000000000000000",
+    "logRetentionDays": "7",
+    "autoDestroyAt": "2099-01-01T00:00:00Z",
+    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+  }
+}

@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY --from=uv /uv /uvx /usr/local/bin/
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project
 
 COPY --chown=supportcopilot:supportcopilot app ./app
 COPY --chown=supportcopilot:supportcopilot migrations ./migrations
@@ -22,7 +22,7 @@ COPY --chown=supportcopilot:supportcopilot policies ./policies
 COPY --chown=supportcopilot:supportcopilot alembic.ini ./
 COPY --chown=supportcopilot:supportcopilot container-entrypoint.sh ./
 RUN chmod +x container-entrypoint.sh \
-    && uv sync --frozen
+    && uv sync --frozen --no-dev
 
 USER supportcopilot
 

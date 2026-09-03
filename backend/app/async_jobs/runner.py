@@ -3,6 +3,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Literal
 
+from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 
 from app.async_jobs.runtime import AsyncJobRuntime, build_async_job_runtime
@@ -75,6 +76,46 @@ class AsyncJobRunner:
             "policy_indexing_enabled": self._app_settings.policy_indexing_enabled,
             **self._job_settings.safe_summary(),
         }
+
+    def validate_aws_runtime(
+        self,
+        *,
+        worker_id: str,
+        validation_id: str,
+        source_bucket: str,
+        source_key: str,
+        source_sha256: str,
+    ) -> dict[str, str | bool]:
+        def operation(runtime: AsyncJobRuntime) -> dict[str, str | bool]:
+            if runtime.database is None:
+                raise AsyncDeliveryUnavailable("database_not_configured")
+            with runtime.database.engine.connect() as connection:
+                migration_revision = connection.execute(
+                    text("SELECT version_num FROM alembic_version")
+                ).scalar_one()
+                vector_enabled = bool(
+                    connection.execute(
+                        text("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')")
+                    ).scalar_one()
+                )
+                connection.execute(text("SELECT 1")).scalar_one()
+            return {
+                "event": "aws_validation_passed",
+                "state": "succeeded",
+                "worker_id": worker_id,
+                "validation_id": validation_id,
+                "source_bucket": source_bucket,
+                "source_key": source_key,
+                "source_sha256": source_sha256,
+                "migration_revision": str(migration_revision),
+                "vector_enabled": vector_enabled,
+            }
+
+        try:
+            with self._runtime_factory() as runtime:
+                return operation(runtime)
+        except (DBAPIError, TimeoutError, OSError) as exc:
+            raise AsyncDeliveryUnavailable(type(exc).__name__) from exc
 
     def drain_inbox(self, *, worker_id: str) -> TaskOutcome:
         def operation(runtime: AsyncJobRuntime) -> TaskOutcome:

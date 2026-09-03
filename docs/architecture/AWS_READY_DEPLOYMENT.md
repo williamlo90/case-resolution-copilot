@@ -1,50 +1,57 @@
 # AWS-Ready Deployment Architecture
 
-Status: proposed deployment architecture. No AWS deployment is claimed.
+Status: AWS-ready deployment architecture with executable CDK and static validation. No live AWS
+deployment or validation is claimed until a sanitized validation record and teardown inventory
+exist. The always-on public demo remains on Vercel with Neon PostgreSQL.
 
 ## Deployment Shape
 
 ```text
 Internet
    |
-Route 53 + ACM
+CloudFront HTTPS endpoint
    |
 Application Load Balancer
    |
 ECS/Fargate API service -------------- CloudWatch logs, metrics, alarms
    |                |
-   |                +---- ElastiCache Redis ---- ECS/Fargate Celery worker
+   |                +---- SQS + dead-letter queue ---- ECS/Fargate Celery worker
    |                            ^
    |                            +---- ECS/Fargate Celery Beat scheduler (one task)
    |                                             |
    +---- RDS PostgreSQL + pgvector --------------+
    |                                             |
-   +---- Secrets Manager                         +---- private S3 bucket
+   +---- Secrets Manager        versioned private S3 ---- Lambda validation trigger
+
+EventBridge Scheduler -- at 45 min --> Step Functions teardown watchdog
+                                          |-- delete Runtime stack
+                                          +-- delete Foundation stack
 
 GitHub Actions -- OIDC --> ECR + ECS deployment roles
                           |
                           +---- one-off migration task
 ```
 
-The API and worker share one immutable backend image but run separate commands and scale
+The API, worker, scheduler, and migration task share one immutable backend image but run separate commands and scale
 independently. This is process separation, not a microservice rewrite. The current frontend may
-remain on Vercel or later move to a separate hosting decision; it is outside this backend-focused
-AWS pack.
+remain on Vercel and use Neon for the always-on demo; this AWS profile exists only for bounded live
+infrastructure validation.
 
 ## Network Boundary
 
 - Use at least two Availability Zones.
-- Put the ALB in public subnets. Put ECS tasks, RDS, and ElastiCache in private subnets.
-- ECS tasks need controlled egress through NAT or VPC endpoints for ECR, CloudWatch, S3, Secrets
-  Manager, and any explicitly enabled external provider.
+- In the low-cost ephemeral profile, put the ALB and ECS tasks in public subnets, assign public IPs
+  to tasks for controlled outbound access, and allow no direct inbound traffic to those tasks.
+- Keep RDS in isolated subnets. This avoids a continuously billed NAT Gateway during the short
+  validation window.
 - Allow inbound traffic to the API task only from the ALB security group on port `8000`.
 - Allow PostgreSQL only from API, worker, and migration security groups.
-- Allow Redis only from API, worker, and scheduler security groups. Require TLS and authentication.
-- Do not expose RDS, Redis, or task public IPs.
+- Grant SQS send permission to API/scheduler and consume plus retry permission to the worker.
+- Never expose RDS. Public task IPs in this profile provide egress only; security groups admit API
+  traffic solely from the ALB and no inbound traffic to worker, scheduler, or migration tasks.
 
-For a cost-limited portfolio environment, one NAT gateway is cheaper but loses Availability Zone
-independence. A serious pilot should use one NAT gateway per Availability Zone or reduce NAT use
-with VPC endpoints after measuring the actual cost tradeoff.
+This is not the recommended customer-pilot network. A serious pilot should move tasks into private
+subnets and choose NAT gateways or VPC endpoints from measured availability and cost requirements.
 
 ## Runtime Components
 
@@ -77,31 +84,33 @@ database and PID file.
 
 ### RDS PostgreSQL and pgvector
 
-Use PostgreSQL with encryption at rest, TLS in transit, automated backups, deletion protection,
-Performance Insights, and a parameter group sized for the chosen instance. Enable `vector` through
-a reviewed migration or bootstrap step. Keep transactional application data and governed retrieval
-metadata together until measured scale justifies a separate store.
+The disposable profile uses encrypted, TLS-capable, single-AZ PostgreSQL with pgvector and deletion
+settings selected for complete teardown. A customer pilot should add deletion protection, tested
+backups/PITR, Performance Insights, and Multi-AZ according to its recovery objectives. Keep
+transactional data and governed retrieval metadata together until measured scale justifies a
+separate store.
 
 Use RDS Proxy only after measuring connection churn. It adds cost and does not remove the need for
 bounded SQLAlchemy pools in API and worker processes.
 
-### ElastiCache Redis
+### SQS
 
-Redis is the Celery broker and coordination layer, not the system of record. Enable encryption in
-transit, encryption at rest, authentication, automatic failover where the pilot requires it, and a
-`noeviction` policy for broker safety. Persistent job lifecycle, idempotency keys, and final outcomes
-must remain in PostgreSQL.
+SQS is the AWS Celery broker, not the system of record. Use long polling, server-side encryption,
+a visibility timeout longer than the PostgreSQL job lease, and a bounded dead-letter policy.
+Persistent job lifecycle, idempotency keys, and final outcomes remain in PostgreSQL. Redis remains
+supported for local development, but the AWS profile avoids an always-on ElastiCache charge.
 
 ### S3
 
 Use a private bucket with Block Public Access, versioning, SSE-KMS, lifecycle rules, and access logs
-or CloudTrail data events where required. Suggested prefixes are `ingestion/` for source objects and
-`evaluations/` for generated evidence. The current application does not yet prove an S3 storage
-adapter; bucket access is architecture-ready until that adapter and its tests exist.
+or CloudTrail data events where required. The executable portfolio profile uses
+`validation-input/` and `validation-output/`: an S3-triggered Lambda reads a bounded evidence file,
+computes its SHA-256 digest, and writes a content-addressed manifest. This validates the event path;
+a full customer-source S3 adapter remains outside the current scope.
 
 ### Secrets Manager
 
-Store database URLs, provider credentials, Clerk keys, Redis authentication, signing secrets, and
+Store database URLs, provider credentials, Clerk keys, signing secrets, and
 credential-vault material as separate secrets where rotation ownership differs. ECS execution roles
 may retrieve only the ARNs referenced by their task definition. Application task roles should not
 receive general Secrets Manager read access.
@@ -110,7 +119,11 @@ receive general Secrets Manager read access.
 
 - GitHub Actions should assume an AWS role with OIDC; do not store long-lived AWS keys in GitHub.
 - Separate ECS execution roles from application task roles.
-- API and worker task roles receive only required S3/KMS actions and no infrastructure mutation.
+- Runtime task roles do not receive general S3 access. Add bucket permissions only when an
+  application storage adapter actually requires them.
+- API and scheduler roles may send to the named SQS queue; the worker may receive, delete, and retry.
+- The evidence Lambda may read only `validation-input/*`, write only `validation-output/*`, and
+  send only to the named validation queue.
 - The migration role receives database connectivity but no S3 or deployment authority.
 - The CI role may push one ECR repository, register task definitions, update named ECS services,
   run the named migration task, and pass only approved roles.
@@ -158,13 +171,13 @@ SNS destination and verify alarm delivery for:
 - ALB 5xx, unhealthy targets, and p95 latency;
 - ECS running-task count, CPU, memory, and deployment failures;
 - Celery queue age, retries, terminal failures, and worker heartbeat;
-- Redis evictions, memory, connections, and failover;
+- SQS queue depth, oldest-message age, receive count, and dead-letter growth;
 - RDS storage, connections, CPU, replica lag if used, and backup failures;
 - application readiness, provider failures, and unknown action outcomes.
 
 ## Cost-Aware Starting Point
 
-The primary fixed costs are continuously running Fargate tasks, RDS, ElastiCache, NAT gateways,
+The primary fixed costs are continuously running Fargate tasks, RDS,
 ALB, CloudWatch ingestion/retention, and VPC endpoints. OpenAI and data transfer are variable costs.
 Do not put exact monthly prices in repository claims because region and AWS pricing change.
 
@@ -174,6 +187,16 @@ resilience is explicit. For a controlled business pilot, prefer Multi-AZ data se
 tasks, tested backups, and alarm delivery. Use AWS Pricing Calculator before activation and set AWS
 Budgets alerts before creating resources.
 
+The executable `infra/aws` portfolio profile avoids a NAT Gateway by placing ECS tasks in public
+subnets with public IPs and no direct inbound task rules. RDS remains isolated. This
+profile also places CloudFront in front of an ALB whose HTTP ingress is restricted to the AWS-managed
+CloudFront origin-facing prefix list. This is a deliberate short-lived cost trade-off, not the target
+controlled-pilot network topology. Its VPC spans two Availability Zones, but its cost-limited RDS
+resource is deliberately not Multi-AZ. EventBridge Scheduler starts a Step Functions teardown
+watchdog at the hard 45-minute deadline, deleting Runtime before Foundation. A 35-minute operator
+teardown target remains the manual control and requires teardown verification; the watchdog covers
+workstation or terminal failure rather than replacing operator ownership.
+
 ## Readiness Gaps
 
 This architecture becomes deployable only after:
@@ -181,8 +204,9 @@ This architecture becomes deployable only after:
 - the API, worker, scheduler, and migration containers pass live startup/health validation;
 - the single-instance scheduler ECS service is configured and its replacement behavior is observed;
 - custom queue-age, retry, terminal-failure, and worker-heartbeat metrics are published;
-- an S3 adapter is implemented if source artifacts are placed in S3;
-- infrastructure is represented in Terraform, CDK, CloudFormation, or an equivalent reviewed tool;
+- a full S3 source adapter is implemented if customer artifacts move beyond validation evidence;
+- the executable CDK stacks pass live CloudFormation provisioning, connected
+  S3-Lambda-SQS-Celery-PostgreSQL validation, and teardown verification;
 - account-specific IAM, networking, DNS, certificates, backup, retention, and budgets are approved;
-- migration, restore, Redis interruption, worker shutdown, and rollback drills are observed;
+- migration, restore, SQS redrive, worker shutdown, and rollback drills are observed;
 - GitHub OIDC deployment is configured and protected by an environment approval gate.

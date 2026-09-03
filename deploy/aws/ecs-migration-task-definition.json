@@ -14,11 +14,16 @@
       "command": [".venv/bin/alembic", "upgrade", "head"],
       "environment": [
         {"name": "SUPPORT_COPILOT_ENVIRONMENT", "value": "production"},
+        {"name": "SUPPORT_COPILOT_AUTH_MODE", "value": "provider"},
+        {"name": "SUPPORT_COPILOT_CLERK_AUTHORIZED_PARTIES", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"},
+        {"name": "SUPPORT_COPILOT_SOURCE_REVISION", "value": "REPLACE_WITH_FULL_GIT_SHA"},
         {"name": "SUPPORT_COPILOT_DEV_MIGRATE", "value": "false"},
         {"name": "SUPPORT_COPILOT_DEV_SEED", "value": "false"}
       ],
       "secrets": [
-        {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"}
+        {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_SECRET_KEY", "valueFrom": "REPLACE_WITH_CLERK_SECRET_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_CLERK_JWT_KEY", "valueFrom": "REPLACE_WITH_CLERK_JWT_KEY_ARN"}
       ],
       "readonlyRootFilesystem": true,
       "user": "10001",

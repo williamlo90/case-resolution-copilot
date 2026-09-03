@@ -37,13 +37,31 @@
         {"name": "SUPPORT_COPILOT_DEV_MIGRATE", "value": "false"},
         {"name": "SUPPORT_COPILOT_DEV_SEED", "value": "false"},
         {"name": "SUPPORT_COPILOT_CORS_ORIGINS", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"},
-        {"name": "SUPPORT_COPILOT_CLERK_AUTHORIZED_PARTIES", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"}
+        {"name": "SUPPORT_COPILOT_CLERK_AUTHORIZED_PARTIES", "value": "REPLACE_WITH_HTTPS_FRONTEND_ORIGIN"},
+        {"name": "SUPPORT_COPILOT_SOURCE_REVISION", "value": "REPLACE_WITH_FULL_GIT_SHA"},
+        {"name": "SUPPORT_COPILOT_INBOX_CONNECTIONS_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_GMAIL_ADAPTER_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_INBOX_SCHEDULED_SYNC_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_REDIRECT_URI", "value": "REPLACE_WITH_HTTPS_GMAIL_CALLBACK"},
+        {"name": "SUPPORT_COPILOT_POLICY_INDEXING_ENABLED", "value": "true"},
+        {"name": "SUPPORT_COPILOT_POLICY_V2_EMBEDDING_PROVIDER", "value": "openai"},
+        {"name": "SUPPORT_COPILOT_POLICY_V2_PROFILE_KEY", "value": "openai-text-embedding-3-small-v2-d512"},
+        {"name": "SUPPORT_COPILOT_ASYNC_BROKER_URL", "value": "sqs://"},
+        {"name": "SUPPORT_COPILOT_ASYNC_QUEUE_NAME", "value": "REPLACE_WITH_SQS_QUEUE_NAME"},
+        {"name": "SUPPORT_COPILOT_ASYNC_SQS_QUEUE_URL", "value": "REPLACE_WITH_SQS_QUEUE_URL"},
+        {"name": "SUPPORT_COPILOT_ASYNC_AWS_REGION", "value": "REPLACE_WITH_AWS_REGION"},
+        {"name": "SUPPORT_COPILOT_ASYNC_SQS_VISIBILITY_TIMEOUT_SECONDS", "value": "180"}
       ],
       "secrets": [
         {"name": "SUPPORT_COPILOT_DATABASE_URL", "valueFrom": "REPLACE_WITH_DATABASE_URL_SECRET_ARN"},
         {"name": "SUPPORT_COPILOT_CLERK_SECRET_KEY", "valueFrom": "REPLACE_WITH_CLERK_SECRET_KEY_ARN"},
         {"name": "SUPPORT_COPILOT_CLERK_JWT_KEY", "valueFrom": "REPLACE_WITH_CLERK_JWT_KEY_ARN"},
-        {"name": "SUPPORT_COPILOT_OPENAI_API_KEY", "valueFrom": "REPLACE_WITH_OPENAI_API_KEY_ARN"}
+        {"name": "SUPPORT_COPILOT_OPENAI_API_KEY", "valueFrom": "REPLACE_WITH_OPENAI_API_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_CLIENT_ID", "valueFrom": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID_ARN"},
+        {"name": "SUPPORT_COPILOT_GOOGLE_OAUTH_CLIENT_SECRET", "valueFrom": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_CREDENTIAL_VAULT_KEY", "valueFrom": "REPLACE_WITH_CREDENTIAL_VAULT_KEY_ARN"},
+        {"name": "SUPPORT_COPILOT_INBOX_SCHEDULER_SECRET", "valueFrom": "REPLACE_WITH_INBOX_SCHEDULER_SECRET_ARN"},
+        {"name": "SUPPORT_COPILOT_POLICY_INDEX_SCHEDULER_SECRET", "valueFrom": "REPLACE_WITH_POLICY_INDEX_SCHEDULER_SECRET_ARN"}
       ],
       "readonlyRootFilesystem": true,
       "user": "10001",
@@ -51,7 +69,7 @@
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=2)\" || exit 1"
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/live', timeout=2)\" || exit 1"
         ],
         "interval": 30,
         "timeout": 5,

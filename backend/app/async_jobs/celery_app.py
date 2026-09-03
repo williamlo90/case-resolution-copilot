@@ -19,6 +19,7 @@ INBOX_REPROCESS_TASK = "case_resolution.async_jobs.inbox_sync.reprocess"
 POLICY_DRAIN_TASK = "case_resolution.async_jobs.policy_index.drain"
 POLICY_STATUS_TASK = "case_resolution.async_jobs.policy_index.status"
 POLICY_REPROCESS_TASK = "case_resolution.async_jobs.policy_index.reprocess"
+AWS_VALIDATION_TASK = "case_resolution.async_jobs.aws_validation"
 
 RunnerFactory = Callable[[], AsyncJobRunner]
 
@@ -33,7 +34,7 @@ def create_celery_app(
         from celery import Celery
     except ImportError as exc:
         raise RuntimeError(
-            "Celery delivery requires the celery[redis] backend dependency."
+            "Celery delivery requires an installed Redis or SQS transport dependency."
         ) from exc
 
     resolved_app_settings = app_settings or get_settings()
@@ -45,6 +46,7 @@ def create_celery_app(
     )
     celery_app.conf.update(
         task_default_queue=resolved_job_settings.queue_name,
+        broker_transport_options=resolved_job_settings.broker_transport_options(),
         task_routes={
             task_name: {"queue": resolved_job_settings.queue_name} for task_name in _TASK_NAMES
         },
@@ -95,6 +97,24 @@ def register_tasks(
     @celery_app.task(bind=True, name=HEALTH_TASK)  # type: ignore[untyped-decorator]
     def health(task: "Task") -> dict[str, str | int | bool]:
         return runner_factory().health(worker_id=_worker_id(task))
+
+    @celery_app.task(  # type: ignore[untyped-decorator]
+        bind=True, name=AWS_VALIDATION_TASK, **retry_options
+    )
+    def validate_aws_runtime(
+        task: "Task",
+        validation_id: str,
+        source_bucket: str,
+        source_key: str,
+        source_sha256: str,
+    ) -> dict[str, str | bool]:
+        return runner_factory().validate_aws_runtime(
+            worker_id=_worker_id(task),
+            validation_id=validation_id,
+            source_bucket=source_bucket,
+            source_key=source_key,
+            source_sha256=source_sha256,
+        )
 
     @celery_app.task(  # type: ignore[untyped-decorator]
         bind=True, name=INBOX_DRAIN_TASK, **retry_options
@@ -197,6 +217,7 @@ def _beat_schedule(
 
 
 _TASK_NAMES = (
+    AWS_VALIDATION_TASK,
     HEALTH_TASK,
     INBOX_DRAIN_TASK,
     INBOX_STATUS_TASK,

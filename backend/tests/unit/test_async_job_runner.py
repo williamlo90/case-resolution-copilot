@@ -13,6 +13,7 @@ from app.async_jobs.settings import AsyncJobSettings
 from app.config import Settings
 from app.domain.inbox import InboxSyncDrainResult
 from app.domain.policy_indexing import PolicyIndexDrainResult
+from app.persistence.database import Database
 from app.runtime.inbox import InboxRuntime
 from app.services.policy_indexing import PolicyIndexingService
 
@@ -83,6 +84,47 @@ class _UnavailableContext:
         traceback: TracebackType | None,
     ) -> None:
         del exc_type, exc_value, traceback
+
+
+class _ScalarResult:
+    def __init__(self, value: object) -> None:
+        self.value = value
+
+    def scalar_one(self) -> object:
+        return self.value
+
+
+class _Connection:
+    def __init__(self) -> None:
+        self.statements: list[str] = []
+
+    def __enter__(self) -> "_Connection":
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        return None
+
+    def execute(self, statement: object) -> _ScalarResult:
+        sql = str(statement)
+        self.statements.append(sql)
+        if "alembic_version" in sql:
+            return _ScalarResult("20260903_01")
+        if "pg_extension" in sql:
+            return _ScalarResult(True)
+        return _ScalarResult(1)
+
+
+class _Engine:
+    def __init__(self, connection: _Connection) -> None:
+        self.connection = connection
+
+    def connect(self) -> _Connection:
+        return self.connection
+
+
+class _DatabaseProbe:
+    def __init__(self, connection: _Connection) -> None:
+        self.engine = _Engine(connection)
 
 
 def _enabled_settings() -> Settings:
@@ -160,6 +202,30 @@ def test_runner_marks_only_transport_runtime_failures_as_retryable() -> None:
         runner.drain_inbox(worker_id="celery:unit")
 
 
+def test_aws_validation_probe_reports_live_database_capabilities() -> None:
+    connection = _Connection()
+    database = cast(Database, _DatabaseProbe(connection))
+    runtime = AsyncJobRuntime(inbox=None, policy_indexing=None, database=database)
+    runner = AsyncJobRunner(
+        runtime_factory=lambda: _RuntimeContext(runtime),
+        app_settings=_enabled_settings(),
+        job_settings=AsyncJobSettings(),
+    )
+
+    result = runner.validate_aws_runtime(
+        worker_id="celery:aws-unit",
+        validation_id="aws-unit",
+        source_bucket="evidence",
+        source_key="validation-input/aws-unit.json",
+        source_sha256="a" * 64,
+    )
+
+    assert result["event"] == "aws_validation_passed"
+    assert result["migration_revision"] == "20260903_01"
+    assert result["vector_enabled"] is True
+    assert any("SELECT 1" in statement for statement in connection.statements)
+
+
 def test_health_surface_never_exposes_redis_credentials() -> None:
     job_settings = AsyncJobSettings(
         broker_url="rediss://worker:secret@redis.example.test:6380/0",
@@ -183,6 +249,43 @@ def test_result_backend_defaults_to_the_broker_without_exposing_it() -> None:
 
     assert settings.result_backend() == settings.broker()
     assert "redis.example.test" not in repr(settings.safe_summary())
+
+
+def test_sqs_transport_uses_iam_broker_without_a_result_backend() -> None:
+    settings = AsyncJobSettings(
+        broker_url="sqs://",
+        queue_name="case-resolution-portfolio-ingestion",
+        sqs_queue_url="https://sqs.ap-southeast-1.amazonaws.com/111111111111/ingestion",
+        aws_region="ap-southeast-1",
+        sqs_visibility_timeout_seconds=180,
+    )
+
+    assert settings.result_backend() is None
+    assert settings.broker_transport_options() == {
+        "region": "ap-southeast-1",
+        "visibility_timeout": 180,
+        "polling_interval": 1.0,
+        "predefined_queues": {
+            "case-resolution-portfolio-ingestion": {
+                "url": "https://sqs.ap-southeast-1.amazonaws.com/111111111111/ingestion"
+            }
+        },
+    }
+    assert "amazonaws.com" not in repr(settings.safe_summary())
+
+
+def test_sqs_transport_rejects_missing_queue_and_short_visibility() -> None:
+    with pytest.raises(ValueError, match="HTTPS queue URL"):
+        AsyncJobSettings(broker_url="sqs://")
+
+    with pytest.raises(ValueError, match="outlive the durable job lease"):
+        AsyncJobSettings(
+            broker_url="sqs://",
+            sqs_queue_url="https://sqs.ap-southeast-1.amazonaws.com/111111111111/ingestion",
+            task_time_limit_seconds=120,
+            lease_safety_margin_seconds=30,
+            sqs_visibility_timeout_seconds=150,
+        )
 
 
 def test_durable_lease_outlives_the_celery_hard_limit() -> None:

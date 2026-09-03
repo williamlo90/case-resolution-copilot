@@ -19,6 +19,7 @@ from app.services.policy_indexing import PolicyIndexingService
 class AsyncJobRuntime:
     inbox: InboxRuntime | None
     policy_indexing: PolicyIndexingService | None
+    database: Database | None = None
 
 
 @contextmanager
@@ -27,7 +28,7 @@ def build_async_job_runtime(
     job_settings: AsyncJobSettings,
 ) -> Iterator[AsyncJobRuntime]:
     if settings.database_url is None:
-        yield AsyncJobRuntime(inbox=None, policy_indexing=None)
+        yield AsyncJobRuntime(database=None, inbox=None, policy_indexing=None)
         return
     database = Database(settings.database_url)
     lease_seconds = job_settings.lease_duration_seconds()
@@ -49,7 +50,11 @@ def build_async_job_runtime(
             lease_seconds=lease_seconds,
         )
     try:
-        yield AsyncJobRuntime(inbox=inbox, policy_indexing=policy_indexing)
+        yield AsyncJobRuntime(
+            database=database,
+            inbox=inbox,
+            policy_indexing=policy_indexing,
+        )
     finally:
         if inbox is not None:
             inbox.close()
