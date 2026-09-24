@@ -1,7 +1,8 @@
 # AWS CDK Validation Environment
 
-Status: executable infrastructure-as-code with local synth coverage. It has not yet been deployed or
-validated against live AWS services.
+Status: executable infrastructure-as-code with local synth coverage and a bounded live AWS
+validation completed on September 24, 2026. The validation environment was fully destroyed
+afterward.
 
 This CDK app turns the reference architecture in `deploy/aws` into two explicit, disposable stacks:
 
@@ -110,5 +111,6 @@ resources remain.
 - The Vercel frontend and Neon database remain the always-on portfolio demo. This AWS profile is a
   separate, short-lived infrastructure validation and is not its production hosting environment.
 
-Do not describe this as deployed on AWS until a live validation run and teardown inventory have been
-recorded. Until then, the honest claim is **AWS-ready deployment architecture with executable CDK**.
+The honest claim is **live-validated, disposable AWS deployment architecture with executable CDK**.
+It is not an always-on AWS production deployment; the public application remains on Vercel and Neon.
+See the sanitized [validation record](../../docs/evidence/aws-live-validation/README.md).

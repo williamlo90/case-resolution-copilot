@@ -57,6 +57,9 @@ describe("AWS lifecycle scripts", () => {
     expect(common).toContain('PSObject.Properties["NotificationThreshold"]');
     expect(common).toContain('PSObject.Properties["Threshold"]');
     expect(common).toContain("Get-BudgetNotificationThreshold");
+    expect(common).toContain("$deadlineValue -is [datetime]");
+    expect(common).toContain("[cultureinfo]::InvariantCulture");
+    expect(common).toContain("$session.watchdogAtUtc -is [datetime]");
     expect(common).toContain("$actualThresholds -notcontains 80");
     expect(common).toContain("Test-UrlSafeBase64Key");
   });
@@ -73,6 +76,7 @@ describe("AWS lifecycle scripts", () => {
     expect(validate).toContain("IngestionDeadLetterQueueUrl");
     expect(validate).toContain("aws_validation_passed");
     expect(validate).toContain("rdsMigrationRevision");
+    expect(validate).toContain("$session.startedAtUtc -is [datetime]");
     expect(destroy).toContain("aws-teardown-evidence.local.json");
     expect(destroy).toContain("stacksRemaining = 0");
   });

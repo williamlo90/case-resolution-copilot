@@ -120,7 +120,15 @@ if ([int]$deadLetters -ne 0) {
     throw "The SQS dead-letter queue is not empty."
 }
 
-$sessionStart = [datetime]::Parse([string]$session.startedAtUtc).ToUniversalTime()
+$sessionStart = if ($session.startedAtUtc -is [datetime]) {
+    $session.startedAtUtc.ToUniversalTime()
+}
+else {
+    [datetimeoffset]::Parse(
+        [string]$session.startedAtUtc,
+        [cultureinfo]::InvariantCulture
+    ).UtcDateTime
+}
 $startMilliseconds = ([DateTimeOffset]$sessionStart).ToUnixTimeMilliseconds()
 $validationLog = $null
 for ($attempt = 0; $attempt -lt 18 -and $null -eq $validationLog; $attempt++) {

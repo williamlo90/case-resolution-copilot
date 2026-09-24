@@ -69,10 +69,11 @@ flowchart LR
   status inspection, duplicate-safe execution, and explicit reprocessing.
 - A credential-free governed RAG evaluator with expected-source checks, latency metrics, and
   sanitized failure events.
-- An AWS-ready, disposable ECS/Fargate validation architecture with RDS PostgreSQL/pgvector, SQS and
+- A live-validated, disposable ECS/Fargate architecture with RDS PostgreSQL/pgvector, SQS and
   a dead-letter queue, versioned S3 evidence, Lambda, CloudFront/ALB, least-privilege IAM,
   CloudWatch, migrations, and an EventBridge Scheduler plus Step Functions auto-destroy watchdog.
-  It has not yet been live-validated or deployed on AWS.
+  A bounded AWS run passed connected ingestion and infrastructure checks, then completed verified
+  teardown; the always-on product demo is not hosted on AWS.
 - A LangGraph production orchestration boundary and LangChain Core prompt/schema-format utility,
   plus isolated CrewAI and AutoGen comparison prototypes that do not affect production behavior.
 

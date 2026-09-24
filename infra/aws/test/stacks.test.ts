@@ -121,6 +121,10 @@ describe("portfolio AWS stacks", () => {
       expect(templateText).toContain("SUPPORT_COPILOT_INBOX_CONNECTIONS_ENABLED");
       expect(templateText).toContain("SUPPORT_COPILOT_POLICY_INDEXING_ENABLED");
       expect(templateText).toContain("SUPPORT_COPILOT_ASYNC_SQS_QUEUE_URL");
+      expect(templateText).toContain('"Name":"TMPDIR","Value":"/dev/shm"');
+      expect(templateText).toContain("--schedule=/dev/shm/celerybeat-schedule");
+      expect(templateText).toContain("--pidfile=/dev/shm/celerybeat.pid");
+      expect(templateText).not.toContain("scheduler-tmp");
       expect(templateText).not.toContain("SUPPORT_COPILOT_REDIS_AUTH_TOKEN");
       expect(templateText).not.toContain("SUPPORT_COPILOT_ARTIFACT_BUCKET");
     },

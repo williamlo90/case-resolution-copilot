@@ -183,7 +183,21 @@ function Assert-ValidationWindow {
 
     $session = Get-Content -LiteralPath (Resolve-Path -LiteralPath $SessionFile) -Raw |
         ConvertFrom-Json
-    $deadline = [datetime]::Parse([string]$session.destroyByUtc).ToUniversalTime()
+    $deadlineValue = $session.destroyByUtc
+    $deadline = if ($deadlineValue -is [datetime]) {
+        $deadlineValue.ToUniversalTime()
+    }
+    else {
+        [datetimeoffset]::Parse(
+            [string]$deadlineValue,
+            [cultureinfo]::InvariantCulture
+        ).UtcDateTime
+    }
+    if ($session.watchdogAtUtc -is [datetime]) {
+        $session.watchdogAtUtc = $session.watchdogAtUtc.ToUniversalTime().ToString(
+            "yyyy-MM-ddTHH:mm:ssZ"
+        )
+    }
     $remaining = $deadline - (Get-Date).ToUniversalTime()
     if ($remaining.TotalMinutes -lt $MinimumMinutesRemaining) {
         throw "Validation window has only $([math]::Round($remaining.TotalMinutes, 1)) minutes left. Destroy the stacks now."

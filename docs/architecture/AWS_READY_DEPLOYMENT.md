@@ -1,8 +1,8 @@
 # AWS-Ready Deployment Architecture
 
-Status: AWS-ready deployment architecture with executable CDK and static validation. No live AWS
-deployment or validation is claimed until a sanitized validation record and teardown inventory
-exist. The always-on public demo remains on Vercel with Neon PostgreSQL.
+Status: AWS-ready deployment architecture with executable CDK, static coverage, and one bounded
+live validation completed on September 24, 2026. The disposable environment was destroyed after
+validation. The always-on public demo remains on Vercel with Neon PostgreSQL.
 
 ## Deployment Shape
 
@@ -79,8 +79,7 @@ percent to `0` and maximum percent to `100`, so ECS stops the old scheduler befo
 replacement instead of overlapping two Beat processes. PostgreSQL duplicate protection still makes
 accidental duplicate deliveries harmless. The scheduler uses the same capability flags and secret
 references as the worker because both construct the same validated application settings. Its
-read-only root filesystem exposes only an ephemeral writable `/tmp` volume for the Beat schedule
-database and PID file.
+read-only root filesystem places the Beat schedule database and PID file in writable `/dev/shm`.
 
 ### RDS PostgreSQL and pgvector
 

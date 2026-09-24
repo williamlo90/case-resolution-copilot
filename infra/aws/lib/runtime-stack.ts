@@ -231,7 +231,10 @@ export class RuntimeStack extends Stack {
         "--prefetch-multiplier=1",
         "--max-tasks-per-child=100",
       ],
-      environment: this.commonEnvironment(config, foundation),
+      environment: {
+        ...this.commonEnvironment(config, foundation),
+        TMPDIR: "/dev/shm",
+      },
       secrets: this.applicationSecrets(foundation.applicationSecret, foundation),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: foundation.logGroups.worker,
@@ -265,7 +268,7 @@ export class RuntimeStack extends Stack {
     runtimeSecurityGroup: ec2.SecurityGroup,
   ): ecs.FargateService {
     const task = this.taskDefinition("SchedulerTask", taskRole, 256, 512);
-    const container = task.addContainer("scheduler", {
+    task.addContainer("scheduler", {
       image,
       command: [
         ".venv/bin/celery",
@@ -273,8 +276,8 @@ export class RuntimeStack extends Stack {
         "app.async_jobs.celery_worker:app",
         "beat",
         "--loglevel=INFO",
-        "--schedule=/tmp/celerybeat-schedule",
-        "--pidfile=/tmp/celerybeat.pid",
+        "--schedule=/dev/shm/celerybeat-schedule",
+        "--pidfile=/dev/shm/celerybeat.pid",
       ],
       environment: this.commonEnvironment(config, foundation),
       secrets: this.applicationSecrets(foundation.applicationSecret, foundation),
@@ -285,12 +288,6 @@ export class RuntimeStack extends Stack {
       }),
       readonlyRootFilesystem: true,
       user: "10001",
-    });
-    task.addVolume({ name: "scheduler-tmp" });
-    container.addMountPoints({
-      sourceVolume: "scheduler-tmp",
-      containerPath: "/tmp",
-      readOnly: false,
     });
     const service = new ecs.FargateService(this, "SchedulerService", {
       serviceName: `${config.projectName}-${config.stage}-scheduler`,

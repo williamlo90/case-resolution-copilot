@@ -65,12 +65,13 @@ Wave 1 adds portfolio-focused backend depth without changing the product boundar
   reprocessing authority.
 - A credential-free governed RAG V2 evaluator checks expected sources, retrieval status, latency,
   and sanitized failure events across representative synthetic cases.
-- An [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
+- A [live-validated disposable AWS architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
   worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, SQS, Lambda, S3,
   Secrets Manager, CloudWatch, least-privilege IAM, and an AWS-side auto-destroy watchdog. An [executable CDK validation
   environment](infra/aws/README.md) now represents that topology with cost-aware disposable defaults.
-  Static synth is covered; this is not yet a claim of live AWS deployment. The always-on demo remains
-  on Vercel with Neon, while AWS validation is designed to self-teardown after a bounded session.
+  A bounded [AWS live validation](docs/evidence/aws-live-validation/README.md) passed the connected
+  ingestion, migration, pgvector, health, queue, and teardown checks. The always-on demo remains on
+  Vercel with Neon; AWS is validated deployment architecture, not permanent production hosting.
 
 Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md):
 

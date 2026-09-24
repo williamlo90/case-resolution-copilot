@@ -1,8 +1,8 @@
 # AWS-Ready Deployment Pack
 
 Status: reference task templates backed by executable CDK in [`infra/aws`](../../infra/aws/README.md).
-The CDK app has static synth coverage but has not yet been deployed, so these files are not evidence
-of a running AWS environment.
+The CDK path completed one bounded live AWS validation on September 24, 2026, followed by verified
+teardown. These review templates are not evidence of a currently running AWS environment.
 
 The target keeps the application as a modular monolith while separating runtime processes:
 
@@ -42,8 +42,8 @@ Manager ARNs; non-secret deployment settings remain ordinary environment variabl
 ## Image Contract
 
 Build one immutable backend image and promote it by digest. Use the same image for API, worker,
-scheduler, and migration tasks, changing only `command`. Remaining live validation work is listed
-in [AWS deployment architecture](../../docs/architecture/AWS_READY_DEPLOYMENT.md).
+scheduler, and migration tasks, changing only `command`. The validated deployment boundary is
+described in [AWS deployment architecture](../../docs/architecture/AWS_READY_DEPLOYMENT.md).
 
 The API, worker, scheduler, and migration definitions use the repository's actual runtime entry points.
 Account-, image-, network-, and secret-specific values remain explicit `REPLACE_` placeholders.
@@ -57,5 +57,6 @@ database connectivity, container startup, migrations, or rollback.
 Use the CDK app for new validation deployments. These JSON files remain reviewable runtime-contract
 references and are covered by backend tests; they are not a second deployment mechanism.
 
-Until live evidence and a clean teardown inventory have been recorded, describe this repository as
-**AWS-ready**, not deployed or validated on AWS.
+Describe this repository as a **live-validated disposable AWS deployment architecture**, not as an
+always-on AWS production service. See the sanitized
+[validation record](../../docs/evidence/aws-live-validation/README.md).
