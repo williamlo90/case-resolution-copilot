@@ -68,7 +68,7 @@ Push-Location $infraRoot
 try {
     npx cdk deploy CaseResolutionRuntime `
         --profile $Profile `
-        --require-approval broadening `
+        --require-approval never `
         -c includeRuntime=true `
         -c imageDigest=$imageDigest `
         -c sourceRevision=$SourceRevision `

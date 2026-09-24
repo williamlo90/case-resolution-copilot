@@ -50,6 +50,18 @@ function Assert-FullGitSha {
     }
 }
 
+function Get-BudgetNotificationThreshold {
+    param([psobject]$Notification)
+
+    if ($null -ne $Notification.PSObject.Properties["NotificationThreshold"]) {
+        return [decimal]$Notification.NotificationThreshold
+    }
+    if ($null -ne $Notification.PSObject.Properties["Threshold"]) {
+        return [decimal]$Notification.Threshold
+    }
+    throw "AWS did not return a threshold for a budget notification."
+}
+
 function Assert-CostBudget {
     param(
         [string]$AccountId,
@@ -78,17 +90,20 @@ function Assert-CostBudget {
         --output json | ConvertFrom-Json
     $percentage = @(
         $notifications.Notifications |
-            Where-Object ThresholdType -eq "PERCENTAGE"
+            Where-Object {
+                $null -eq $_.PSObject.Properties["ThresholdType"] `
+                    -or $_.ThresholdType -eq "PERCENTAGE"
+            }
     )
     $actualThresholds = @(
         $percentage |
             Where-Object NotificationType -eq "ACTUAL" |
-            ForEach-Object { [decimal]$_.NotificationThreshold }
+            ForEach-Object { Get-BudgetNotificationThreshold -Notification $_ }
     )
     $forecastThresholds = @(
         $percentage |
             Where-Object NotificationType -eq "FORECASTED" |
-            ForEach-Object { [decimal]$_.NotificationThreshold }
+            ForEach-Object { Get-BudgetNotificationThreshold -Notification $_ }
     )
     if ($actualThresholds -notcontains 50 `
         -or $actualThresholds -notcontains 80 `

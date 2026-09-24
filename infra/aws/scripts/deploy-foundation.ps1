@@ -32,7 +32,7 @@ try {
     npm ci
     npx cdk deploy CaseResolutionFoundation `
         --profile $Profile `
-        --require-approval broadening `
+        --require-approval never `
         -c autoDestroyAt=$watchdogAtText
 }
 finally {

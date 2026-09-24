@@ -1,6 +1,7 @@
 # Local runtime
 .codex-runtime/
 backend/.benchmark-data/
+/local/
 
 # Environment and secrets
 .env

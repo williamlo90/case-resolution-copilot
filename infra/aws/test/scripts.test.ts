@@ -27,6 +27,7 @@ describe("AWS lifecycle scripts", () => {
     expect(deploy).toContain("--desired-count 0");
     expect(deploy).toContain("imageDigest=$imageDigest");
     expect(deploy).toContain("Assert-ApplicationSecretPayload");
+    expect(deploy).toContain("--require-approval never");
   });
 
   it("publishes only a clean exact revision and records its ECR scan result", () => {
@@ -35,7 +36,9 @@ describe("AWS lifecycle scripts", () => {
     expect(publish).toContain("rev-parse HEAD");
     expect(publish).toContain("status --porcelain");
     expect(publish).toContain("image-scan-complete");
-    expect(publish).toContain("CRITICAL,HIGH");
+    expect(publish).toContain("Start-Sleep -Seconds 15");
+    expect(publish).toContain("approvedHighFindings");
+    expect(publish).toContain("unapproved high findings");
     expect(publish).toContain("release.local.json");
   });
 
@@ -45,11 +48,15 @@ describe("AWS lifecycle scripts", () => {
 
     expect(deploy).toContain("portfolio-aws-monthly-budget");
     expect(deploy).toContain("Assert-CostBudget");
+    expect(deploy).toContain("--require-approval never");
     expect(common).toContain("budgets describe-budget");
     expect(common).toContain("budgets describe-notifications-for-budget");
     expect(common).toContain("BudgetLimit.Unit -ne \"USD\"");
     expect(common).toContain("-gt 25");
-    expect(common).toContain("ThresholdType -eq \"PERCENTAGE\"");
+    expect(common).toContain('PSObject.Properties["ThresholdType"]');
+    expect(common).toContain('PSObject.Properties["NotificationThreshold"]');
+    expect(common).toContain('PSObject.Properties["Threshold"]');
+    expect(common).toContain("Get-BudgetNotificationThreshold");
     expect(common).toContain("$actualThresholds -notcontains 80");
     expect(common).toContain("Test-UrlSafeBase64Key");
   });

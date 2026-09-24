@@ -72,6 +72,9 @@ def test_container_contract_excludes_development_dependencies() -> None:
     )
 
     assert containerfile.count("uv sync --frozen --no-dev") == 2
+    assert "FROM python:3.12-slim" in containerfile
+    assert "apt-get upgrade --yes" in containerfile
+    assert "rm -rf /var/lib/apt/lists/*" in containerfile
     assert "USER supportcopilot" in containerfile
     assert "sslmode=require" in entrypoint
     assert "unset SUPPORT_COPILOT_DB_USERNAME SUPPORT_COPILOT_DB_PASSWORD" in entrypoint

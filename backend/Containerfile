@@ -6,7 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy
 
-RUN groupadd --system --gid 10001 supportcopilot \
+RUN apt-get update \
+    && apt-get upgrade --yes \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 supportcopilot \
     && useradd --system --uid 10001 --gid supportcopilot --create-home supportcopilot
 
 WORKDIR /app
