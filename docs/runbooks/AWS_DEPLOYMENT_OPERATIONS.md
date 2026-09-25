@@ -10,8 +10,8 @@ validation environment designed to exist for minutes, not an always-on pilot. It
 Availability Zones, while RDS deliberately lacks Multi-AZ resilience. Its deployment
 scripts require explicit cost acknowledgement, keep all ECS services at zero until migration passes,
 and provide a full-stack destroy command. EventBridge Scheduler starts an AWS-side Step Functions
-watchdog at the hard 45-minute deadline to delete Runtime before Foundation. The operator targets
-manual teardown at 35 minutes and then verifies the inventory.
+watchdog at the hard 60-minute deadline to delete Runtime before Foundation. The operator targets
+manual teardown at 50 minutes and then verifies the inventory.
 
 The manually managed `$25` AWS Budget is a required preflight and an alert, not a spending cap. RDS,
 ALB, public IPv4, CloudFront, Secrets Manager, logs, and Fargate may continue charging until their
@@ -29,7 +29,7 @@ Record these as deployment metadata, not secrets:
 - RDS cluster/instance identifier and current Alembic revision;
 - SQS queue and dead-letter queue identifiers;
 - S3 bucket name and approved prefixes;
-- teardown watchdog schedule, execution ARN, 35-minute operator target, and 45-minute hard trigger;
+- teardown watchdog schedule, execution ARN, 50-minute operator target, and 60-minute hard trigger;
 - rollback task definition revisions and recovery-point timestamp.
 
 Keep credentials and connection strings in Secrets Manager. The deployment log may contain secret
@@ -77,8 +77,8 @@ ARNs but must never contain secret values.
    revision and pgvector check, SQS plus empty DLQ, versioned S3 input/output, Lambda invocation,
    Celery completion for the same validation identifier, CloudWatch logs, and watchdog schedule.
 3. Do not delay teardown to improve screenshots. Begin manual teardown immediately after validation.
-4. At 35 minutes, begin operator-led Runtime and Foundation teardown after evidence capture.
-5. At 45 minutes, the AWS-side watchdog starts deletion if the operator path did not. Verify both
+4. At 50 minutes, begin operator-led Runtime and Foundation teardown after evidence capture.
+5. At 60 minutes, the AWS-side watchdog starts deletion if the operator path did not. Verify both
    stacks and tagged resources are absent. A started deletion is not the
    same as a verified teardown.
 

@@ -19,8 +19,8 @@ Vercel with Neon PostgreSQL. RDS, ALB, public IPv4, and
 Fargate accrue charges while present. Scaling ECS to zero does not stop all charges.
 
 At deployment start, EventBridge Scheduler is configured to start a Step Functions teardown
-watchdog at the hard 45-minute deadline. The state machine requests deletion of Runtime first and
-Foundation second. The operator targets manual teardown at 35 minutes and must run the destroy
+watchdog at the hard 60-minute deadline. The state machine requests deletion of Runtime first and
+Foundation second. The operator targets manual teardown at 50 minutes and must run the destroy
 script as soon as evidence is captured. The watchdog is a failure backstop, not a reason to leave
 resources unattended.
 
@@ -79,7 +79,7 @@ For the portfolio record, capture only these high-signal console views before te
 CloudFormation stacks; running ECS services; the SQS queue and empty DLQ; the S3 input/output objects;
 the Lambda invocation log; RDS availability/migration evidence; CloudFront health; and the passing
 validation summary. Also capture the scheduled watchdog and Step Functions definition. The
-operator targets teardown at 35 minutes; the watchdog starts teardown at the hard 45-minute deadline.
+operator targets teardown at 50 minutes; the watchdog starts teardown at the hard 60-minute deadline.
 
 ## Teardown
 

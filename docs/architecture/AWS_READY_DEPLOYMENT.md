@@ -23,7 +23,7 @@ ECS/Fargate API service -------------- CloudWatch logs, metrics, alarms
    |                                             |
    +---- Secrets Manager        versioned private S3 ---- Lambda validation trigger
 
-EventBridge Scheduler -- at 45 min --> Step Functions teardown watchdog
+EventBridge Scheduler -- at 60 min --> Step Functions teardown watchdog
                                           |-- delete Runtime stack
                                           +-- delete Foundation stack
 
@@ -192,7 +192,7 @@ profile also places CloudFront in front of an ALB whose HTTP ingress is restrict
 CloudFront origin-facing prefix list. This is a deliberate short-lived cost trade-off, not the target
 controlled-pilot network topology. Its VPC spans two Availability Zones, but its cost-limited RDS
 resource is deliberately not Multi-AZ. EventBridge Scheduler starts a Step Functions teardown
-watchdog at the hard 45-minute deadline, deleting Runtime before Foundation. A 35-minute operator
+watchdog at the hard 60-minute deadline, deleting Runtime before Foundation. A 50-minute operator
 teardown target remains the manual control and requires teardown verification; the watchdog covers
 workstation or terminal failure rather than replacing operator ownership.
 

@@ -69,8 +69,8 @@ describe("AWS lifecycle scripts", () => {
     const validate = script("validate-live.ps1");
     const destroy = script("destroy.ps1");
 
-    expect(foundation).toContain("AddMinutes(45)");
-    expect(foundation).toContain("AddMinutes(35)");
+    expect(foundation).toContain("AddMinutes(60)");
+    expect(foundation).toContain("AddMinutes(50)");
     expect(foundation).toContain("-c autoDestroyAt=$watchdogAtText");
     expect(validate).toContain("Assert-ValidationWindow");
     expect(validate).toContain("IngestionDeadLetterQueueUrl");

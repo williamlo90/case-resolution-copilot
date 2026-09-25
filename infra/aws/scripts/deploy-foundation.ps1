@@ -15,8 +15,8 @@ Assert-CostBudget -AccountId $identity.Account -BudgetName $BudgetName -Profile 
 $infraRoot = Split-Path -Parent $PSScriptRoot
 $sessionPath = Join-Path $infraRoot "validation-session.local.json"
 $startedAt = (Get-Date).ToUniversalTime()
-$operatorTeardownAt = $startedAt.AddMinutes(35)
-$watchdogAt = $startedAt.AddMinutes(45)
+$operatorTeardownAt = $startedAt.AddMinutes(50)
+$watchdogAt = $startedAt.AddMinutes(60)
 $watchdogAtText = $watchdogAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
 [ordered]@{
     startedAtUtc = $startedAt.ToString("o")
