@@ -1,0 +1,47 @@
+{
+  "schema_version": "case-resolution-aws-public-evidence-v1",
+  "validation_date": "2026-09-25",
+  "region": "ap-southeast-1",
+  "source_revision": "0a92c4b23f655b037a45c0999a1530c49d19d3ed",
+  "deployment": {
+    "foundation_stack": "completed",
+    "runtime_stack": "completed",
+    "cloudfront_health_status": 200,
+    "ecs_services_stable": 3,
+    "migration_exit_code": 0,
+    "migration_revision": "20260813_0024",
+    "pgvector_enabled": true,
+    "ecr_scan_gate": "passed"
+  },
+  "connected_validation": {
+    "path": "S3 -> Lambda -> SQS -> Celery -> PostgreSQL",
+    "initial_result": "passed",
+    "post_recovery_result": "passed",
+    "dead_letter_messages": 0
+  },
+  "controlled_recovery": {
+    "injected_failure": "stopped one running Celery worker task",
+    "replacement_observed": true,
+    "service_desired_tasks": 1,
+    "service_running_tasks": 1,
+    "result": "passed"
+  },
+  "replay": {
+    "source_object_versions": 2,
+    "lambda_validations": 2,
+    "worker_successes": 2,
+    "content_addressed_logical_manifests": 1,
+    "dead_letter_messages": 0,
+    "result": "idempotent_output_passed"
+  },
+  "teardown": {
+    "started_at_utc": "2026-09-25T07:05:01.7167938Z",
+    "completed_at_utc": "2026-09-25T07:48:57.3229703Z",
+    "manual_target_utc": "2026-09-25T07:55:01.7167938Z",
+    "watchdog_utc": "2026-09-25T08:05:01Z",
+    "application_stacks_remaining": 0,
+    "post_teardown_inventory": "empty",
+    "status": "destroyed"
+  },
+  "claim_boundary": "Live-validated disposable AWS deployment; not permanent production hosting, sustained load evidence, or customer traffic."
+}
