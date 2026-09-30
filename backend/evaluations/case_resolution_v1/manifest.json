@@ -1,0 +1,11 @@
+{
+  "version": "case-resolution-manifest-v1",
+  "inputs_file": "inputs.json",
+  "labels_file": "labels.json",
+  "inputs_sha256": "66c58190a016186802435c33b6452a5e3f9e7085e95ccf5fb2b2584aa582113d",
+  "labels_sha256": "703e480c000eb5ab454fae8e7c3525d0416a543ad0225a6f2f70cd4de13bcd53",
+  "case_count": 10,
+  "repeats_per_case": 2,
+  "product_revision": "892dede6fc562da652279ad0d992f115724835e3",
+  "frozen_at": "2026-09-30T00:07:11Z"
+}

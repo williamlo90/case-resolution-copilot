@@ -262,6 +262,91 @@ def test_stale_account_context_requires_refresh_and_identity_verification() -> N
     assert any(risk.outcome is RiskOutcome.INFORMATION_NEEDED for risk in result.risks)
 
 
+def test_conflicting_ownership_evidence_blocks_account_recovery() -> None:
+    workspace = _account_workspace_with_ownership_match("mismatch")
+    evidence = _evidence(EvidenceRetrievalStatus.RELEVANT)
+
+    result = DeterministicDecisionEngine().analyze(
+        workspace=workspace,
+        evidence=evidence,
+        input_fingerprint="f" * 64,
+    )
+
+    assert result.state is DecisionProposalState.INFORMATION_NEEDED
+    assert result.confidence is ProposalConfidence.LOW
+    assert {gap.label for gap in result.missing_information} == {
+        "Identity verification"
+    }
+    assert "specialist review" in result.missing_information[0].description
+    assert result.outcome == (
+        "Escalate conflicting ownership evidence before account recovery"
+    )
+    assert result.proposed_actions[0].type == "request_information"
+    assert result.response_draft.status.value == "blocked"
+    assert any(fact.statement == "Ownership match: mismatch." for fact in result.facts)
+
+
+def test_exact_ownership_evidence_allows_verified_account_recovery() -> None:
+    workspace = _account_workspace_with_ownership_match("exact")
+    evidence = _evidence(EvidenceRetrievalStatus.RELEVANT)
+
+    result = DeterministicDecisionEngine().analyze(
+        workspace=workspace,
+        evidence=evidence,
+        input_fingerprint="f" * 64,
+    )
+
+    assert result.state is DecisionProposalState.READY_FOR_REVIEW
+    assert result.missing_information == []
+    assert result.proposed_actions[0].type == "start_verified_recovery"
+
+
+def _account_workspace_with_ownership_match(
+    ownership_match: str,
+) -> CaseWorkspaceRecord:
+    workspace = _workspace("CS-2046")
+    account = workspace.business_contexts[0]
+    account = account.model_copy(
+        update={
+            "fields": {**account.fields, "identity_check": "verified"},
+            "source_freshness": SourceFreshness.CURRENT,
+        }
+    )
+    ownership = BusinessObjectRecord(
+        id=uuid4(),
+        public_id="CTX-2046-OWNERSHIP",
+        organization_id=workspace.case.organization_id,
+        case_id=workspace.case.id,
+        type=BusinessObjectType.OTHER,
+        label="Ownership verification",
+        source="identity-provider",
+        source_reference="IDV-2046",
+        status="passed" if ownership_match == "exact" else "failed",
+        fields={"ownership_match": ownership_match},
+        captured_at=account.captured_at,
+        source_freshness=SourceFreshness.CURRENT,
+        source_checked_at=account.source_checked_at,
+        version=1,
+    )
+    return workspace.model_copy(
+        update={
+            "case": workspace.case.model_copy(
+                update={"source_freshness": SourceFreshness.CURRENT}
+            ),
+            "business_contexts": [account, ownership],
+            "collections": workspace.collections.model_copy(
+                update={
+                    "business_contexts": CaseCollectionWindowRecord(
+                        returned=2,
+                        total=2,
+                        has_more=False,
+                    )
+                }
+            ),
+        }
+    )
+
+
 def test_missing_policy_abstains_without_consequential_action() -> None:
     result = _analyze("CS-2047", EvidenceRetrievalStatus.MISSING)
 

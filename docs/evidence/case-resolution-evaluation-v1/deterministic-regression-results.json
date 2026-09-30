@@ -1,0 +1,62 @@
+{
+  "run_id": "deterministic-v3-regression-20-20260930",
+  "evaluated_on": "2026-09-30",
+  "evidence_type": "post_fix_regression_validation",
+  "tested_implementation": {
+    "bundle_sha256": "a7108771c80ab7402117bd5a906e0072d4dd5530b2d3657808f7e8844f0a5ea3",
+    "hash_method": "SHA-256 over each listed UTF-8 path, NUL, UTF-8 content normalized to LF, NUL, in listed order",
+    "files": [
+      "backend/app/analysis/deterministic_decision_engine.py",
+      "backend/app/evaluation/case_resolution/__init__.py",
+      "backend/app/evaluation/case_resolution/generation.py",
+      "backend/app/evaluation/case_resolution/models.py",
+      "backend/app/evaluation/case_resolution/reporting.py",
+      "backend/app/evaluation/case_resolution/runner.py",
+      "backend/app/evaluation/case_resolution/scoring.py",
+      "backend/app/evaluation/case_resolution/validation.py",
+      "backend/evaluations/case_resolution_v1/manifest.json",
+      "backend/evaluations/case_resolution_v1/inputs.json",
+      "backend/evaluations/case_resolution_v1/labels.json",
+      "backend/evaluations/case_resolution_v1/thresholds.json"
+    ]
+  },
+  "raw_artifact_sha256": {
+    "observations.json": "fb773d213b57b0f75ba89e17a18184b89fc4f4f6df2772ac7615e47404002e7f",
+    "report.json": "7fb92af181a13f822f33208131630e5295320108664f2a16e670280c1f9778b5"
+  },
+  "benchmark": {
+    "case_count": 10,
+    "repeats_per_case": 2,
+    "observation_count": 20,
+    "inputs_sha256": "66c58190a016186802435c33b6452a5e3f9e7085e95ccf5fb2b2584aa582113d",
+    "labels_sha256": "703e480c000eb5ab454fae8e7c3525d0416a543ad0225a6f2f70cd4de13bcd53"
+  },
+  "result": {
+    "passed_observations": 20,
+    "failed_observations": 0,
+    "control_state_accuracy": 1.0,
+    "required_evidence_coverage_rate": 1.0,
+    "required_policy_retrieval_coverage_rate": 1.0,
+    "risk_outcome_pass_rate": 1.0,
+    "escalation_disposition_accuracy": 1.0,
+    "unsupported_claim_rate": 0.0,
+    "required_action_pass_rate": 1.0,
+    "forbidden_action_pass_rate": 1.0,
+    "schema_validity_rate": 1.0,
+    "run_to_run_consistency": 1.0,
+    "critical_failure_signals": 0,
+    "p50_engine_latency_ms": 1.886868,
+    "p95_engine_latency_ms": 3.265093
+  },
+  "versions": {
+    "decision_engine": "deterministic-decision-engine-v3",
+    "risk_rules": "generic-risk-rules-v2"
+  },
+  "limitations": [
+    "The suite is synthetic and contains ten cases.",
+    "The final result is regression evidence after a benchmark-discovered product fix, not a blind holdout.",
+    "The manifest product revision records the pre-execution freeze point; the tested implementation bundle hash identifies the post-fix source that produced this result.",
+    "Engine latency is not API latency or human productivity evidence.",
+    "Exact semantic fact phrasing, information-gap wording, complete action parameters, and persisted review boundaries are not included in the aggregate score."
+  ]
+}

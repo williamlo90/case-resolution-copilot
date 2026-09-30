@@ -27,10 +27,12 @@ from app.domain.decision_briefs import (
 )
 from app.domain.policies import EvidenceRetrievalResult, EvidenceRetrievalStatus
 
-DECISION_MODEL_VERSION = "deterministic-decision-engine-v2"
+DECISION_MODEL_VERSION = "deterministic-decision-engine-v3"
 DECISION_PROMPT_VERSION = "decision-brief-rules-v2"
 DECISION_GRAPH_VERSION = "generic-decision-brief-v1"
-DECISION_RISK_RULE_VERSION = "generic-risk-rules-v1"
+DECISION_RISK_RULE_VERSION = "generic-risk-rules-v2"
+
+_CONFIRMED_OWNERSHIP_MATCHES = frozenset({"exact", "match", "matched", "verified"})
 
 
 class DecisionEngine(Protocol):
@@ -138,7 +140,7 @@ class DeterministicDecisionEngine:
             else DecisionProposalState.READY_FOR_REVIEW
         )
         confidence = _confidence(workspace, evidence.status, blocking)
-        outcome = _outcome(workspace.case.category, state, evidence.status)
+        outcome = _outcome(workspace, state, evidence.status)
         impact_amount = None
         impact_currency = None
         if state is DecisionProposalState.READY_FOR_REVIEW and workspace.case.category in {
@@ -207,6 +209,7 @@ def _facts(workspace: CaseWorkspaceRecord) -> list[VerifiedFact]:
         "delivery_state": "Delivery state",
         "attempt_count": "Recorded payment attempts",
         "identity_check": "Identity check",
+        "ownership_match": "Ownership match",
         "mfa_state": "Multi-factor authentication",
     }
     for context in workspace.business_contexts:
@@ -312,12 +315,25 @@ def _information_gaps(
                 )
             )
     elif category is CaseCategory.ACCOUNT_ACCESS:
+        conflicting_ownership = _has_conflicting_ownership_evidence(workspace)
         verified_identity = any(
             context.type is BusinessObjectType.ACCOUNT
             and str(context.fields.get("identity_check", "")) == "verified"
             for context in workspace.business_contexts
         )
-        if not verified_identity:
+        if conflicting_ownership:
+            gaps.append(
+                _gap(
+                    workspace.case.public_id,
+                    "identity-verification-conflict",
+                    "Identity verification",
+                    (
+                        "Resolve the conflicting ownership evidence through specialist review "
+                        "before starting account recovery or changing an authentication setting."
+                    ),
+                )
+            )
+        elif not verified_identity:
             gaps.append(
                 _gap(
                     workspace.case.public_id,
@@ -427,13 +443,18 @@ def _confidence(
 
 
 def _outcome(
-    category: CaseCategory,
+    workspace: CaseWorkspaceRecord,
     state: DecisionProposalState,
     policy_status: EvidenceRetrievalStatus,
 ) -> str:
+    category = workspace.case.category
     if policy_status is not EvidenceRetrievalStatus.RELEVANT:
         return "Pause the resolution until applicable policy is available"
     if state is DecisionProposalState.INFORMATION_NEEDED:
+        if category is CaseCategory.ACCOUNT_ACCESS and _has_conflicting_ownership_evidence(
+            workspace
+        ):
+            return "Escalate conflicting ownership evidence before account recovery"
         return {
             CaseCategory.BILLING_DISPUTE: "Verify the second charge before a billing adjustment",
             CaseCategory.REFUND_REQUEST: "Confirm delivery status before a refund decision",
@@ -446,6 +467,15 @@ def _outcome(
         CaseCategory.ACCOUNT_ACCESS: "Start verified account recovery",
         CaseCategory.SERVICE_EXCEPTION: "Approve the documented service correction",
     }[category]
+
+
+def _has_conflicting_ownership_evidence(workspace: CaseWorkspaceRecord) -> bool:
+    ownership_matches = {
+        str(value).strip().lower()
+        for context in workspace.business_contexts
+        if (value := context.fields.get("ownership_match")) is not None
+    }
+    return any(value not in _CONFIRMED_OWNERSHIP_MATCHES for value in ownership_matches)
 
 
 def _actions(

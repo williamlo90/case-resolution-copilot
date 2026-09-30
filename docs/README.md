@@ -59,6 +59,7 @@ contracts and operating material used to build and evaluate the application.
 - [Wave 1 credential-free RAG evaluation](../backend/evaluations/wave1_rag/README.md)
 - [Phase 5 Decision and Draft gate](../backend/evaluations/decision_draft/README.md)
 - [Phase 6 OpenAI activation evidence](../backend/evaluations/openai_activation/README.md)
+- [Case Resolution Evaluation V1](evidence/case-resolution-evaluation-v1/README.md)
 - [Hosted product walkthrough](evidence/production-demo/README.md)
 - [Hosted deterministic workflow acceptance](evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 - [Hosted connected Gmail draft acceptance](evidence/hosted-connected-draft-acceptance/2026-08-23/README.md)

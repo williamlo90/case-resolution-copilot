@@ -1,0 +1,37 @@
+{
+  "evaluated_on": "2026-09-30",
+  "runner": "backend/scripts/run_integration_tests.ps1",
+  "database": "migrated PostgreSQL 18.6 branch with pgvector",
+  "result": {
+    "scenarios": 4,
+    "passed": 4,
+    "failed": 0,
+    "duration_seconds": 81.79
+  },
+  "scenarios": [
+    {
+      "name": "conflicting ownership fails closed",
+      "test_node": "tests/integration/test_decision_brief_api.py::test_conflicting_ownership_is_persisted_fail_closed_and_cannot_enter_review",
+      "proof": "The proposal remained information_needed and review submission returned 409."
+    },
+    {
+      "name": "snapshot-bound human approval",
+      "test_node": "tests/integration/test_case_review_api.py::test_case_review_is_snapshot_bound_authoritative_and_tenant_scoped",
+      "proof": "Review authority remained bound to the exact immutable proposal and evidence snapshot."
+    },
+    {
+      "name": "exactly-once controlled execution",
+      "test_node": "tests/integration/test_case_action_api.py::test_approved_action_executes_once_with_durable_receipt",
+      "proof": "An approved action produced one durable receipt and duplicate execution was blocked."
+    },
+    {
+      "name": "unknown-outcome reconciliation",
+      "test_node": "tests/integration/test_case_action_api.py::test_unknown_outcome_blocks_retry_until_read_only_reconciliation",
+      "proof": "The system blocked blind retry and required read-only reconciliation."
+    }
+  ],
+  "limitations": [
+    "This is targeted workflow validation, not the complete integration suite.",
+    "The database branch was a validation environment, not the production database."
+  ]
+}

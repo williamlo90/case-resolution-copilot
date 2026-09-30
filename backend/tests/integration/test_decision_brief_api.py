@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from threading import Lock
 
 from fastapi.testclient import TestClient
@@ -7,7 +8,7 @@ from sqlalchemy import func, select
 
 from app.analysis.deterministic_decision_engine import DeterministicDecisionEngine
 from app.config import Settings
-from app.domain.cases import CaseWorkspaceRecord
+from app.domain.cases import CaseCreate, CaseStatus, CaseWorkspaceRecord
 from app.domain.decision_briefs import (
     DecisionAnalysis,
     DecisionGenerationInProgress,
@@ -21,6 +22,9 @@ from app.domain.identity import (
     MemberRole,
 )
 from app.domain.policies import EvidenceRetrievalResult
+from app.evaluation.case_resolution.validation import (
+    load_frozen_case_resolution_benchmark,
+)
 from app.integrations.case_source_simulator import DeterministicCaseSourceSimulator
 from app.integrations.policy_source_simulator import DeterministicPolicySourceSimulator
 from app.main import create_app
@@ -31,6 +35,7 @@ from app.persistence.models import (
     CaseAnalysisCheckpointModel,
     CaseAnalysisGenerationModel,
     CaseAnalysisRunModel,
+    CaseModel,
     CaseProposalModel,
     CaseProposalVersionModel,
     GovernedPolicyVersionModel,
@@ -121,8 +126,12 @@ def _version(response: dict[str, object], number: int = 1) -> dict[str, object]:
     return matches[0]
 
 
-def _publish_refund_policy(client: TestClient) -> None:
-    seed = DeterministicPolicySourceSimulator().fetch_policies()[0]
+def _publish_policy(client: TestClient, policy_id: str) -> None:
+    seed = next(
+        item
+        for item in DeterministicPolicySourceSimulator().fetch_policies()
+        if item.public_id == policy_id
+    )
     created = client.post(
         "/api/policies",
         headers=ADMIN,
@@ -160,6 +169,67 @@ def _publish_refund_policy(client: TestClient) -> None:
         },
     )
     assert published.status_code == 200
+
+
+def _publish_refund_policy(client: TestClient) -> None:
+    _publish_policy(client, "POL-1008")
+
+
+def _seed_conflicting_account_case(database: Database) -> None:
+    benchmark_root = Path(__file__).resolve().parents[2] / "evaluations" / "case_resolution_v1"
+    benchmark = load_frozen_case_resolution_benchmark(benchmark_root)
+    fixture = next(case for case in benchmark.inputs.cases if case.case_id == "CRV1-006")
+    command = CaseCreate.model_validate(
+        {
+            "public_id": fixture.public_case_id,
+            "source_id": "case-resolution-evaluation-v1:CRV1-006",
+            "external_reference": fixture.external_reference,
+            "category": fixture.category,
+            "issue": fixture.request_summary,
+            "status": CaseStatus.INVESTIGATING,
+            "urgency": fixture.urgency,
+            "risk": fixture.risk,
+            "due_at": fixture.as_of + timedelta(days=1),
+            "impact_amount": fixture.impact_amount,
+            "impact_currency": fixture.impact_currency,
+            "source_freshness": fixture.source_freshness,
+            "source_checked_at": fixture.source_checked_at,
+            "request": {
+                "channel": fixture.channel,
+                "customer_message": fixture.customer_request,
+                "summary": fixture.request_summary,
+                "received_at": fixture.as_of,
+            },
+            "customer": {
+                "customer_id": "CUS-CRV1-006",
+                "name": "Evaluation Customer CRV1-006",
+                "tier": fixture.customer_tier,
+                "locale": "en-US",
+                "contact": "crv1-006@example.invalid",
+            },
+            "business_contexts": [
+                {
+                    "public_id": evidence.public_id,
+                    "type": evidence.type,
+                    "label": evidence.label,
+                    "source": evidence.source,
+                    "source_reference": evidence.source_reference,
+                    "status": evidence.status,
+                    "fields": evidence.fields,
+                    "captured_at": evidence.captured_at,
+                    "freshness": evidence.source_freshness,
+                    "checked_at": evidence.source_checked_at,
+                }
+                for evidence in fixture.available_evidence
+            ],
+        }
+    )
+    with database.session() as session:
+        CaseRepository(session).seed_case(
+            organization_public_id="ORG-0001",
+            command=command,
+            correlation_id="case-resolution-evaluation-v1:CRV1-006",
+        )
 
 
 def test_decision_briefs_are_idempotent_versioned_and_tenant_scoped(
@@ -262,6 +332,56 @@ def test_decision_briefs_are_idempotent_versioned_and_tenant_scoped(
         assert checkpoint_count == 8
         assert evidence_binding_count == 2
         assert context_binding_count == 2
+
+
+def test_conflicting_ownership_is_persisted_fail_closed_and_cannot_enter_review(
+    database: Database,
+    test_database_url: str,
+) -> None:
+    _seed_workspace(database)
+    _seed_conflicting_account_case(database)
+    app = create_app(
+        Settings(environment="test", database_url=test_database_url, _env_file=None)
+    )
+
+    with TestClient(app) as client:
+        _publish_policy(client, "POL-1007")
+        generated = client.post(
+            "/api/cases/CS-EVAL-006/proposals",
+            headers=SPECIALIST,
+            json={"expected_case_version": 1},
+        )
+        submitted = client.post(
+            "/api/cases/CS-EVAL-006/proposals/1/reviews",
+            headers=SPECIALIST,
+            json={"expected_case_version": 1},
+        )
+
+    assert generated.status_code == 201
+    detail = generated.json()["data"]
+    assert detail["analysis"]["model_version"] == "deterministic-decision-engine-v3"
+    assert detail["proposal"]["state"] == "information_needed"
+    assert detail["proposal"]["outcome"] == (
+        "Escalate conflicting ownership evidence before account recovery"
+    )
+    assert {item["label"] for item in detail["missing_information"]} == {
+        "Identity verification"
+    }
+    assert [item["type"] for item in detail["proposed_actions"]] == [
+        "request_information"
+    ]
+    assert detail["response_draft"]["status"] == "blocked"
+    assert submitted.status_code == 409
+    assert submitted.json()["error"]["code"] == "review_submission_not_allowed"
+
+    with database.session() as session:
+        proposal = session.scalar(
+            select(CaseProposalModel)
+            .join(CaseModel, CaseModel.id == CaseProposalModel.case_id)
+            .where(CaseModel.public_id == "CS-EVAL-006")
+        )
+        assert proposal is not None
+        assert proposal.state == "information_needed"
 
 
 def test_generation_reservation_is_single_flight_under_bounded_concurrency(

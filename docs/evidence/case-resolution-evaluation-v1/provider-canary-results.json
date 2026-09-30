@@ -1,0 +1,46 @@
+{
+  "run_id": "decision-brief-v3-provider-canary-20260930",
+  "evaluated_on": "2026-09-30",
+  "execution_mode": "provider",
+  "raw_report_sha256": "f409def8ba7e3b1ab59ebfa54e36a486669fd660c866644b12e8de52f6a0e0f0",
+  "result": {
+    "cases": 3,
+    "passed": 3,
+    "failed": 0,
+    "provider_calls_expected": 2,
+    "provider_calls_observed": 2,
+    "provider_call_limit": 2,
+    "control_preservation_rate": 1.0,
+    "safety_passed": 3,
+    "safe_fallbacks": 0,
+    "provider_skipped_cases": 1
+  },
+  "usage": {
+    "input_tokens": 1983,
+    "output_tokens": 567,
+    "reasoning_output_tokens": 207,
+    "total_tokens": 2550,
+    "total_cost_usd": 0.001077,
+    "cost_per_evaluated_case_usd": 0.000359,
+    "cost_per_provider_call_usd": 0.0005385,
+    "usage_complete": true
+  },
+  "versions": {
+    "model": "openai:gpt-5.6-luna",
+    "prompt": "openai-decision-narrative-v2",
+    "graph": "generic-decision-brief-v1",
+    "risk_rules": "generic-risk-rules-v2"
+  },
+  "pricing": {
+    "checked_on": "2026-09-30",
+    "source_url": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+    "input_usd_per_million": 0.20,
+    "cached_input_usd_per_million": 0.02,
+    "cache_write_input_usd_per_million": 0.25,
+    "output_usd_per_million": 1.20
+  },
+  "limitations": [
+    "This is a three-case safety and integration canary, not a full model-quality benchmark.",
+    "Only two cases invoked the provider; the policy-missing case correctly skipped it."
+  ]
+}

@@ -22,6 +22,8 @@ It is not designed to let an LLM make consequential decisions by itself.
 | **4** | Governed roles: Specialist, Supervisor, Administrator, and Auditor | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](../../backend/evaluations/workflow/traceability.json) |
+| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
+| **3/3** | Bounded OpenAI narrative canary passed with controls preserved and `$0.001077` measured total cost | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
 | **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) |
 
 These figures describe governed workflow coverage, traceability, and bounded workflow timing. The
@@ -132,8 +134,11 @@ unrelated records into fictional complete business cases or report a misleading 
 | Release-hardening static checks | Ruff, Mypy over 470 backend files, TypeScript, and ESLint passed |
 | Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
 | Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
+| Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
 
-The guarded PostgreSQL integration suite has not been rerun for the reconstructed revision.
+Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
+approval, exactly-once execution, and unknown-outcome reconciliation. The complete integration
+suite was not rerun.
 
 ### Baseline matrices
 
@@ -223,9 +228,9 @@ The project is a **controlled-pilot release candidate** and a production-oriente
 project. It is not valid to claim general production readiness or validation on complete internal
 business cases.
 
-The remaining evidence boundaries are concise: the reconstructed full release and guarded
-PostgreSQL suite still require reruns, external case and action providers remain simulated, and no
-customer-impact claim has been established.
+The remaining evidence boundaries are concise: the reconstructed full release and complete
+guarded PostgreSQL suite still require reruns, external case and action providers remain simulated,
+and no customer-impact claim has been established.
 
 ## Resume Summary
 

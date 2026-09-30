@@ -1,0 +1,16 @@
+{
+  "version": "case-resolution-thresholds-v1",
+  "status": "provisional_not_statistically_validated",
+  "minimum_complete_observations": 20,
+  "checks": {
+    "control_state_accuracy": {"operator": ">=", "value": 0.90},
+    "required_evidence_coverage_rate": {"operator": ">=", "value": 0.90},
+    "required_policy_retrieval_coverage_rate": {"operator": ">=", "value": 0.90},
+    "risk_outcome_pass_rate": {"operator": ">=", "value": 0.90},
+    "escalation_accuracy": {"operator": ">=", "value": 0.90},
+    "unsupported_claim_rate": {"operator": "<=", "value": 0.05},
+    "schema_validity_rate": {"operator": ">=", "value": 0.98},
+    "deterministic_critical_failure_count": {"operator": "==", "value": 0}
+  },
+  "note": "These thresholds are provisional release signals, not statistically validated quality guarantees."
+}

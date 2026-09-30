@@ -23,6 +23,8 @@ The hosted application is invite-only. The public walkthrough contains labelled 
 | **4** | Specialist, Supervisor, Administrator, and Auditor roles | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](backend/evaluations/workflow/traceability.json) |
+| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
+| **3/3** | Bounded OpenAI narrative canary passed with deterministic controls preserved and `$0.001077` measured total cost | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
 | **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](docs/evidence/developer-workflow-benchmark/REPORT.md) |
 
 The separate [historical hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
@@ -165,12 +167,14 @@ Deterministic providers keep repository verification independent of paid credent
 | --- | ---: |
 | Release-hardening static checks | Ruff, strict Mypy over 470 backend files, TypeScript, and ESLint passed |
 | Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
+| Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
 | Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
 | Migration and secret safety | Full Alembic SQL generation passed through revision `0024`; repository secret scan found 0 findings |
 
-The guarded PostgreSQL integration suite has not been rerun for this reconstructed revision. Static
-Alembic SQL generation does not prove that revisions `0021`-`0024` have been applied successfully to
-a live PostgreSQL database, and credential-free tests do not prove Google or OpenAI activation.
+Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
+approval, exactly-once execution, and unknown-outcome reconciliation. This is not a rerun of the
+complete integration suite. Static Alembic SQL generation does not prove that every migration was
+promoted to production, and the bounded OpenAI canary does not prove Google activation.
 
 ### Baseline coverage artifacts
 
@@ -232,6 +236,7 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [Engineering case study](docs/portfolio/CASE_STUDY.md)
 - [API conventions](docs/api/CONVENTIONS.md)
 - [Evaluation strategy](docs/backend/EVALUATION_STRATEGY.md)
+- [Case Resolution Evaluation V1](docs/evidence/case-resolution-evaluation-v1/README.md)
 - [Wave 1 governed RAG evaluation](backend/evaluations/wave1_rag/README.md)
 - [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md)
 - [Orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md)
