@@ -1,5 +1,8 @@
 # Case Resolution Copilot - Engineering Case Study
 
+For role-specific CV bullets, recruiter copy, and interview positioning, see the
+[application pack](APPLICATION_PACK.md).
+
 ## Product Thesis
 
 Most support tools optimize ticket handling and reply speed. Complex cases requiring judgment have
@@ -71,7 +74,7 @@ flowchart LR
   status inspection, duplicate-safe execution, and explicit reprocessing.
 - A credential-free governed RAG evaluator with expected-source checks, latency metrics, and
   sanitized failure events.
-- A live-validated, disposable ECS/Fargate architecture with RDS PostgreSQL/pgvector, SQS and
+- A live-validated, reproducible ECS/Fargate architecture with RDS PostgreSQL/pgvector, SQS and
   a dead-letter queue, versioned S3 evidence, Lambda, CloudFront/ALB, least-privilege IAM,
   CloudWatch, migrations, and an EventBridge Scheduler plus Step Functions auto-destroy watchdog.
   A bounded AWS run passed connected ingestion and infrastructure checks, then completed verified

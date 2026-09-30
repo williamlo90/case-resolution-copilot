@@ -43,5 +43,5 @@
     "post_teardown_inventory": "empty",
     "status": "destroyed"
   },
-  "claim_boundary": "Live-validated disposable AWS deployment; not permanent production hosting, sustained load evidence, or customer traffic."
+  "claim_boundary": "Live-validated reproducible AWS deployment architecture designed for safe teardown and redeployment; not permanent production hosting, sustained load evidence, or customer traffic."
 }

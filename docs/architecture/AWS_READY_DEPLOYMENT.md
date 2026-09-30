@@ -1,8 +1,8 @@
 # AWS-Ready Deployment Architecture
 
 Status: AWS-ready deployment architecture with executable CDK, static coverage, and one bounded
-live validation completed on September 24, 2026. The disposable environment was destroyed after
-validation. The always-on public demo remains on Vercel with Neon PostgreSQL.
+live validation completed on September 24, 2026. The reproducible environment was safely torn down
+after validation. The always-on public demo remains on Vercel with Neon PostgreSQL.
 
 ## Deployment Shape
 
@@ -83,7 +83,7 @@ read-only root filesystem places the Beat schedule database and PID file in writ
 
 ### RDS PostgreSQL and pgvector
 
-The disposable profile uses encrypted, TLS-capable, single-AZ PostgreSQL with pgvector and deletion
+The teardown-safe profile uses encrypted, TLS-capable, single-AZ PostgreSQL with pgvector and deletion
 settings selected for complete teardown. A customer pilot should add deletion protection, tested
 backups/PITR, Performance Insights, and Multi-AZ according to its recovery objectives. Keep
 transactional data and governed retrieval metadata together until measured scale justifies a

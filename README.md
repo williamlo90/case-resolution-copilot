@@ -12,7 +12,7 @@ application controls and authorized people decide what may happen.
 
 [![Decision Brief workspace](docs/evidence/production-demo/02-decision-brief.png)](docs/evidence/production-demo/README.md)
 
-[Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md)
+[Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md) | [Application pack](docs/portfolio/APPLICATION_PACK.md)
 
 The hosted application is invite-only. The public walkthrough contains labelled demo data only.
 
@@ -67,13 +67,17 @@ Wave 1 adds portfolio-focused backend depth without changing the product boundar
   reprocessing authority.
 - A credential-free governed RAG V2 evaluator checks expected sources, retrieval status, latency,
   and sanitized failure events across representative synthetic cases.
-- A [live-validated disposable AWS architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
+- A [live-validated reproducible AWS architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
   worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, SQS, Lambda, S3,
   Secrets Manager, CloudWatch, least-privilege IAM, and an AWS-side auto-destroy watchdog. An [executable CDK validation
-  environment](infra/aws/README.md) now represents that topology with cost-aware disposable defaults.
+  environment](infra/aws/README.md) now represents that topology with cost-aware, teardown-safe defaults.
   A bounded [AWS live validation](docs/evidence/aws-live-validation/README.md) passed the connected
   ingestion, migration, pgvector, health, queue, and teardown checks. The always-on demo remains on
   Vercel with Neon; AWS is validated deployment architecture, not permanent production hosting.
+
+**Portfolio claim:** Built and live-validated a reproducible AWS deployment architecture using
+ECS/Fargate, RDS PostgreSQL with pgvector, S3, Lambda, SQS, CloudFront, IAM, Secrets Manager, and
+CloudWatch, with infrastructure designed for safe teardown and redeployment.
 
 Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md):
 
@@ -234,6 +238,7 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [Product contract](docs/product/PRODUCT_CONTRACT.md)
 - [UX architecture](docs/product/UX_ARCHITECTURE.md)
 - [Engineering case study](docs/portfolio/CASE_STUDY.md)
+- [CV, LinkedIn, Upwork, and interview application pack](docs/portfolio/APPLICATION_PACK.md)
 - [API conventions](docs/api/CONVENTIONS.md)
 - [Evaluation strategy](docs/backend/EVALUATION_STRATEGY.md)
 - [Case Resolution Evaluation V1](docs/evidence/case-resolution-evaluation-v1/README.md)

@@ -55,6 +55,7 @@ contracts and operating material used to build and evaluate the application.
 ## Portfolio Evidence
 
 - [Engineering case study](portfolio/CASE_STUDY.md)
+- [Application pack for CV, LinkedIn, Upwork, and interviews](portfolio/APPLICATION_PACK.md)
 - [Frozen Governed RAG V2 benchmark](../backend/evaluations/retrieval_v2/README.md)
 - [Wave 1 credential-free RAG evaluation](../backend/evaluations/wave1_rag/README.md)
 - [Phase 5 Decision and Draft gate](../backend/evaluations/decision_draft/README.md)

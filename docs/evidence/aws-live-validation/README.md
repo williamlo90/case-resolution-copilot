@@ -3,9 +3,10 @@
 Latest validation date: September 25, 2026<br>
 Validated source revision: `0a92c4b23f655b037a45c0999a1530c49d19d3ed`
 
-The repository's disposable AWS CDK environment was deployed to `ap-southeast-1`, validated, and
-destroyed. This record supports the claim that the deployment path works on live AWS services. It
-does not claim permanent production hosting or customer traffic on AWS.
+The repository's reproducible AWS CDK environment was deployed to `ap-southeast-1`, validated, and
+safely torn down. This record supports the claim that the deployment path works on live AWS services
+and can be redeployed from code. It does not claim permanent production hosting or customer traffic
+on AWS.
 
 ## Passed Checks
 

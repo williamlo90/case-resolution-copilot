@@ -4,7 +4,7 @@ Status: executable infrastructure-as-code with local synth coverage and a bounde
 validation completed on September 24, 2026. The validation environment was fully destroyed
 afterward.
 
-This CDK app turns the reference architecture in `deploy/aws` into two explicit, disposable stacks:
+This CDK app turns the reference architecture in `deploy/aws` into two explicit, reproducible stacks:
 
 - `CaseResolutionFoundation`: VPC, isolated RDS PostgreSQL with pgvector, SQS with a dead-letter
   queue, ECR, an ECS cluster, a private versioned S3 evidence bucket, Lambda validation, Secrets
@@ -13,8 +13,8 @@ This CDK app turns the reference architecture in `deploy/aws` into two explicit,
   HTTPS endpoint. Services begin at desired count `0`; the deployment script runs migrations before
   scaling scheduler, worker, and API to `1`.
 
-The defaults are intentionally disposable and non-resilient. They are useful for a bounded portfolio
-validation session, not a production or customer pilot. The always-on demonstration remains on
+The defaults are intentionally teardown-safe and non-resilient. They are useful for a bounded
+portfolio validation session, not a production or customer pilot. The always-on demonstration remains on
 Vercel with Neon PostgreSQL. RDS, ALB, public IPv4, and
 Fargate accrue charges while present. Scaling ECS to zero does not stop all charges.
 
@@ -111,6 +111,7 @@ resources remain.
 - The Vercel frontend and Neon database remain the always-on portfolio demo. This AWS profile is a
   separate, short-lived infrastructure validation and is not its production hosting environment.
 
-The honest claim is **live-validated, disposable AWS deployment architecture with executable CDK**.
-It is not an always-on AWS production deployment; the public application remains on Vercel and Neon.
-See the sanitized [validation record](../../docs/evidence/aws-live-validation/README.md).
+The honest claim is **live-validated, reproducible AWS deployment architecture with executable CDK,
+designed for safe teardown and redeployment**. It is not an always-on AWS production deployment; the
+public application remains on Vercel and Neon. See the sanitized
+[validation record](../../docs/evidence/aws-live-validation/README.md).

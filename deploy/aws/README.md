@@ -57,6 +57,6 @@ database connectivity, container startup, migrations, or rollback.
 Use the CDK app for new validation deployments. These JSON files remain reviewable runtime-contract
 references and are covered by backend tests; they are not a second deployment mechanism.
 
-Describe this repository as a **live-validated disposable AWS deployment architecture**, not as an
-always-on AWS production service. See the sanitized
+Describe this repository as a **live-validated reproducible AWS deployment architecture designed
+for safe teardown and redeployment**, not as an always-on AWS production service. See the sanitized
 [validation record](../../docs/evidence/aws-live-validation/README.md).

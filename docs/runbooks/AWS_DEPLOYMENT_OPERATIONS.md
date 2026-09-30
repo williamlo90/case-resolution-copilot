@@ -5,8 +5,8 @@ covered, but no AWS environment has been exercised by this repository.
 
 ## Portfolio Validation Profile
 
-The executable profile lives in [`infra/aws`](../../infra/aws/README.md). It is a disposable
-validation environment designed to exist for minutes, not an always-on pilot. Its VPC spans two
+The executable profile lives in [`infra/aws`](../../infra/aws/README.md). It is a reproducible,
+short-lived validation environment designed to exist for minutes, not an always-on pilot. Its VPC spans two
 Availability Zones, while RDS deliberately lacks Multi-AZ resilience. Its deployment
 scripts require explicit cost acknowledgement, keep all ECS services at zero until migration passes,
 and provide a full-stack destroy command. EventBridge Scheduler starts an AWS-side Step Functions
