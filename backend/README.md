@@ -218,8 +218,12 @@ return internal exception details.
 
 `vercel.json` pins the serverless function region to Singapore. `Containerfile` and the root
 `compose.dev.yaml` provide an optional development stack. The separate
-[AWS-ready architecture](../docs/architecture/AWS_READY_DEPLOYMENT.md) and deployment templates are
-reviewable preparation, not evidence that this application has been deployed to AWS.
+[AWS CDK deployment](../infra/aws/README.md) was live-validated in Singapore on September 25, 2026,
+using source revision `0a92c4b23f655b037a45c0999a1530c49d19d3ed`. The bounded run covered
+migration, API health, connected ingestion, worker recovery, replay, and verified teardown; see the
+[sanitized validation record](../docs/evidence/aws-live-validation/README.md). This is evidence for
+that revision and deployment path, not a claim of an always-on AWS service or a test of every later
+code change.
 Container execution is excluded from the default local gate because it is comparatively expensive.
 
 ## Remaining External Gates

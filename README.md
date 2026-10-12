@@ -10,7 +10,7 @@ application controls and authorized people decide what may happen.
 
 > From scattered evidence to an approved, verifiable resolution.
 
-[![Decision Brief workspace](docs/evidence/production-demo/02-decision-brief.png)](docs/evidence/production-demo/README.md)
+[![Decision Brief workspace](docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg)](docs/evidence/live-product-tour/2026-10-12/README.md)
 
 [Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md) | [Application pack](docs/portfolio/APPLICATION_PACK.md)
 
@@ -94,35 +94,34 @@ Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORC
 <table>
   <tr>
     <td width="50%">
-      <a href="docs/evidence/production-demo/01-cases-queue.png"><img src="docs/evidence/production-demo/01-cases-queue.png" alt="Cases queue"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg" alt="Cases queue showing synthetic demo cases"></a><br>
       <strong>Operational queue</strong><br>
       Triage by risk, SLA, ownership, status, and source freshness.
     </td>
     <td width="50%">
-      <a href="docs/evidence/production-demo/02-decision-brief.png"><img src="docs/evidence/production-demo/02-decision-brief.png" alt="Decision Brief"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg" alt="Decision Brief for a synthetic billing case"></a><br>
       <strong>Decision Brief</strong><br>
       Verified facts, missing evidence, uncertainty, and the review boundary.
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <a href="docs/evidence/production-demo/04-evidence.png"><img src="docs/evidence/production-demo/04-evidence.png" alt="Policy and business evidence"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/03-evidence.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/03-evidence.jpg" alt="Policy and connected business evidence"></a><br>
       <strong>Traceable evidence</strong><br>
       Policy clauses and business records remain connected to sources.
     </td>
     <td width="50%">
-      <a href="docs/evidence/hosted-e2e-acceptance/2026-08-05/05-action-completed-receipt.png"><img src="docs/evidence/hosted-e2e-acceptance/2026-08-05/05-action-completed-receipt.png" alt="Completed controlled action"></a><br>
-      <strong>Controlled execution</strong><br>
-      Approved actions preserve attempts, receipts, and external references.
+      <a href="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg" alt="Conversation and suggested response for a synthetic billing case"></a><br>
+      <strong>Conversation</strong><br>
+      Customer messages, internal notes, and an evidence-aware response draft.
     </td>
   </tr>
 </table>
 
-The [product walkthrough](docs/evidence/production-demo/README.md) and
-[hosted deterministic acceptance](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md) were
-captured from the predecessor hosted deployment of the same product. They prove those observed
-states, not the correctness of the current source revision; current source verification is reported
-separately below.
+These [live product-tour screenshots](docs/evidence/live-product-tour/2026-10-12/README.md) were
+captured on October 12, 2026, from the hosted demo using synthetic cases. They show the UI, not
+end-to-end correctness. The [earlier hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+separately covers approved controlled execution and its receipt.
 
 ## Authority Model
 
@@ -250,3 +249,9 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [Controlled pilot runbook](docs/pilot/PILOT_RUNBOOK.md)
 - [Security hardening](docs/runbooks/SECURITY_HARDENING.md)
 - [Post-environment verification](docs/runbooks/POST_ENV_VERIFICATION.md)
+
+## Source Use
+
+Copyright (c) 2026 williamlo90. All rights reserved. This public repository is available for
+portfolio review; no license to reuse, modify, or redistribute the original source code is granted.
+Third-party dependencies retain their own licenses.
