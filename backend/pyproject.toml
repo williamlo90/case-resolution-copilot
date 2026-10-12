@@ -15,12 +15,12 @@ dependencies = [
     "langgraph>=1.0.10,<2",
     "langchain-core>=1.2,<2",
     "langgraph-checkpoint>=4.1.1,<5",
-    "langgraph-checkpoint-postgres>=3.1,<4",
+    "langgraph-checkpoint-postgres>=3.1.1,<4",
     "pgvector>=0.4,<1",
     "cryptography>=50,<51",
     "httpx>=0.28,<1",
     "openai>=2,<3",
-    "PyJWT>=2.13,<3",
+    "PyJWT>=2.15,<3",
     "celery[redis,sqs]>=5.5,<6",
 ]
 
