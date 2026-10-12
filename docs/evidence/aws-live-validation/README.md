@@ -3,6 +3,11 @@
 Latest validation date: September 25, 2026<br>
 Validated source revision: `0a92c4b23f655b037a45c0999a1530c49d19d3ed`
 
+There were two bounded validation sessions: an initial connected-path check on September 24 and
+the final expanded run on September 25. The results and timestamps below, including the
+machine-readable record, refer to the final September 25 run. The earlier session is recorded in
+[the repository history](https://github.com/williamlo90/case-resolution-copilot/commit/38e7baf9ad5b3210aa217d49cf9245ef6662f02e).
+
 The repository's reproducible AWS CDK environment was deployed to `ap-southeast-1`, validated, and
 safely torn down. This record supports the claim that the deployment path works on live AWS services
 and can be redeployed from code. It does not claim permanent production hosting or customer traffic

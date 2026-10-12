@@ -1,7 +1,7 @@
 # AWS-Ready Deployment Architecture
 
-Status: AWS-ready deployment architecture with executable CDK, static coverage, and one bounded
-live validation completed on September 24, 2026. The reproducible environment was safely torn down
+Status: AWS-ready deployment architecture with executable CDK, static coverage, and a final bounded
+live validation completed on September 25, 2026. The reproducible environment was safely torn down
 after validation. The always-on public demo remains on Vercel with Neon PostgreSQL.
 
 ## Deployment Shape
@@ -192,7 +192,7 @@ profile also places CloudFront in front of an ALB whose HTTP ingress is restrict
 CloudFront origin-facing prefix list. This is a deliberate short-lived cost trade-off, not the target
 controlled-pilot network topology. Its VPC spans two Availability Zones, but its cost-limited RDS
 resource is deliberately not Multi-AZ. EventBridge Scheduler starts a Step Functions teardown
-watchdog at the hard 60-minute deadline, deleting Runtime before Foundation. A 50-minute operator
+watchdog at minute 60 to begin deleting Runtime before Foundation. A 50-minute operator
 teardown target remains the manual control and requires teardown verification; the watchdog covers
 workstation or terminal failure rather than replacing operator ownership.
 

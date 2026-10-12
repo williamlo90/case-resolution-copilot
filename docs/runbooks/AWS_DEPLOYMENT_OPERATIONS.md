@@ -1,7 +1,8 @@
 # AWS Deployment Operations
 
-Status: pre-deployment runbook with executable CDK and PowerShell lifecycle scripts. Static synth is
-covered, but no AWS environment has been exercised by this repository.
+Status: operational runbook for the executable CDK and PowerShell deployment path. The latest
+bounded AWS validation ran on September 25, 2026, and the application environment was torn down.
+See the [live validation record](../evidence/aws-live-validation/README.md) for the tested scope.
 
 ## Portfolio Validation Profile
 
@@ -10,14 +11,13 @@ short-lived validation environment designed to exist for minutes, not an always-
 Availability Zones, while RDS deliberately lacks Multi-AZ resilience. Its deployment
 scripts require explicit cost acknowledgement, keep all ECS services at zero until migration passes,
 and provide a full-stack destroy command. EventBridge Scheduler starts an AWS-side Step Functions
-watchdog at the hard 60-minute deadline to delete Runtime before Foundation. The operator targets
+watchdog at minute 60 to begin deleting Runtime before Foundation. The operator targets
 manual teardown at 50 minutes and then verifies the inventory.
 
-The manually managed `$25` AWS Budget is a required preflight and an alert, not a spending cap. RDS,
-ALB, public IPv4, CloudFront, Secrets Manager, logs, and Fargate may continue charging until their
-resources are deleted. Do not
-leave the Foundation stack idle after validation. The always-on portfolio demo remains on Vercel
-and Neon; this runbook does not migrate that environment.
+The manually managed AWS cost budget of USD 5 or lower is a required preflight and an alert, not a
+spending cap. RDS, ALB, public IPv4, CloudFront, Secrets Manager, logs, and Fargate may continue
+charging until their resources are deleted. Do not leave the Foundation stack idle after validation.
+The always-on portfolio demo remains on Vercel and Neon; this runbook does not migrate that environment.
 
 ## Required Inputs
 
@@ -29,7 +29,7 @@ Record these as deployment metadata, not secrets:
 - RDS cluster/instance identifier and current Alembic revision;
 - SQS queue and dead-letter queue identifiers;
 - S3 bucket name and approved prefixes;
-- teardown watchdog schedule, execution ARN, 50-minute operator target, and 60-minute hard trigger;
+- teardown watchdog schedule, execution ARN, 50-minute operator target, and minute-60 trigger;
 - rollback task definition revisions and recovery-point timestamp.
 
 Keep credentials and connection strings in Secrets Manager. The deployment log may contain secret
