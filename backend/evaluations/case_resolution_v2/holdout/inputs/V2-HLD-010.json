@@ -1,0 +1,52 @@
+{
+  "case_id": "V2-HLD-010",
+  "family_id": "billing:meter-dispute",
+  "sop_family_id": "rule:billing:meter-dispute",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle meter dispute for TARGET-V2-HLD-010.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-010",
+      "facts": {
+        "meter_calibration": "failed",
+        "requested_target": "TARGET-V2-HLD-010",
+        "original_recipient": "OWNER-V2-HLD-010"
+      },
+      "source": "synthetic-meter-dispute-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-METER-DISPUTE",
+      "version": "1",
+      "clause_id": "meter-dispute",
+      "text": "Void charges from a failed calibrated meter only after resolving conflicting finance and metering instructions.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    },
+    {
+      "policy_id": "POL-METER-DISPUTE-EXCEPTION",
+      "version": "1",
+      "clause_id": "meter-dispute",
+      "text": "An equally ranked active exception prohibits this operation for the supplied entitlement. No precedence rule is available.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "billing",
+    "policy_ambiguity"
+  ],
+  "critical": true
+}

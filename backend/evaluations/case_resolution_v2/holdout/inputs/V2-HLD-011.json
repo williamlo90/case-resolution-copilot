@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-011",
+  "family_id": "billing:compound-discount",
+  "sop_family_id": "rule:billing:compound-discount",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle compound discount for TARGET-V2-HLD-011.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-011",
+      "facts": {
+        "stacking_entitlement": "verified",
+        "requested_target": "TARGET-V2-HLD-011",
+        "original_recipient": "OWNER-V2-HLD-011",
+        "supporting_record": "absent"
+      },
+      "source": "synthetic-compound-discount-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-COMPOUND-DISCOUNT",
+      "version": "1",
+      "clause_id": "compound-discount",
+      "text": "Apply a contracted stackable 800-unit discount only with both campaign and contract entitlement evidence.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "billing",
+    "missing_evidence"
+  ],
+  "critical": true
+}

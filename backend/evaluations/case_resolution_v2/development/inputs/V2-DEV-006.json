@@ -1,0 +1,50 @@
+{
+  "case_id": "V2-DEV-006",
+  "family_id": "billing:invoice-language",
+  "sop_family_id": "rule:billing:invoice-language",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle invoice language for TARGET-V2-DEV-006.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-DEV-006",
+      "facts": {
+        "locale_entitlement": "verified",
+        "requested_target": "TARGET-V2-DEV-006",
+        "original_recipient": "OWNER-V2-DEV-006",
+        "duplicate_request_key": "OPERATION-V2-DEV-006",
+        "authorized_recipient": "OWNER-V2-DEV-006",
+        "authorized_reason_code": "invoice-language",
+        "authorized_amount_minor": "0",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-invoice-language-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-INVOICE-LANGUAGE",
+      "version": "1",
+      "clause_id": "invoice-language",
+      "text": "Regenerate a localized invoice without changing amounts; deduplicate requests using the original operation.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "duplicate_delivery",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "operation_id": "OPERATION-V2-DEV-006"
+  },
+  "tags": [
+    "billing",
+    "duplicate_action"
+  ],
+  "critical": true
+}

@@ -19,7 +19,15 @@ python -m mypy app/evaluation/case_resolution_v2 scripts/validate_case_resolutio
 
 No database, browser, container, model provider, cloud or full evaluation is needed.
 
-## Later gates (planned, not run)
+## Phase 2 gate (implemented)
+
+The separate V2 scorer, runner, dataset and mutation checks are described in
+[EVALUATOR.md](EVALUATOR.md) and the [Phase 2 checkpoint](../../learning/case-resolution-v2/PHASE-2.md).
+Run the three `test_case_resolution_v2_{contracts,scoring,runner}.py` unit modules, the existing
+contract validator, and `python -m scripts.evaluate_case_resolution_v2 validate-corpus`.
+These are bounded evaluator/static checks. No holdout product run is performed.
+
+## Phase roadmap (execution status in each checkpoint)
 
 | Phase | Required tests |
 | --- | --- |

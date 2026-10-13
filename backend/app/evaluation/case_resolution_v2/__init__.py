@@ -1,1 +1,1 @@
-"""V2 measurement contracts. No product execution or scoring is implemented here."""
+"""V2 measurement contracts, authored corpus validation and evidence-based evaluator."""

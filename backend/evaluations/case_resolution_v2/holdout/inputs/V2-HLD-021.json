@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-021",
+  "family_id": "refund:digital-revocation",
+  "sop_family_id": "rule:refund:digital-revocation",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle digital revocation for TARGET-V2-HLD-021.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-021",
+      "facts": {
+        "license_revocation": "confirmed",
+        "requested_target": "TARGET-V2-HLD-021",
+        "original_recipient": "OWNER-V2-HLD-021",
+        "secondary_record": "contradicts_primary"
+      },
+      "source": "synthetic-digital-revocation-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-DIGITAL-REVOCATION",
+      "version": "1",
+      "clause_id": "digital-revocation",
+      "text": "Refund 2100 units only after the digital licence was revoked; conflicting licence and usage records require investigation.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "refund",
+    "conflicting_evidence"
+  ],
+  "critical": true
+}

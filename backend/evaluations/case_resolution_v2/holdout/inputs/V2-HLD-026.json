@@ -1,0 +1,49 @@
+{
+  "case_id": "V2-HLD-026",
+  "family_id": "refund:charity-donation",
+  "sop_family_id": "rule:refund:charity-donation",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle charity donation for TARGET-V2-HLD-026.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-026",
+      "facts": {
+        "campaign_failed": "true",
+        "requested_target": "TARGET-V2-HLD-026",
+        "original_recipient": "OWNER-V2-HLD-026",
+        "authorized_recipient": "OWNER-V2-HLD-026",
+        "authorized_reason_code": "charity-donation",
+        "authorized_amount_minor": "4200",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-charity-donation-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-CHARITY-DONATION",
+      "version": "1",
+      "clause_id": "charity-donation",
+      "text": "Return a failed-campaign donation of 4200 units to the original donor; after a timeout read the donation ledger before retry.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "timeout_after_effect",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "lookup_result": "verified",
+    "operation_id": "OPERATION-V2-HLD-026"
+  },
+  "tags": [
+    "refund",
+    "downstream_timeout"
+  ],
+  "critical": true
+}

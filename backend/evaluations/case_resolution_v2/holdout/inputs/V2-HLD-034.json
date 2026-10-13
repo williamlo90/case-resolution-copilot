@@ -1,0 +1,50 @@
+{
+  "case_id": "V2-HLD-034",
+  "family_id": "account_recovery:reseller-identity",
+  "sop_family_id": "rule:account_recovery:reseller-identity",
+  "domain": "account_recovery",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle reseller identity for TARGET-V2-HLD-034.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-034",
+      "facts": {
+        "delegated_admin": "verified",
+        "requested_target": "TARGET-V2-HLD-034",
+        "original_recipient": "OWNER-V2-HLD-034",
+        "duplicate_request_key": "OPERATION-V2-HLD-034",
+        "authorized_recipient": "OWNER-V2-HLD-034",
+        "authorized_reason_code": "reseller-identity",
+        "authorized_access_scope": "delegated_only",
+        "authorized_preserve_owner": "true"
+      },
+      "source": "synthetic-reseller-identity-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-RESELLER-IDENTITY",
+      "version": "1",
+      "clause_id": "reseller-identity",
+      "text": "Restore reseller administration only within the verified delegation scope; duplicate requests must preserve one operation.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "duplicate_delivery",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "operation_id": "OPERATION-V2-HLD-034"
+  },
+  "tags": [
+    "account_recovery",
+    "duplicate_action"
+  ],
+  "critical": true
+}

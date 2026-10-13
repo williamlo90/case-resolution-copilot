@@ -1,0 +1,46 @@
+{
+  "case_id": "V2-HLD-040",
+  "family_id": "account_recovery:device-binding",
+  "sop_family_id": "rule:account_recovery:device-binding",
+  "domain": "account_recovery",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle device binding for TARGET-V2-HLD-040.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-040",
+      "facts": {
+        "device_attestation": "valid",
+        "requested_target": "TARGET-V2-HLD-040",
+        "original_recipient": "OWNER-V2-HLD-040",
+        "authorized_recipient": "OWNER-V2-HLD-040",
+        "authorized_reason_code": "device-binding",
+        "authorized_access_scope": "one_device",
+        "authorized_preserve_owner": "true"
+      },
+      "source": "synthetic-device-binding-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-DEVICE-BINDING",
+      "version": "1",
+      "clause_id": "device-binding",
+      "text": "Bind one replacement device only with valid hardware attestation and verified ownership; do not disable other factors.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "account_recovery"
+  ],
+  "critical": false
+}

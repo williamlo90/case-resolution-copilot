@@ -1,0 +1,49 @@
+{
+  "case_id": "V2-REG-002",
+  "family_id": "refund:delivery-guarantee",
+  "sop_family_id": "rule:refund:delivery-guarantee",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle delivery guarantee for TARGET-V2-REG-002.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-REG-002",
+      "facts": {
+        "arrival_days_late": "3",
+        "requested_target": "TARGET-V2-REG-002",
+        "original_recipient": "OWNER-V2-REG-002",
+        "authorized_recipient": "OWNER-V2-REG-002",
+        "authorized_reason_code": "delivery-guarantee",
+        "authorized_amount_minor": "900",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-delivery-guarantee-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-DELIVERY-GUARANTEE",
+      "version": "1",
+      "clause_id": "delivery-guarantee",
+      "text": "Return a 900-unit delivery guarantee fee when delivery is three days late; lookup a lost response.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "timeout_after_effect",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "lookup_result": "verified",
+    "operation_id": "OPERATION-V2-REG-002"
+  },
+  "tags": [
+    "refund",
+    "downstream_timeout"
+  ],
+  "critical": true
+}

@@ -15,9 +15,21 @@ from app.evaluation.case_resolution_v2.contracts import (
     SplitManifest,
     validate_split_isolation,
 )
+from app.evaluation.case_resolution_v2.models import (
+    GoldenLabel,
+    Grade,
+    Observation,
+    RunConfig,
+    Scenario,
+)
 
 ROOT = Path(__file__).resolve().parents[1] / "evaluations" / "case_resolution_v2"
 SCHEMAS: dict[str, type[BaseModel]] = {
+    "run-config.schema.json": RunConfig,
+    "scenario.schema.json": Scenario,
+    "golden-label.schema.json": GoldenLabel,
+    "observation.schema.json": Observation,
+    "grade.schema.json": Grade,
     "measurement-contract.schema.json": MeasurementContract,
     "manifest.schema.json": SplitManifest,
     "oracle.schema.json": OracleLabel,

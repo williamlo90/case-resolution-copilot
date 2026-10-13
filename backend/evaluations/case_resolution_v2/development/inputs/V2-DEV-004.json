@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-DEV-004",
+  "family_id": "billing:trial-conversion",
+  "sop_family_id": "rule:billing:trial-conversion",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle trial conversion for TARGET-V2-DEV-004.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-DEV-004",
+      "facts": {
+        "trial_notice": "missing",
+        "requested_target": "TARGET-V2-DEV-004",
+        "original_recipient": "OWNER-V2-DEV-004",
+        "approval_expired_at": "2026-10-12T23:00:00Z"
+      },
+      "source": "synthetic-trial-conversion-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-TRIAL-CONVERSION",
+      "version": "1",
+      "clause_id": "trial-conversion",
+      "text": "Reverse a 1500-unit conversion charge when the required trial notice was not sent; an expired approval cannot authorize payment.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "expired"
+  },
+  "tags": [
+    "billing",
+    "expired_authority"
+  ],
+  "critical": true
+}

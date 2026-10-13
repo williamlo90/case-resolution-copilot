@@ -287,7 +287,8 @@
     "provenance": {
       "enum": [
         "ai_assisted_developer_adjudicated",
-        "developer_authored"
+        "developer_authored",
+        "ai_authored_agent_adjudicated"
       ],
       "title": "Provenance",
       "type": "string"

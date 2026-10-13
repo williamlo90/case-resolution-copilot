@@ -101,7 +101,9 @@ class OracleLabel(ContractModel):
     acknowledgement_required: bool
     reopen_days: tuple[Literal[7, 30], ...]
     rationale: Annotated[str, Field(min_length=20)]
-    provenance: Literal["ai_assisted_developer_adjudicated", "developer_authored"]
+    provenance: Literal[
+        "ai_assisted_developer_adjudicated", "developer_authored", "ai_authored_agent_adjudicated"
+    ]
     adjudicator: Name
     adjudicated_at: datetime
     source_rule_reference: Name

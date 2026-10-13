@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-014",
+  "family_id": "billing:consolidated-tenant",
+  "sop_family_id": "rule:billing:consolidated-tenant",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle consolidated tenant for TARGET-V2-HLD-014.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-014",
+      "facts": {
+        "subsidiary_mandate": "valid",
+        "requested_target": "TARGET-V2-HLD-014",
+        "original_recipient": "OWNER-V2-HLD-014",
+        "approval_expired_at": "2026-10-12T23:00:00Z"
+      },
+      "source": "synthetic-consolidated-tenant-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-CONSOLIDATED-TENANT",
+      "version": "1",
+      "clause_id": "consolidated-tenant",
+      "text": "Reassign a consolidated invoice only with a valid subsidiary mandate and unexpired approval, never across tenant boundaries.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "expired"
+  },
+  "tags": [
+    "billing",
+    "expired_authority"
+  ],
+  "critical": true
+}

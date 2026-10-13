@@ -1,0 +1,52 @@
+{
+  "case_id": "V2-HLD-019",
+  "family_id": "refund:partial-bundle",
+  "sop_family_id": "rule:refund:partial-bundle",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle partial bundle for TARGET-V2-HLD-019.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-019",
+      "facts": {
+        "returned_components": "base_only",
+        "requested_target": "TARGET-V2-HLD-019",
+        "original_recipient": "OWNER-V2-HLD-019"
+      },
+      "source": "synthetic-partial-bundle-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-PARTIAL-BUNDLE",
+      "version": "1",
+      "clause_id": "partial-bundle",
+      "text": "Refund the 2400-unit allocated base-component value only after resolving a conflicting bundle allocation addendum.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    },
+    {
+      "policy_id": "POL-PARTIAL-BUNDLE-EXCEPTION",
+      "version": "1",
+      "clause_id": "partial-bundle",
+      "text": "An equally ranked active exception prohibits this operation for the supplied entitlement. No precedence rule is available.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "refund",
+    "policy_ambiguity"
+  ],
+  "critical": true
+}

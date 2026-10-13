@@ -133,8 +133,14 @@ def test_repository_contract_and_generated_schemas() -> None:
             (ROOT / f"{split}.manifest.v1.json").read_text(encoding="utf-8")
         )
         assert manifest.split == split
-        assert manifest.state == "planned"
-        assert not manifest.entries
+        if split == "time_study":
+            assert manifest.state == "planned"
+            assert not manifest.entries
+        else:
+            assert manifest.state == ("sealed" if split == "holdout" else "exposed")
+            assert (
+                len(manifest.entries) == {"development": 24, "regression": 3, "holdout": 40}[split]
+            )
 
 
 @pytest.mark.parametrize(

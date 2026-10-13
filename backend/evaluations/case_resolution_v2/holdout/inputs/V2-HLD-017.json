@@ -1,0 +1,49 @@
+{
+  "case_id": "V2-HLD-017",
+  "family_id": "refund:gift-card-cash",
+  "sop_family_id": "rule:refund:gift-card-cash",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle gift card cash for TARGET-V2-HLD-017.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-017",
+      "facts": {
+        "statutory_cashout": "eligible",
+        "requested_target": "TARGET-V2-HLD-017",
+        "original_recipient": "OWNER-V2-HLD-017",
+        "authorized_recipient": "OWNER-V2-HLD-017",
+        "authorized_reason_code": "gift-card-cash",
+        "authorized_amount_minor": "600",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-gift-card-cash-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-GIFT-CARD-CASH",
+      "version": "1",
+      "clause_id": "gift-card-cash",
+      "text": "Cash out a 600-unit gift-card remainder only when statutory eligibility is verified; timeout requires receipt lookup.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "timeout_after_effect",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "lookup_result": "verified",
+    "operation_id": "OPERATION-V2-HLD-017"
+  },
+  "tags": [
+    "refund",
+    "downstream_timeout"
+  ],
+  "critical": true
+}
