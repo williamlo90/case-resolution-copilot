@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import UTC, datetime
+from decimal import Decimal
 from enum import StrEnum
 from hashlib import sha256
 
@@ -6,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domain.actions import ActionSideEffectState
 from app.domain.connections import ConnectionHealth
+from app.domain.resolution import ActionReadback, VerificationState
 
 
 class GatewayBehavior(StrEnum):
@@ -23,6 +26,8 @@ class ActionGatewayRequest(BaseModel):
     action_type: str = Field(min_length=1, max_length=100)
     target: str = Field(min_length=1, max_length=200)
     parameters: dict[str, str]
+    impact_amount: Decimal | None = None
+    impact_currency: str | None = None
     idempotency_key: str = Field(min_length=16, max_length=128)
 
 
@@ -44,6 +49,7 @@ class ActionLookupResult(BaseModel):
     receipt: ActionGatewayReceipt | None
     detail: str = Field(min_length=1, max_length=1000)
     absence_is_terminal: bool = False
+    readback: ActionReadback | None = None
 
     @model_validator(mode="after")
     def validate_lookup_evidence(self) -> "ActionLookupResult":
@@ -171,6 +177,7 @@ class RoutingActionGateway(ActionGateway):
 @dataclass
 class _StoredOutcome:
     receipt: ActionGatewayReceipt
+    request: ActionGatewayRequest
 
 
 class DeterministicActionGateway(ActionGateway):
@@ -210,7 +217,9 @@ class DeterministicActionGateway(ActionGateway):
             )
         receipt = self._receipt(provider_type, request)
         if behavior is GatewayBehavior.OUTCOME_UNKNOWN_ACCEPTED:
-            self._outcomes[request.idempotency_key] = _StoredOutcome(receipt)
+            self._outcomes[request.idempotency_key] = _StoredOutcome(
+                receipt, request.model_copy(deep=True)
+            )
             raise ActionGatewayError(
                 "The demo target accepted the request but did not return a receipt.",
                 code="target_timeout_after_acceptance",
@@ -227,7 +236,9 @@ class DeterministicActionGateway(ActionGateway):
                 side_effect_state=ActionSideEffectState.POSSIBLE,
                 retryable=False,
             )
-        self._outcomes[request.idempotency_key] = _StoredOutcome(receipt)
+        self._outcomes[request.idempotency_key] = _StoredOutcome(
+            receipt, request.model_copy(deep=True)
+        )
         return receipt
 
     def reconcile(
@@ -256,9 +267,7 @@ class DeterministicActionGateway(ActionGateway):
                 found=False,
                 receipt=None,
                 detail="No matching target change was found.",
-                absence_is_terminal=(
-                    behavior is GatewayBehavior.OUTCOME_UNKNOWN_ABSENT
-                ),
+                absence_is_terminal=(behavior is GatewayBehavior.OUTCOME_UNKNOWN_ABSENT),
             )
         if (
             external_reference is not None
@@ -272,7 +281,19 @@ class DeterministicActionGateway(ActionGateway):
         return ActionLookupResult(
             found=True,
             receipt=stored.receipt.model_copy(deep=True),
-            detail="The target confirmed the recorded change.",
+            detail="The demo ledger confirmed the recorded change.",
+            readback=ActionReadback(
+                operation_id=stored.request.idempotency_key,
+                external_reference=stored.receipt.external_reference,
+                action_type=stored.request.action_type,
+                target=stored.request.target,
+                observed_parameters=stored.request.parameters,
+                impact_amount=stored.request.impact_amount,
+                impact_currency=stored.request.impact_currency,
+                status=VerificationState.VERIFIED,
+                observed_at=datetime.now(UTC),
+                effect_count=1,
+            ),
         )
 
     def check_health(

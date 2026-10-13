@@ -13,7 +13,7 @@ const qualityEnvelopeSchema = z.object({
       z.object({
         key: z.string().min(1),
         label: z.string().min(1),
-        value: z.number(),
+        value: z.number().nullable(),
         unit: z.string().min(1),
         numerator: z.number().int().nonnegative().nullable(),
         denominator: z.number().int().nonnegative().nullable(),

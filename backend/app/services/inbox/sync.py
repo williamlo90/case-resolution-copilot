@@ -22,6 +22,7 @@ from app.ports.inbox_sync_persistence import (
     InboxSyncUnitOfWorkFactory,
 )
 from app.security.authorization import require_permission
+from app.services.lifecycle_telemetry import LifecycleSpan, emit_span, stage_span
 
 logger = logging.getLogger(__name__)
 
@@ -155,15 +156,33 @@ class InboxSyncService:
         imported = 0
         duplicates = 0
         for work in work_items:
-            try:
-                messages, observed_history_id, next_page_token = self._fetch(work)
-                page_imported, page_duplicates = self._persist(
-                    work=work,
-                    worker_id=worker_id,
-                    messages=messages,
-                    observed_history_id=observed_history_id,
-                    next_page_token=next_page_token,
+            correlation = f"sync:{work.job.public_id}"
+            emit_span(
+                LifecycleSpan(
+                    correlation_id=correlation,
+                    subject_id=work.job.public_id,
+                    stage="queue_wait",
+                    duration_ms=max(
+                        0, (datetime.now(UTC) - work.job.available_at).total_seconds() * 1000
+                    ),
+                    outcome="completed",
                 )
+            )
+            try:
+                with stage_span(correlation, work.job.public_id, "worker"):
+                    with stage_span(correlation, work.job.public_id, "provider"):
+                        messages, observed_history_id, next_page_token = self._fetch(work)
+                    with (
+                        stage_span(correlation, work.job.public_id, "intake"),
+                        stage_span(correlation, work.job.public_id, "db"),
+                    ):
+                        page_imported, page_duplicates = self._persist(
+                            work=work,
+                            worker_id=worker_id,
+                            messages=messages,
+                            observed_history_id=observed_history_id,
+                            next_page_token=next_page_token,
+                        )
                 completed += 1
                 imported += page_imported
                 duplicates += page_duplicates

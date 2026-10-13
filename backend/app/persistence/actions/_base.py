@@ -31,11 +31,13 @@ from app.integrations.action_gateway import (
 )
 from app.persistence.models import (
     AuditEventModel,
+    BusinessObjectSnapshotModel,
     CaseActionAttemptModel,
     CaseActionModel,
     CaseActionReceiptModel,
     CaseActionReconciliationModel,
     CaseModel,
+    CasePolicyEvidenceModel,
     CaseProposalModel,
     CaseProposalVersionModel,
     CaseProposedActionModel,
@@ -43,8 +45,12 @@ from app.persistence.models import (
     CaseReviewModel,
     CaseReviewSnapshotModel,
     ConnectionModel,
+    GovernedPolicyVersionModel,
     MembershipModel,
     OrganizationModel,
+    PolicyModel,
+    ProposalContextBindingModel,
+    ProposalEvidenceBindingModel,
 )
 
 ACTION_AUTHORIZATION_HOURS = 24
@@ -149,6 +155,11 @@ class ActionRepositoryBase:
     ) -> ActionExecutionBlocker | None:
         if action.status == ActionStatus.COMPLETED.value or self._receipt(action) is not None:
             return ActionExecutionBlocker.DUPLICATE
+        return self._authority_blocker(action, now=now)
+
+    def _authority_blocker(
+        self, action: CaseActionModel, *, now: datetime, for_closure: bool = False
+    ) -> ActionExecutionBlocker | None:
         if not action.execution_eligible:
             return ActionExecutionBlocker.STALE_PROPOSAL
         if action.authorization_expires_at <= now:
@@ -179,13 +190,72 @@ class ActionRepositoryBase:
             or decision.decision != "approve"
             or decision.snapshot_fingerprint != snapshot.snapshot_fingerprint
             or not snapshot.execution_eligible
-            or case.version != snapshot.case_version
+            or (not for_closure and case.version != snapshot.case_version)
             or proposal.current_version != snapshot.proposal_version
             or proposal.state != "approved"
             or version.version != snapshot.proposal_version
             or version.legacy_proposal_version_id is not None
         ):
             return ActionExecutionBlocker.STALE_PROPOSAL
+        proposed = self._session.get(CaseProposedActionModel, action.proposed_action_id)
+        if (
+            proposed is None
+            or proposed.parameters != action.typed_parameters
+            or proposed.type != action.type
+            or action.target != _action_target(proposed, case)
+            or proposed.impact_amount != action.impact_amount
+            or proposed.impact_currency != action.impact_currency
+        ):
+            return ActionExecutionBlocker.STALE_PROPOSAL
+        bindings = list(
+            self._session.scalars(
+                select(ProposalEvidenceBindingModel).where(
+                    ProposalEvidenceBindingModel.proposal_version_id == action.proposal_version_id,
+                    ProposalEvidenceBindingModel.organization_id == action.organization_id,
+                )
+            )
+        )
+        if not bindings:
+            return ActionExecutionBlocker.STALE_PROPOSAL
+        for binding in bindings:
+            evidence = self._session.get(CasePolicyEvidenceModel, binding.evidence_id)
+            policy_version = (
+                self._session.get(GovernedPolicyVersionModel, evidence.policy_version_id)
+                if evidence
+                else None
+            )
+            policy = self._session.get(PolicyModel, evidence.policy_id) if evidence else None
+            if (
+                evidence is None
+                or evidence.freshness != "current"
+                or evidence.fingerprint != binding.evidence_fingerprint
+                or policy_version is None
+                or policy is None
+                or policy.status != "published"
+                or policy_version.status != "published"
+                or policy.current_version != policy_version.version
+                or (
+                    policy_version.effective_from is not None
+                    and policy_version.effective_from > now
+                )
+                or (policy_version.effective_to is not None and policy_version.effective_to <= now)
+            ):
+                return ActionExecutionBlocker.STALE_PROPOSAL
+        for binding_context in self._session.scalars(
+            select(ProposalContextBindingModel).where(
+                ProposalContextBindingModel.proposal_version_id == action.proposal_version_id,
+                ProposalContextBindingModel.organization_id == action.organization_id,
+            )
+        ):
+            context = self._session.get(BusinessObjectSnapshotModel, binding_context.context_id)
+            if (
+                context is None
+                or context.version != binding_context.snapshot_version
+                or context.source_freshness != "current"
+            ):
+                return ActionExecutionBlocker.STALE_PROPOSAL
+        if for_closure:
+            return None
         connection = self._required_connection(action)
         if (
             not _connection_is_eligible(connection, now=now)
@@ -455,7 +525,17 @@ class ActionRepositoryBase:
             )
         )
         if for_update:
-            statement = statement.with_for_update()
+            candidate = self._session.scalar(statement)
+            if candidate is not None:
+                self._session.scalar(
+                    select(CaseModel)
+                    .where(
+                        CaseModel.id == candidate.case_id,
+                        CaseModel.organization_id == candidate.organization_id,
+                    )
+                    .with_for_update()
+                )
+            statement = statement.with_for_update(of=CaseActionModel)
         return self._session.scalar(statement)
 
     def _organization(self, organization_public_id: str) -> OrganizationModel | None:

@@ -10,6 +10,7 @@ from app.orchestrators.langchain_helpers import (
     DecisionNarrativePromptTooLarge,
     build_decision_narrative_messages,
 )
+from app.services.lifecycle_telemetry import provider_span
 
 OPENAI_DECISION_INSTRUCTIONS = """
 Draft clear support decision language from the supplied server-generated control record.
@@ -143,15 +144,16 @@ class OpenAIDecisionNarrativeGateway:
                 "AI narrative generation input exceeded the configured safety limit."
             )
         try:
-            response = self._client_instance().responses.parse(
-                model=cast(Any, self.model_version),
-                instructions=model_instructions,
-                input=model_input,
-                text_format=DecisionNarrative,
-                reasoning={"effort": "low"},
-                max_output_tokens=OPENAI_DECISION_MAX_OUTPUT_TOKENS,
-                store=False,
-            )
+            with provider_span():
+                response = self._client_instance().responses.parse(
+                    model=cast(Any, self.model_version),
+                    instructions=model_instructions,
+                    input=model_input,
+                    text_format=DecisionNarrative,
+                    reasoning={"effort": "low"},
+                    max_output_tokens=OPENAI_DECISION_MAX_OUTPUT_TOKENS,
+                    store=False,
+                )
         except ValidationError as exc:
             raise ModelGatewayUnavailable(
                 "AI narrative generation returned an invalid structured result."

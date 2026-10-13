@@ -153,10 +153,10 @@ def test_approved_action_executes_once_with_durable_receipt(
     assert hidden.status_code == 404
     assert executed.status_code == 200
     executed_detail = executed.json()["data"]
-    assert executed_detail["action"]["status"] == "completed"
+    assert executed_detail["action"]["status"] == "outcome_unknown"
     assert executed_detail["action"]["attempt_count"] == 1
     assert executed_detail["receipt"]["external_reference"]
-    assert executed_detail["attempts"][0]["outcome"] == "succeeded"
+    assert executed_detail["attempts"][0]["outcome"] == "unknown"
     assert duplicate.status_code == 409
     assert duplicate.json()["error"]["details"]["blocker"] == "duplicate"
 

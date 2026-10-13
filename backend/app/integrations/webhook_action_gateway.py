@@ -15,6 +15,7 @@ from pydantic import (
 
 from app.domain.actions import ActionSideEffectState
 from app.domain.connections import ConnectionHealth
+from app.domain.resolution import ActionReadback
 from app.integrations.action_gateway import (
     ActionGateway,
     ActionGatewayError,
@@ -45,10 +46,7 @@ class ActionWebhookReceipt(_WebhookResponse):
     @field_validator("data")
     @classmethod
     def validate_data(cls, value: dict[str, str]) -> dict[str, str]:
-        if any(
-            not key or len(key) > 100 or len(item) > 2000
-            for key, item in value.items()
-        ):
+        if any(not key or len(key) > 100 or len(item) > 2000 for key, item in value.items()):
             raise ValueError("receipt data exceeds the supported size")
         return value
 
@@ -58,6 +56,7 @@ class ActionWebhookLookup(_WebhookResponse):
     receipt: ActionWebhookReceipt | None = None
     detail: str = Field(min_length=1, max_length=1000)
     absence_is_terminal: bool = False
+    readback: ActionReadback | None = None
 
     @model_validator(mode="after")
     def require_receipt_for_found_action(self) -> Self:
@@ -183,6 +182,7 @@ class SignedWebhookActionGateway(ActionGateway):
             receipt=receipt,
             detail=payload.detail,
             absence_is_terminal=payload.absence_is_terminal,
+            readback=payload.readback,
         )
 
     def check_health(

@@ -82,6 +82,7 @@ from .policy_retrieval_v2 import (
     PolicyEmbeddingProfileModel,
     PolicyIndexJobModel,
 )
+from .resolution import CaseResolutionEventModel
 from .reviews import (
     CaseReviewDecisionModel,
     CaseReviewModel,
@@ -90,6 +91,7 @@ from .reviews import (
 )
 
 __all__ = [
+    "CaseResolutionEventModel",
     "Base",
     "utc_now",
     "OrganizationModel",

@@ -28,6 +28,7 @@ from app.domain.decision_briefs import (
 from app.domain.identity import ActorContext, Permission
 from app.domain.policies import EvidenceRetrievalResult
 from app.security.authorization import require_permission
+from app.services.lifecycle_telemetry import stage_span
 
 DECISION_GENERATION_LEASE_SECONDS = 60
 MAX_DECISION_GENERATION_ATTEMPTS = 3
@@ -164,11 +165,12 @@ class DecisionBriefService:
         if not isinstance(prepared, DecisionBriefGenerationPlan):
             return prepared
         try:
-            analysis = self._engine.analyze(
-                workspace=prepared.workspace,
-                evidence=prepared.evidence,
-                input_fingerprint=prepared.input_fingerprint,
-            )
+            with stage_span(correlation_id, case_id, "decision"):
+                analysis = self._engine.analyze(
+                    workspace=prepared.workspace,
+                    evidence=prepared.evidence,
+                    input_fingerprint=prepared.input_fingerprint,
+                )
             return self.persist_generation(
                 actor=actor,
                 case_id=case_id,
@@ -210,11 +212,12 @@ class DecisionBriefService:
             raise ProposalGenerationNotAllowed(
                 "A completed case must be reopened before its decision brief can be revised."
             )
-        evidence = self._evidence_resolver.refresh_for_case(
-            actor=actor,
-            case_id=case_id,
-            correlation_id=correlation_id,
-        )
+        with stage_span(correlation_id, case_id, "retrieval"):
+            evidence = self._evidence_resolver.refresh_for_case(
+                actor=actor,
+                case_id=case_id,
+                correlation_id=correlation_id,
+            )
         context_fingerprint = combined_context_fingerprint(workspace)
         evidence_fingerprint = combined_evidence_fingerprint(evidence)
         base_input_fingerprint = decision_input_fingerprint(

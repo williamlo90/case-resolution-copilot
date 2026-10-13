@@ -71,8 +71,9 @@ def reconciliation_outcome_for_lookup(
     *,
     found: bool | None,
     absence_is_terminal: bool,
+    verified: bool = False,
 ) -> ReconciliationOutcome:
-    if found is True:
+    if found is True and verified:
         return ReconciliationOutcome.CONFIRMED_COMPLETED
     if found is False and absence_is_terminal:
         return ReconciliationOutcome.CONFIRMED_ABSENT
@@ -82,8 +83,6 @@ def reconciliation_outcome_for_lookup(
 def reconciliation_outcome_for_manual_record(
     outcome: ManualActionOutcome,
 ) -> ReconciliationOutcome:
-    if outcome is ManualActionOutcome.COMPLETED:
-        return ReconciliationOutcome.CONFIRMED_COMPLETED
     return ReconciliationOutcome.STILL_UNKNOWN
 
 
@@ -284,6 +283,8 @@ class ActionExecutionLease(BaseModel):
     action_type: str
     target: str
     parameters: dict[str, str]
+    impact_amount: Decimal | None = None
+    impact_currency: str | None = None
     idempotency_key: str
     adapter_key: str
     provider_type: str
@@ -298,6 +299,8 @@ class ActionReconciliationLease(BaseModel):
     action_type: str
     target: str
     parameters: dict[str, str]
+    impact_amount: Decimal | None = None
+    impact_currency: str | None = None
     idempotency_key: str
     external_reference: str | None
     adapter_key: str
