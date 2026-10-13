@@ -1,0 +1,13 @@
+{
+  "version": "case-resolution-v2-manifest-1",
+  "split": "holdout",
+  "state": "planned",
+  "seed": 20261013,
+  "sealed_at": null,
+  "product_revision": null,
+  "config_sha256": null,
+  "model_version": null,
+  "prompt_version": null,
+  "scorer_version": null,
+  "entries": []
+}

@@ -13,6 +13,8 @@ contracts and operating material used to build and evaluate the application.
 
 ## Architecture And Contracts
 
+- [Case Resolution V2 measurement contract and Phase 0 audit](evidence/case-resolution-v2/CONTRACT.md)
+- [V2 Phase 0 learning checkpoint](learning/case-resolution-v2/PHASE-0.md)
 - [Architecture decisions](adr/README.md)
 - [API conventions](api/CONVENTIONS.md)
 - [Generic SaaS backend contract](backend/GENERIC_SAAS_CONTRACT.md)

@@ -1,0 +1,140 @@
+{
+  "version": "case-resolution-v2-contract-1",
+  "frozen_on": "2026-10-13",
+  "status": "design_frozen_not_evaluated",
+  "holdout_families": 40,
+  "time_study_families": 12,
+  "minimum_correct_pairs": 8,
+  "sop_revisions": 3,
+  "primary_repeats": 1,
+  "policy_correctness_floor": 0.95,
+  "completion_floor": 0.9,
+  "critical_failures_allowed": 0,
+  "timing_terminal_contract": "same_oracle_both_conditions",
+  "latency_min_samples": 100,
+  "latency_stages": [
+    "intake",
+    "retrieval",
+    "decision",
+    "api",
+    "queue_wait",
+    "worker",
+    "provider",
+    "db",
+    "tool",
+    "manual_wait",
+    "end_to_end"
+  ],
+  "taxonomy": [
+    "billing",
+    "refund",
+    "account_recovery",
+    "policy_ambiguity",
+    "missing_evidence",
+    "conflicting_evidence",
+    "unauthorized_actor",
+    "expired_authority",
+    "stale_sop",
+    "duplicate_action",
+    "downstream_timeout",
+    "reopen"
+  ],
+  "metrics": {
+    "policy_correctness": {
+      "numerator": "all required semantic, policy, grounding, authority and action predicates pass",
+      "denominator": "all scheduled unique cases including invalid, missing and provider failures",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "correct_completion": {
+      "numerator": "oracle terminal reached correctly with all required receipts",
+      "denominator": "all scheduled unique cases including safe escalation targets",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "safe_automation": {
+      "numerator": "policy-correct verified resolutions without human intervention",
+      "denominator": "all scheduled unique cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "eligible_automation_coverage": {
+      "numerator": "eligible cases correctly resolved without human intervention",
+      "denominator": "all oracle automation-eligible cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "actual_escalation": {
+      "numerator": "correct queue routing and authorized acknowledgement receipts",
+      "denominator": "all oracle escalation-required cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "missed_escalation": {
+      "numerator": "required escalation not routed and acknowledged by deadline",
+      "denominator": "all oracle escalation-required cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "unexpected_escalation": {
+      "numerator": "cases escalated without oracle escalation requirement",
+      "denominator": "all cases without oracle escalation requirement",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "verified_action": {
+      "numerator": "authorized operations with exact target read-back and correct effect count",
+      "denominator": "all oracle-required operations plus unexpected observed operations",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "false_closure": {
+      "numerator": "closed cases without valid correct resolution at closure time",
+      "denominator": "all observed closed cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "unsafe_effect": {
+      "numerator": "cases with at least one unauthorized or duplicate consequential effect",
+      "denominator": "all scheduled unique cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "missing_observation": {
+      "numerator": "cases without a valid persisted observation",
+      "denominator": "all scheduled unique cases",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "reopen_7d": {
+      "numerator": "initially verified closed cases reopened within 7 simulated days",
+      "denominator": "initially verified closed cases with a complete 7-day simulated follow-up",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "reopen_30d": {
+      "numerator": "initially verified closed cases reopened within 30 simulated days",
+      "denominator": "initially verified closed cases with a complete 30-day simulated follow-up",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "reopen_correctness": {
+      "numerator": "expected invalidations linked to the original resolution and reopened once",
+      "denominator": "all oracle expected invalidations",
+      "zero_denominator": "N/A",
+      "unit": "fraction"
+    },
+    "provider_cost_per_verified_resolution": {
+      "numerator": "measured USD provider costs for all attempts including failures",
+      "denominator": "policy-correct verified resolutions",
+      "zero_denominator": "N/A",
+      "unit": "USD/resolution"
+    },
+    "total_cost_per_verified_resolution": {
+      "numerator": "measured USD provider and attributable runtime costs for all attempts",
+      "denominator": "policy-correct verified resolutions",
+      "zero_denominator": "N/A",
+      "unit": "USD/resolution"
+    }
+  }
+}

@@ -1,0 +1,347 @@
+{
+  "$defs": {
+    "ActionExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Action Type",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "consequential_parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Consequential Parameters",
+          "type": "object"
+        },
+        "approval": {
+          "enum": [
+            "human_required",
+            "policy_grant"
+          ],
+          "title": "Approval",
+          "type": "string"
+        },
+        "expected_effect_count": {
+          "const": 1,
+          "title": "Expected Effect Count",
+          "type": "integer"
+        },
+        "readback_predicates": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Readback Predicates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "action_type",
+        "target",
+        "tenant_id",
+        "consequential_parameters",
+        "approval",
+        "expected_effect_count",
+        "readback_predicates"
+      ],
+      "title": "ActionExpectation",
+      "type": "object"
+    },
+    "PolicyExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "clause_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Clause Id",
+          "type": "string"
+        },
+        "effective_from": {
+          "format": "date-time",
+          "title": "Effective From",
+          "type": "string"
+        },
+        "effective_to": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective To"
+        },
+        "applicable_at": {
+          "format": "date-time",
+          "title": "Applicable At",
+          "type": "string"
+        },
+        "date_basis": {
+          "enum": [
+            "transaction",
+            "request",
+            "execution"
+          ],
+          "title": "Date Basis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "version",
+        "clause_id",
+        "effective_from",
+        "effective_to",
+        "applicable_at",
+        "date_basis"
+      ],
+      "title": "PolicyExpectation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "case-resolution-v2-oracle-1",
+      "title": "Version",
+      "type": "string"
+    },
+    "case_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "family_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Family Id",
+      "type": "string"
+    },
+    "sop_family_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Sop Family Id",
+      "type": "string"
+    },
+    "domain": {
+      "enum": [
+        "billing",
+        "refund",
+        "account_recovery"
+      ],
+      "title": "Domain",
+      "type": "string"
+    },
+    "required_facts": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Required Facts",
+      "type": "array"
+    },
+    "required_gaps": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Required Gaps",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "$ref": "#/$defs/PolicyExpectation"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "policy_expectation": {
+      "enum": [
+        "applicable",
+        "missing",
+        "conflicting"
+      ],
+      "title": "Policy Expectation",
+      "type": "string"
+    },
+    "resolution_predicates": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Resolution Predicates",
+      "type": "array"
+    },
+    "expected_terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation",
+        "open"
+      ],
+      "title": "Expected Terminal",
+      "type": "string"
+    },
+    "expected_actions": {
+      "items": {
+        "$ref": "#/$defs/ActionExpectation"
+      },
+      "title": "Expected Actions",
+      "type": "array"
+    },
+    "forbidden_action_types": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Forbidden Action Types",
+      "type": "array"
+    },
+    "automation_eligible": {
+      "title": "Automation Eligible",
+      "type": "boolean"
+    },
+    "escalation_required": {
+      "title": "Escalation Required",
+      "type": "boolean"
+    },
+    "escalation_queue": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Escalation Queue"
+    },
+    "acknowledgement_required": {
+      "title": "Acknowledgement Required",
+      "type": "boolean"
+    },
+    "reopen_days": {
+      "items": {
+        "enum": [
+          7,
+          30
+        ],
+        "type": "integer"
+      },
+      "title": "Reopen Days",
+      "type": "array"
+    },
+    "rationale": {
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "provenance": {
+      "enum": [
+        "ai_assisted_developer_adjudicated",
+        "developer_authored"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "adjudicator": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Adjudicator",
+      "type": "string"
+    },
+    "adjudicated_at": {
+      "format": "date-time",
+      "title": "Adjudicated At",
+      "type": "string"
+    },
+    "source_rule_reference": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Source Rule Reference",
+      "type": "string"
+    },
+    "derived_from_product_output": {
+      "const": false,
+      "title": "Derived From Product Output",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "version",
+    "case_id",
+    "family_id",
+    "sop_family_id",
+    "domain",
+    "required_facts",
+    "required_gaps",
+    "evidence_ids",
+    "policies",
+    "policy_expectation",
+    "resolution_predicates",
+    "expected_terminal",
+    "expected_actions",
+    "forbidden_action_types",
+    "automation_eligible",
+    "escalation_required",
+    "escalation_queue",
+    "acknowledgement_required",
+    "reopen_days",
+    "rationale",
+    "provenance",
+    "adjudicator",
+    "adjudicated_at",
+    "source_rule_reference",
+    "derived_from_product_output"
+  ],
+  "title": "OracleLabel",
+  "type": "object"
+}
