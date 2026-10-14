@@ -29,6 +29,14 @@ These are bounded evaluator/static checks. No holdout product run is performed.
 
 ## Phase roadmap (execution status in each checkpoint)
 
+Phase 3 source and instructions: [SOP revisions](SOP_REVISIONS.md),
+[learning checkpoint](../../learning/case-resolution-v2/PHASE-3.md), and
+[operator runbook](../../runbooks/sop-change-and-recovery.md).
+Local unit module: `tests/unit/test_sop_revision_decisions.py`.
+Guarded PostgreSQL module: `tests/integration/test_sop_revision_lifecycle.py` (race test skips locally).
+The `SOP revision gate` workflow runs the complete exposed replay and race test in isolation,
+with report and JUnit artifacts bound to the exact commit. No Phase 2 holdout observation is generated.
+
 | Phase | Required tests |
 | --- | --- |
 | 1 | Completion/reopen transition and prior-cycle attribution; migration legacy rows; cross-tenant/permission denial; stale review; fail-after-effect; read-back mismatch; routing+ack receipt; missing telemetry; bounded PostgreSQL journey |

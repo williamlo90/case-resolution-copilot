@@ -124,7 +124,9 @@ class PolicyLifecycleRepository(PolicyRepositoryBase):
                 previous.status = PolicyVersionStatus.RETIRED.value
                 previous.record_version += 1
                 previous.retired_at = now
-                if previous.effective_to is None or previous.effective_to > effective_from:
+                if (
+                    previous.effective_from is None or previous.effective_from < effective_from
+                ) and (previous.effective_to is None or previous.effective_to > effective_from):
                     previous.effective_to = effective_from
 
         updated_policy = self._update_policy(
@@ -175,7 +177,11 @@ class PolicyLifecycleRepository(PolicyRepositoryBase):
         version = self._required_version(policy, version_number)
         now = utc_now()
         previous_active = None
-        if version.status == PolicyVersionStatus.SCHEDULED.value:
+        if (
+            version.status == PolicyVersionStatus.SCHEDULED.value
+            and version.effective_from is not None
+            and version.effective_from > now
+        ):
             previous_active = self._session.scalar(
                 select(GovernedPolicyVersionModel)
                 .where(

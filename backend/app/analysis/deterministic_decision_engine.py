@@ -4,6 +4,7 @@ from hashlib import sha256
 from typing import Protocol
 
 from app.analysis.customer_response_drafting import draft_customer_response
+from app.analysis.sop_rules import sop_gaps
 from app.domain.cases import (
     BusinessObjectRecord,
     BusinessObjectType,
@@ -27,10 +28,10 @@ from app.domain.decision_briefs import (
 )
 from app.domain.policies import EvidenceRetrievalResult, EvidenceRetrievalStatus
 
-DECISION_MODEL_VERSION = "deterministic-decision-engine-v3"
-DECISION_PROMPT_VERSION = "decision-brief-rules-v2"
+DECISION_MODEL_VERSION = "deterministic-decision-engine-v4"
+DECISION_PROMPT_VERSION = "decision-brief-rules-v3"
 DECISION_GRAPH_VERSION = "generic-decision-brief-v1"
-DECISION_RISK_RULE_VERSION = "generic-risk-rules-v2"
+DECISION_RISK_RULE_VERSION = "generic-risk-rules-v3"
 
 _CONFIRMED_OWNERSHIP_MATCHES = frozenset({"exact", "match", "matched", "verified"})
 
@@ -132,6 +133,8 @@ class DeterministicDecisionEngine:
     ) -> DecisionAnalysis:
         facts = _facts(workspace)
         gaps = _information_gaps(workspace, evidence.status)
+        policy_gaps = sop_gaps(workspace, evidence)
+        gaps.extend(policy_gaps)
         blocking = [gap for gap in gaps if gap.blocking]
         risks = _risk_checks(workspace, evidence.status, blocking)
         state = (
@@ -141,6 +144,8 @@ class DeterministicDecisionEngine:
         )
         confidence = _confidence(workspace, evidence.status, blocking)
         outcome = _outcome(workspace, state, evidence.status)
+        if policy_gaps:
+            outcome = "Escalate for SOP review before any consequential action"
         impact_amount = None
         impact_currency = None
         if state is DecisionProposalState.READY_FOR_REVIEW and workspace.case.category in {
@@ -210,6 +215,8 @@ def _facts(workspace: CaseWorkspaceRecord) -> list[VerifiedFact]:
         "attempt_count": "Recorded payment attempts",
         "identity_check": "Identity check",
         "ownership_match": "Ownership match",
+        "ownership_proof": "Ownership proof level",
+        "purchased_at": "Purchase timestamp",
         "mfa_state": "Multi-factor authentication",
     }
     for context in workspace.business_contexts:

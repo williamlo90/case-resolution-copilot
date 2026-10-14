@@ -27,6 +27,7 @@ from app.persistence.models import (
     OrganizationModel,
     PolicyModel,
 )
+from app.persistence.policy_authority import selected_version
 
 from ._base import (
     PolicyRepositoryBase,
@@ -192,6 +193,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
             _json_dimension_match(version.customer_tiers, {customer_tier}),
         )
         effective_match = and_(
+            selected_version(as_of),
             or_(version.effective_from.is_(None), version.effective_from <= as_of),
             or_(version.effective_to.is_(None), version.effective_to > as_of),
         )
@@ -252,8 +254,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
             .join(
                 GovernedPolicyClauseModel,
                 and_(
-                    GovernedPolicyClauseModel.organization_id
-                    == version.organization_id,
+                    GovernedPolicyClauseModel.organization_id == version.organization_id,
                     GovernedPolicyClauseModel.policy_id == version.policy_id,
                     GovernedPolicyClauseModel.policy_version_id == version.id,
                 ),

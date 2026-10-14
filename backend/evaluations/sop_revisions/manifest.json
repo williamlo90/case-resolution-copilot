@@ -1,0 +1,11 @@
+{
+  "kind": "exposed_development_replay",
+  "case_count": 6,
+  "scheduled_observations": 18,
+  "date_basis": "decision_time",
+  "holdout_access": false,
+  "files": {
+    "inputs.json": "f238c39bf157ec5a348aaca26a101330e1c15d55998acb3e5d7ad58626da939f",
+    "labels.json": "7e2c1d4a241444c3769e29a14784af72c37199d7783b18b3c66994a54df7dbca"
+  }
+}

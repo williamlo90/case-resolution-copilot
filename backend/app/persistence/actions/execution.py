@@ -18,6 +18,7 @@ from app.persistence.models import (
     OrganizationModel,
     utc_now,
 )
+from app.persistence.policy_authority import lock_policy_authority
 
 from ._base import (
     ActionRepositoryBase,
@@ -45,6 +46,7 @@ class ActionExecutionRepository(ActionRepositoryBase):
             action_public_id,
             for_update=True,
         )
+        lock_policy_authority(self._session, action.organization_id)
         now = utc_now()
         self._reconcile_abandoned(action=action, now=now)
         if action.version != expected_version:

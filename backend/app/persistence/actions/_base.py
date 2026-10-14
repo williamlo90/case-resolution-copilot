@@ -52,6 +52,7 @@ from app.persistence.models import (
     ProposalContextBindingModel,
     ProposalEvidenceBindingModel,
 )
+from app.persistence.policy_authority import is_current_authority
 
 ACTION_AUTHORIZATION_HOURS = 24
 ABANDONED_ACTION_MINUTES = 5
@@ -155,6 +156,27 @@ class ActionRepositoryBase:
     ) -> ActionExecutionBlocker | None:
         if action.status == ActionStatus.COMPLETED.value or self._receipt(action) is not None:
             return ActionExecutionBlocker.DUPLICATE
+        previous_effect = self._session.scalar(
+            select(CaseActionModel.id)
+            .where(
+                CaseActionModel.organization_id == action.organization_id,
+                CaseActionModel.case_id == action.case_id,
+                CaseActionModel.id != action.id,
+                CaseActionModel.type == action.type,
+                CaseActionModel.target == action.target,
+                CaseActionModel.status.in_(
+                    [
+                        ActionStatus.RUNNING.value,
+                        ActionStatus.COMPLETED.value,
+                        ActionStatus.OUTCOME_UNKNOWN.value,
+                        ActionStatus.RECOVERY_REQUIRED.value,
+                    ]
+                ),
+            )
+            .limit(1)
+        )
+        if previous_effect is not None:
+            return ActionExecutionBlocker.DUPLICATE
         return self._authority_blocker(action, now=now)
 
     def _authority_blocker(
@@ -231,9 +253,7 @@ class ActionRepositoryBase:
                 or evidence.fingerprint != binding.evidence_fingerprint
                 or policy_version is None
                 or policy is None
-                or policy.status != "published"
-                or policy_version.status != "published"
-                or policy.current_version != policy_version.version
+                or not is_current_authority(self._session, policy_version.id, now)
                 or (
                     policy_version.effective_from is not None
                     and policy_version.effective_from > now

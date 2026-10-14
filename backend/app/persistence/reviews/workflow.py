@@ -32,6 +32,7 @@ from app.persistence.models import (
     ResponseDraftModel,
     utc_now,
 )
+from app.persistence.policy_authority import lock_policy_authority
 from app.services.lifecycle_telemetry import LifecycleSpan, emit_span
 
 from ._base import (
@@ -286,6 +287,7 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
             review_public_id,
             for_update=True,
         )
+        lock_policy_authority(self._session, review.organization_id)
         now = utc_now()
         if review.version != expected_version:
             raise ReviewVersionConflict(
