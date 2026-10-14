@@ -8,7 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domain.actions import ActionSideEffectState
 from app.domain.connections import ConnectionHealth
+from app.domain.controlled_operations import OPERATIONS
 from app.domain.resolution import ActionReadback, VerificationState
+from app.integrations.controlled_target import ControlledTarget
 
 
 class GatewayBehavior(StrEnum):
@@ -188,10 +190,12 @@ class DeterministicActionGateway(ActionGateway):
         *,
         behaviors: dict[str, GatewayBehavior] | None = None,
         health: dict[str, ConnectionHealth] | None = None,
+        objects: dict[str, dict[str, str]] | None = None,
     ) -> None:
         self._behaviors = behaviors or {}
         self._health = health or {}
         self._outcomes: dict[str, _StoredOutcome] = {}
+        self.controlled_target = ControlledTarget(objects)
 
     def execute(
         self,
@@ -203,6 +207,13 @@ class DeterministicActionGateway(ActionGateway):
         self._require_demo_adapter(adapter_key)
         existing = self._outcomes.get(request.idempotency_key)
         if existing is not None:
+            if request.action_type in OPERATIONS and existing.request != request:
+                raise ActionGatewayError(
+                    "The operation key is already bound to a different payload.",
+                    code="idempotency_payload_conflict",
+                    side_effect_state=ActionSideEffectState.NONE,
+                    retryable=False,
+                )
             return existing.receipt.model_copy(update={"duplicate": True})
         behavior = self._behaviors.get(
             request.action_type,
@@ -216,16 +227,6 @@ class DeterministicActionGateway(ActionGateway):
                 retryable=False,
             )
         receipt = self._receipt(provider_type, request)
-        if behavior is GatewayBehavior.OUTCOME_UNKNOWN_ACCEPTED:
-            self._outcomes[request.idempotency_key] = _StoredOutcome(
-                receipt, request.model_copy(deep=True)
-            )
-            raise ActionGatewayError(
-                "The demo target accepted the request but did not return a receipt.",
-                code="target_timeout_after_acceptance",
-                side_effect_state=ActionSideEffectState.POSSIBLE,
-                retryable=False,
-            )
         if behavior in {
             GatewayBehavior.OUTCOME_UNKNOWN_ABSENT,
             GatewayBehavior.RECONCILIATION_UNAVAILABLE,
@@ -236,9 +237,36 @@ class DeterministicActionGateway(ActionGateway):
                 side_effect_state=ActionSideEffectState.POSSIBLE,
                 retryable=False,
             )
+        if request.action_type in OPERATIONS:
+            try:
+                changes = self.controlled_target.prepare(
+                    action_type=request.action_type,
+                    provider=provider_type,
+                    target=request.target,
+                    parameters=request.parameters,
+                    amount=request.impact_amount,
+                    currency=request.impact_currency,
+                )
+                self.controlled_target.commit(
+                    request.idempotency_key, request.target, request.parameters, changes
+                )
+            except ValueError as exc:
+                raise ActionGatewayError(
+                    "The controlled synthetic target rejected the operation before change.",
+                    code="invalid_controlled_target",
+                    side_effect_state=ActionSideEffectState.NONE,
+                    retryable=False,
+                ) from exc
         self._outcomes[request.idempotency_key] = _StoredOutcome(
             receipt, request.model_copy(deep=True)
         )
+        if behavior is GatewayBehavior.OUTCOME_UNKNOWN_ACCEPTED:
+            raise ActionGatewayError(
+                "The demo target accepted the request but did not return a receipt.",
+                code="target_timeout_after_acceptance",
+                side_effect_state=ActionSideEffectState.POSSIBLE,
+                retryable=False,
+            )
         return receipt
 
     def reconcile(
@@ -278,6 +306,12 @@ class DeterministicActionGateway(ActionGateway):
                 receipt=None,
                 detail="The recorded reference does not match the target result.",
             )
+        observed_parameters = stored.request.parameters
+        verification = VerificationState.VERIFIED
+        if stored.request.action_type in OPERATIONS:
+            observed_parameters, matches = self.controlled_target.readback(request.idempotency_key)
+            if not matches:
+                verification = VerificationState.MISMATCH
         return ActionLookupResult(
             found=True,
             receipt=stored.receipt.model_copy(deep=True),
@@ -287,10 +321,10 @@ class DeterministicActionGateway(ActionGateway):
                 external_reference=stored.receipt.external_reference,
                 action_type=stored.request.action_type,
                 target=stored.request.target,
-                observed_parameters=stored.request.parameters,
+                observed_parameters=observed_parameters,
                 impact_amount=stored.request.impact_amount,
                 impact_currency=stored.request.impact_currency,
-                status=VerificationState.VERIFIED,
+                status=verification,
                 observed_at=datetime.now(UTC),
                 effect_count=1,
             ),

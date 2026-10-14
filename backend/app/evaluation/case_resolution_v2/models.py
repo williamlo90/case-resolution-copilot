@@ -16,7 +16,7 @@ from app.evaluation.case_resolution_v2.contracts import (
     Terminal,
 )
 
-SCORER_VERSION = "case-resolution-v2-scorer-1"
+SCORER_VERSION = "case-resolution-v2-scorer-2"
 
 
 class RunConfig(ContractModel):
@@ -121,7 +121,7 @@ class Observation(ContractModel):
     disposition: Literal["resolve", "escalate", "request_information", "decline"]
     proposed_actions: tuple[ActionExpectation, ...]
     operations: tuple[Operation, ...]
-    claims: tuple[Name, ...]
+    claims: tuple[str, ...]
     terminal: Terminal
     completion: Completion | None
     escalation: Escalation | None

@@ -1,0 +1,49 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-REG-002",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "refund",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "current",
+    "fault": "timeout_after_effect",
+    "lookup_result": "verified",
+    "operation_id": "OPERATION-V2-REG-002"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "arrival_days_late": "3",
+        "authorized_amount_minor": "900",
+        "authorized_currency": "USD",
+        "authorized_reason_code": "delivery-guarantee",
+        "authorized_recipient": "OWNER-V2-REG-002",
+        "original_recipient": "OWNER-V2-REG-002",
+        "requested_target": "TARGET-V2-REG-002"
+      },
+      "id": "EVD-V2-REG-002",
+      "source": "synthetic-delivery-guarantee-record"
+    }
+  ],
+  "family_id": "refund:delivery-guarantee",
+  "policies": [
+    {
+      "clause_id": "POLC-DFAA4B36B2F42ECB",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-DELIVERY-GUARANTEE",
+      "text": "Return a 900-unit delivery guarantee fee when delivery is three days late; lookup a lost response.",
+      "version": "1"
+    }
+  ],
+  "request": "Please handle delivery guarantee for TARGET-V2-REG-002.",
+  "sop_family_id": "rule:refund:delivery-guarantee",
+  "tags": [
+    "refund",
+    "downstream_timeout"
+  ],
+  "tenant_id": "ORG-0001"
+}

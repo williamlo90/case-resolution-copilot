@@ -12,11 +12,25 @@ from app.domain.policies import (
 )
 from app.retrieval.embeddings import DEFAULT_EMBEDDING_PROVIDER, EmbeddingProvider
 from app.retrieval.governed_facade import GovernedPolicyRetrievalFacade
+from app.retrieval.policy_context import case_context
 from app.retrieval.v1_governed import PolicyEvidenceSearchStore, V1PolicyRetrieval
 from app.security.authorization import require_permission
 
 
 class PolicyEvidenceStore(PolicyEvidenceSearchStore, Protocol):
+    def has_pending_scope_conflict(
+        self,
+        *,
+        organization_public_id: str,
+        case_category: str,
+        products: set[str],
+        region: str,
+        channel: str,
+        customer_tier: str,
+        decision_scope: str,
+        as_of: datetime,
+    ) -> bool: ...
+
     def bind_evidence(
         self,
         *,
@@ -147,6 +161,33 @@ class PolicyEvidenceService:
         as_of: datetime,
         correlation_id: str = "retrieval",
     ) -> tuple[EvidenceRetrievalStatus, str, list[PolicyEvidenceBinding]]:
+        context = case_context(workspace)
+        scopes = {
+            row.fields["policy_scope"]
+            for row in workspace.business_contexts
+            if row.fields.get("policy_scope")
+        }
+        if len(scopes) > 1:
+            return (
+                EvidenceRetrievalStatus.CONFLICTING,
+                "Case source records disagree about the policy decision scope.",
+                [],
+            )
+        if scopes and self._policy_store.has_pending_scope_conflict(
+            organization_public_id=actor.organization_id,
+            case_category=context["category"],
+            products=context["products"],
+            region=context["region"],
+            channel=context["channel"],
+            customer_tier=context["tier"],
+            decision_scope=next(iter(scopes)),
+            as_of=as_of,
+        ):
+            return (
+                EvidenceRetrievalStatus.CONFLICTING,
+                "An overlapping policy publication remains in conflict review.",
+                [],
+            )
         resolution = self._retrieval.resolve(
             actor=actor,
             workspace=workspace,

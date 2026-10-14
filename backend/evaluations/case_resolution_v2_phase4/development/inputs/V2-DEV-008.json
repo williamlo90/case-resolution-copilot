@@ -1,0 +1,52 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-DEV-008",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "billing",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "current",
+    "fault": "none",
+    "future_event": "new_contradictory_evidence",
+    "reopen_simulated_days": "7,30"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "authorized_amount_minor": "0",
+        "authorized_currency": "USD",
+        "authorized_reason_code": "purchase-order",
+        "authorized_recipient": "OWNER-V2-DEV-008",
+        "original_recipient": "OWNER-V2-DEV-008",
+        "po_authorization": "valid",
+        "requested_operation": "attach_purchase_order",
+        "requested_purchase_order": "PO-SYNTHETIC-008",
+        "requested_target": "TARGET-V2-DEV-008",
+        "target_owner": "OWNER-V2-DEV-008"
+      },
+      "id": "EVD-V2-DEV-008",
+      "source": "synthetic-purchase-order-record"
+    }
+  ],
+  "family_id": "billing:purchase-order",
+  "policies": [
+    {
+      "clause_id": "POLC-89F8BE0C158686CA",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-PURCHASE-ORDER",
+      "text": "Attach a purchase order only with valid PO authorization; later revocation must reopen the case.\n\n```case-resolution-rules\n{\"schema_version\": 1, \"rules\": [{\"kind\": \"controlled_operation\", \"action_type\": \"attach_purchase_order\", \"max_amount_minor\": 0, \"currency\": \"USD\"}]}\n```",
+      "version": "1"
+    }
+  ],
+  "request": "Attach the purchase order after valid PO authorization; preserve the invoice amount. Target TARGET-V2-DEV-008.",
+  "sop_family_id": "rule:billing:purchase-order",
+  "tags": [
+    "billing",
+    "reopen"
+  ],
+  "tenant_id": "ORG-0001"
+}

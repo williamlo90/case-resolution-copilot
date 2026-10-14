@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from app.domain.controlled_operations import OPERATIONS
 from app.integrations.connection_seed import (
     deterministic_connection_seeds,
     runtime_connection_seeds,
@@ -15,6 +16,7 @@ def test_connection_seed_covers_every_executable_action_without_secrets() -> Non
         "issue_refund",
         "start_verified_recovery",
         "apply_service_correction",
+        *OPERATIONS,
     }
     assert all(seed.adapter_key == "deterministic_demo" for seed in seeds)
     assert all(seed.credential_status.value == "demo" for seed in seeds)

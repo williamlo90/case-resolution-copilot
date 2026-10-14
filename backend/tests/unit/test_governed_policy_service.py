@@ -504,6 +504,10 @@ class EvidencePolicyStore:
         self.bindings: list[PolicyEvidenceBinding] = []
         self.searches: list[dict[str, object]] = []
 
+    def has_pending_scope_conflict(self, **values: object) -> bool:
+        del values
+        return False
+
     def search_retrieval_candidates(
         self,
         **values: object,

@@ -1,0 +1,44 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-DEV-015",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "refund",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "expired",
+    "fault": "none"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "activation_count": "0",
+        "approval_expired_at": "2026-10-12T23:00:00Z",
+        "original_recipient": "OWNER-V2-DEV-015",
+        "requested_target": "TARGET-V2-DEV-015"
+      },
+      "id": "EVD-V2-DEV-015",
+      "source": "synthetic-app-install-record"
+    }
+  ],
+  "family_id": "refund:app-install",
+  "policies": [
+    {
+      "clause_id": "POLC-CFAF2EA01DD8AAA7",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-APP-INSTALL",
+      "text": "Refund a 1200-unit unused app activation after verifying zero activations and a valid approval.",
+      "version": "1"
+    }
+  ],
+  "request": "Refund the unused app activation after verifying zero activations.",
+  "sop_family_id": "rule:refund:app-install",
+  "tags": [
+    "refund",
+    "expired_authority"
+  ],
+  "tenant_id": "ORG-0001"
+}

@@ -41,6 +41,12 @@ def example(case_id: str = "V2-DEV-002") -> tuple[Scenario, GoldenLabel, dict[st
                     status="verified",
                     observed_at=(start + timedelta(seconds=2)).isoformat(),
                     effect_count=1,
+                    impact_amount=(
+                        int(action.consequential_parameters["amount_minor"]) / 100
+                        if "amount_minor" in action.consequential_parameters
+                        else None
+                    ),
+                    impact_currency=action.consequential_parameters.get("currency"),
                 ),
             )
         )
@@ -103,6 +109,14 @@ def test_positive_contract_example_is_not_a_product_result() -> None:
     assert grade.policy_correct and grade.correct_completion
     assert grade.verified_actions == grade.action_denominator == 1
     assert not grade.automated_resolution
+
+
+def test_verified_readback_rejects_mismatched_monetary_impact() -> None:
+    scenario, label, payload = example()
+    payload["operations"][0]["readback"]["impact_amount"] = "999.00"
+    grade = score(scenario, label, Observation.model_validate(payload))
+    assert not grade.components["readback"]
+    assert not grade.correct_completion
 
 
 @pytest.mark.parametrize(

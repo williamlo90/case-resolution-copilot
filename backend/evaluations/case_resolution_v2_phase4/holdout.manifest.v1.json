@@ -1,0 +1,294 @@
+{
+  "config_sha256": "a64541d759b7336460330bfd014a6f68ac73d02dca0fe6b9830646338923ecbe",
+  "entries": [
+    {
+      "case_id": "H4R2-HLD-001",
+      "family_id": "billing:municipal-address-correction",
+      "input_sha256": "f784803b456b8a423112b1947659eba0a73ca039a50963d61b3f2653fa97cb73",
+      "label_sha256": "e64c821d33d915a8d24350a12f9dad08a6ff3fa371a17fb2c45fc7f2e40fa87a",
+      "sop_family_id": "rule:billing:municipal-address-correction"
+    },
+    {
+      "case_id": "H4R2-HLD-002",
+      "family_id": "billing:export-draft-currency",
+      "input_sha256": "51f25764b15c6733c3166a95faa5554b8d08cfcddaeb29410d22a76cab2fc693",
+      "label_sha256": "0eedba3cd43f43a79dabd3b3a1569300663408c58c93989fb653ec0b1f900ffd",
+      "sop_family_id": "rule:billing:export-draft-currency"
+    },
+    {
+      "case_id": "H4R2-HLD-003",
+      "family_id": "billing:regional-invoice-locale",
+      "input_sha256": "10a04cba0691cb26ba03853e429b8550c5b24a1e7e216028217883f9a7ee6fc7",
+      "label_sha256": "e2e28a721a85a4a4d9eb8d55d089fa51a825c8589de743a5e24e018240318623",
+      "sop_family_id": "rule:billing:regional-invoice-locale"
+    },
+    {
+      "case_id": "H4R2-HLD-004",
+      "family_id": "billing:nonprofit-seat-credit",
+      "input_sha256": "3cc825c7ae15234128193acfa5f80d2666842ca0c179450479138af3951f8f08",
+      "label_sha256": "e4230f16cd2b86f031be87132716085f1a7c164b1148e72397ecc3f6103fb5ee",
+      "sop_family_id": "rule:billing:nonprofit-seat-credit"
+    },
+    {
+      "case_id": "H4R2-HLD-005",
+      "family_id": "billing:university-purchase-order",
+      "input_sha256": "75e4f125397892bf99778b699e7af86bc35d3fa312796ec647cbd112dd62bf53",
+      "label_sha256": "8ed374514759199c77e1227ae9f1c13db120cf6286b313c1615f6a3982a5d1f7",
+      "sop_family_id": "rule:billing:university-purchase-order"
+    },
+    {
+      "case_id": "H4R2-HLD-006",
+      "family_id": "billing:managed-address-conflict",
+      "input_sha256": "c779429085aa1a75716250b72fd7df07255e30db5d78348775b1c827a667c70b",
+      "label_sha256": "ca22ba12779b3c06aae46edeb3ff0c7e971da24e56423900253c694befce2014",
+      "sop_family_id": "rule:billing:managed-address-conflict"
+    },
+    {
+      "case_id": "H4R2-HLD-007",
+      "family_id": "billing:agency-draft-missing-record",
+      "input_sha256": "ba75cd021db1e9de675976398a7bbb786b0e19257d1ebdfe987340c42d6091ee",
+      "label_sha256": "5fc609a2878acb5c14851695892bb3e87fa0f6b9596700cdf91baf224272a9c8",
+      "sop_family_id": "rule:billing:agency-draft-missing-record"
+    },
+    {
+      "case_id": "H4R2-HLD-008",
+      "family_id": "billing:regional-locale-stale-rule",
+      "input_sha256": "61cd94b4e873567bcccd3645d3f7267402a389efb526082f3a6ede7e42fbc5f6",
+      "label_sha256": "5dd4366f3dab2c057efc239df7628a37fcb95d475b42513156de0d50f1b371b3",
+      "sop_family_id": "rule:billing:regional-locale-stale-rule"
+    },
+    {
+      "case_id": "H4R2-HLD-009",
+      "family_id": "billing:cooperative-seat-delegate",
+      "input_sha256": "2e8a180738458f4995ad311b92e75211a6513e263d93c5fcc5e6d5b11fc59ce9",
+      "label_sha256": "97859de59e4bee03e0c387444d659fee638f108e553718466b8e3693a739a19e",
+      "sop_family_id": "rule:billing:cooperative-seat-delegate"
+    },
+    {
+      "case_id": "H4R2-HLD-010",
+      "family_id": "billing:hospital-po-policy-overlap",
+      "input_sha256": "e365a56e88a2a0cbd753a616afddce7b0766368f23b1480619b397591eeb0d8f",
+      "label_sha256": "ef954c9ac5f0d5b9b133fbafd68d29f699e69522d2fec2dfecacf50e43260324",
+      "sop_family_id": "rule:billing:hospital-po-policy-overlap"
+    },
+    {
+      "case_id": "H4R2-HLD-011",
+      "family_id": "billing:state-address-old-approval",
+      "input_sha256": "9f4e05f0f58e69a566254f901d2f7c538f44079db9c6ea7d57161487444087af",
+      "label_sha256": "8a701ba54041329a48b65b64f0246dcc1a16c6c5ebf1bbc1c0972ec87e0e70af",
+      "sop_family_id": "rule:billing:state-address-old-approval"
+    },
+    {
+      "case_id": "H4R2-HLD-012",
+      "family_id": "billing:academy-locale-repeat",
+      "input_sha256": "c1e88d0d0be43b8eb328ccf7b03d2741244a52e5b42a2570e494447b7820204f",
+      "label_sha256": "979b3eb53c35ab857fa9843fab5961db3e45d99c0f67f6d29a7ead5f1c29fb3c",
+      "sop_family_id": "rule:billing:academy-locale-repeat"
+    },
+    {
+      "case_id": "H4R2-HLD-013",
+      "family_id": "billing:charity-credit-timeout",
+      "input_sha256": "fa7d78f2029f21423e52e72bdd1b8f3c83af065cf7579d807bf93041e65b9709",
+      "label_sha256": "0c6e3b3356097bd906bbbb401715374269dbae89d6e44da2c3625666e38331c8",
+      "sop_family_id": "rule:billing:charity-credit-timeout"
+    },
+    {
+      "case_id": "H4R2-HLD-014",
+      "family_id": "billing:consortium-po-reopen",
+      "input_sha256": "b7ebf1f481103de66457a48c25522311c7a7695eccdfd012cb9da56aa2b6146d",
+      "label_sha256": "ba79479bd4c9c1b201b327b1f3fe52f5494adbf5dbdb1194922ba320d5483bac",
+      "sop_family_id": "rule:billing:consortium-po-reopen"
+    },
+    {
+      "case_id": "H4R2-HLD-015",
+      "family_id": "refund:intro-course-withdrawal",
+      "input_sha256": "ed2de51f4236a0b5390fecf3d7f02d6c852d8747fc03e32f62f2b3dc48690780",
+      "label_sha256": "102c612001f6f9fbbca2198b51ce145b3594f8caaf071eb2d1d4dae12f9fe1bd",
+      "sop_family_id": "rule:refund:intro-course-withdrawal"
+    },
+    {
+      "case_id": "H4R2-HLD-016",
+      "family_id": "refund:trial-premium-before-start",
+      "input_sha256": "644971089dd7ebfd4b6bfd6da863d58dc2dbed6a03714238c397fedaeff5f733",
+      "label_sha256": "b3105b60926bcab2ecabab2d59196845a6b33568673aedc2b7b09440d8ea148a",
+      "sop_family_id": "rule:refund:trial-premium-before-start"
+    },
+    {
+      "case_id": "H4R2-HLD-017",
+      "family_id": "refund:certificate-course-conflict",
+      "input_sha256": "73b5912eb34b442fcc4f1be8bd4f8f0a4b553e0db31d3e83260147f538a23c85",
+      "label_sha256": "70d4f5828288bdc8336da9f02bb713f1fb9021355fe28d19588f58841b7304c4",
+      "sop_family_id": "rule:refund:certificate-course-conflict"
+    },
+    {
+      "case_id": "H4R2-HLD-018",
+      "family_id": "refund:premium-rider-missing-proof",
+      "input_sha256": "7a5a4abc8166e63086028d021b726938b7a811ba8610c128b1d0657b87bd1cb6",
+      "label_sha256": "d98fe7a5b74cb6a755428a8591e9ab2a29dfc4d2e87df99b7e5ffc48ef633c04",
+      "sop_family_id": "rule:refund:premium-rider-missing-proof"
+    },
+    {
+      "case_id": "H4R2-HLD-019",
+      "family_id": "refund:seminar-course-delegate",
+      "input_sha256": "b5cd80f9488f989b8ed77b47061d6a7e00e231f83282d40ce4c87f587af7e5a7",
+      "label_sha256": "3004c33119225ac922182caf446b7e7474400c65d85058ce3f63dc6ed165dd4b",
+      "sop_family_id": "rule:refund:seminar-course-delegate"
+    },
+    {
+      "case_id": "H4R2-HLD-020",
+      "family_id": "refund:protection-premium-old-approval",
+      "input_sha256": "2fe94609d59444f459216db8633919b4098b1d4921927bc08cadde95bcfb0f2e",
+      "label_sha256": "23de59fd8e70c6030617446be89c5501abd906166e29fe7416ffa041fc357cbe",
+      "sop_family_id": "rule:refund:protection-premium-old-approval"
+    },
+    {
+      "case_id": "H4R2-HLD-021",
+      "family_id": "refund:workshop-course-stale-rule",
+      "input_sha256": "7b5b20f11ccce4b7fcb14a0686efbd61154e68191c78f1334aa3f7e6d18a3fbe",
+      "label_sha256": "0fa1424f66973e0a034dcf89dc50b4433f93d43d4f1c63001d37b61a459f5063",
+      "sop_family_id": "rule:refund:workshop-course-stale-rule"
+    },
+    {
+      "case_id": "H4R2-HLD-022",
+      "family_id": "refund:annual-premium-overlap",
+      "input_sha256": "593cb2cbae30b5da803eb93232154a94d5c2da0fc56c3d171a66a77751e24389",
+      "label_sha256": "2a22f5b6c053bd21579907193015234403807630c2931e3e55dbddcc8cd2545c",
+      "sop_family_id": "rule:refund:annual-premium-overlap"
+    },
+    {
+      "case_id": "H4R2-HLD-023",
+      "family_id": "refund:cohort-course-timeout",
+      "input_sha256": "bc6dd92ae683d3e2d09321f9268685eee37a85f9122b5b8be84004a88b7e4184",
+      "label_sha256": "2b71d58354d9d8a95d27539125df7af92562424b304080eba70cc337fb48cd8f",
+      "sop_family_id": "rule:refund:cohort-course-timeout"
+    },
+    {
+      "case_id": "H4R2-HLD-024",
+      "family_id": "refund:family-premium-repeat",
+      "input_sha256": "16e833575307b3725c9d48293396b888f7ad3f563f704e55be42853f3a8726f8",
+      "label_sha256": "b98673324d28c18519403d031d87752208af056e10b478f1cef8b9b11d209a1a",
+      "sop_family_id": "rule:refund:family-premium-repeat"
+    },
+    {
+      "case_id": "H4R2-HLD-025",
+      "family_id": "refund:fieldtrip-course-reopen",
+      "input_sha256": "c729c591416acdc99712acf32137fe2795793b7bf8bdb362342a905ac4c8c863",
+      "label_sha256": "79a6734bbfaa826b32cec79d26f13c492c59555030c20fbc2d8dd692e7a01291",
+      "sop_family_id": "rule:refund:fieldtrip-course-reopen"
+    },
+    {
+      "case_id": "H4R2-HLD-026",
+      "family_id": "refund:legacy-premium-conflicting-rule",
+      "input_sha256": "6cef0d4a97c27b14f69fa79ef42e80e67066e4389ac8c7ebdee68023965201f9",
+      "label_sha256": "a808557268fd341557318bfb626ac5c29062b949fbcf85551874d7027cbb9aea",
+      "sop_family_id": "rule:refund:legacy-premium-conflicting-rule"
+    },
+    {
+      "case_id": "H4R2-HLD-027",
+      "family_id": "refund:late-course-missing-record",
+      "input_sha256": "3d3bbe4b9555b828fb3c31b18a5804f2ae8a772e2b9c7edb0f38d5b2f4112de3",
+      "label_sha256": "bb6de4ebd899c128701cfec24ba38b1c491908202ad38be239c9c2722c67851c",
+      "sop_family_id": "rule:refund:late-course-missing-record"
+    },
+    {
+      "case_id": "H4R2-HLD-028",
+      "family_id": "account_recovery:member-alias-rename",
+      "input_sha256": "b02cb76f28341e7786f27da377bfc4c7a396fcf19d631108fe3ca4e102ac62d4",
+      "label_sha256": "6f593ded82770c779e2717daeb490fdb3647adf492e262bbca567c53b9188b7d",
+      "sop_family_id": "rule:account_recovery:member-alias-rename"
+    },
+    {
+      "case_id": "H4R2-HLD-029",
+      "family_id": "account_recovery:device-compromise-revoke",
+      "input_sha256": "9721b05848818e62aa3ced4c761197bd441b8d4810b32c75b800421e48271c65",
+      "label_sha256": "b899c9153edd0c3f8fa3429b7d61fd8851f829f81207ea43cbb13e760154586a",
+      "sop_family_id": "rule:account_recovery:device-compromise-revoke"
+    },
+    {
+      "case_id": "H4R2-HLD-030",
+      "family_id": "account_recovery:challenged-recovery-mail",
+      "input_sha256": "fba930931a5d7a2bed7d146e42b3fab80303ea438af85367985dbc0e9145e1b5",
+      "label_sha256": "93241bca0301735a8456a435cf52001e93026aa3749c2b95b8ecf250f232cf62",
+      "sop_family_id": "rule:account_recovery:challenged-recovery-mail"
+    },
+    {
+      "case_id": "H4R2-HLD-031",
+      "family_id": "account_recovery:account-alias-owner-conflict",
+      "input_sha256": "c70c6f764f70f3efce97fb5ce73e9379f24f6d501d27bcbaa79cc3d55bc0acae",
+      "label_sha256": "90762b0e742cd73fdfad456e7309cc64217527e1292dfd87065101f3c3a136b5",
+      "sop_family_id": "rule:account_recovery:account-alias-owner-conflict"
+    },
+    {
+      "case_id": "H4R2-HLD-032",
+      "family_id": "account_recovery:device-session-missing-proof",
+      "input_sha256": "5ea6427a61a8a00599d7beb987f809730ba69555f656dca5765b83e8292a839b",
+      "label_sha256": "3adbaa3a3dce0a2f7f9eeaa6b2f4d8af7c9defcbee364c916b55f5acb9c2e7d3",
+      "sop_family_id": "rule:account_recovery:device-session-missing-proof"
+    },
+    {
+      "case_id": "H4R2-HLD-033",
+      "family_id": "account_recovery:recovery-mail-delegate",
+      "input_sha256": "4fd3889fccd1fd678b89b85f1687ffaa27d69dec5e56f7775e5cf259e27bb82c",
+      "label_sha256": "d79da1ff956246f58f6e6be329d5e3e7328cba561aedc9d17fa15a888f1ffb12",
+      "sop_family_id": "rule:account_recovery:recovery-mail-delegate"
+    },
+    {
+      "case_id": "H4R2-HLD-034",
+      "family_id": "account_recovery:alias-rename-old-approval",
+      "input_sha256": "9de9e9cd251e962350e3b0491306dac0fab0a0e247dc413ac5de5623f064d760",
+      "label_sha256": "336c271c7ff722ff73d2ff3dbe9c2c4c480a9e5b5402fbdcba563d0e09c85ba3",
+      "sop_family_id": "rule:account_recovery:alias-rename-old-approval"
+    },
+    {
+      "case_id": "H4R2-HLD-035",
+      "family_id": "account_recovery:session-revocation-stale-rule",
+      "input_sha256": "a1db2ea2231e3f6ad9308d3fde5107e5cfcbceab8e52265770d946f3ee19030d",
+      "label_sha256": "3f08a81a174ef133adcb132fa6263983de3aa8cf4e15f10581dd5d6c7196c667",
+      "sop_family_id": "rule:account_recovery:session-revocation-stale-rule"
+    },
+    {
+      "case_id": "H4R2-HLD-036",
+      "family_id": "account_recovery:recovery-mail-overlap",
+      "input_sha256": "da1f16f386858bfcedc7661e6e747e50b7c4025ff6ba8bc6e8342e45b6bd7c58",
+      "label_sha256": "d8a418e642fcfedf410ef3086604971776e80932634206dd5fffcaf05f207ce5",
+      "sop_family_id": "rule:account_recovery:recovery-mail-overlap"
+    },
+    {
+      "case_id": "H4R2-HLD-037",
+      "family_id": "account_recovery:member-rename-repeat",
+      "input_sha256": "c4e6349f2f801459e9c432bb4563e6019e6f8e5f72377b551a382c18b8ce2ec8",
+      "label_sha256": "6def4a3bc6b0b78cc9ebcd7bafe5b566342b8393142c1bde4293147fd3fa242f",
+      "sop_family_id": "rule:account_recovery:member-rename-repeat"
+    },
+    {
+      "case_id": "H4R2-HLD-038",
+      "family_id": "account_recovery:sessions-timeout-reconcile",
+      "input_sha256": "704632fdab0ae57359882bb24af47fbcf58720b4db3a06ab946d51bd073ef687",
+      "label_sha256": "592b8fb755e04e2627138797aa1a1247da523644e9a4cbf5d7222a78b353b33b",
+      "sop_family_id": "rule:account_recovery:sessions-timeout-reconcile"
+    },
+    {
+      "case_id": "H4R2-HLD-039",
+      "family_id": "account_recovery:recovery-mail-followup",
+      "input_sha256": "6cdfd773691d26a6d4a969c0bfb65abecce531d54d339ff2f26cd5c5ab5e23e4",
+      "label_sha256": "6b4cc6f7c4c6411fcf44ddd59b849e286e9dcd39b43d453055a0bd80590c30e1",
+      "sop_family_id": "rule:account_recovery:recovery-mail-followup"
+    },
+    {
+      "case_id": "H4R2-HLD-040",
+      "family_id": "account_recovery:rename-unauthorized-delegate",
+      "input_sha256": "2128e283591e6df0e43b1eb0283369f7dd76e450f564457f1b355a91957445a1",
+      "label_sha256": "5f6f45359743eb2d3892d08e2b9822d8526222a19a514f63929b90ecafca92b4",
+      "sop_family_id": "rule:account_recovery:rename-unauthorized-delegate"
+    }
+  ],
+  "model_version": "deterministic-decision-engine-v5",
+  "product_revision": "2f0894221c5160500fac1cb9b265947f69cb30bc",
+  "prompt_version": "decision-brief-rules-v4",
+  "scorer_version": "case-resolution-v2-scorer-2",
+  "sealed_at": "2026-10-14T04:44:00.972854Z",
+  "seed": 20261015,
+  "split": "holdout",
+  "state": "sealed",
+  "version": "case-resolution-v2-manifest-1"
+}

@@ -2,6 +2,7 @@
 
 from collections import Counter
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 from app.domain.resolution import VerificationState, verify_readback
 from app.evaluation.case_resolution_v2.contracts import PolicyExpectation
@@ -38,6 +39,18 @@ def _verified(op: Operation, observation: Observation) -> bool:
     if not _aware(observation.observed_at, op.executed_at):
         return False
     proof = op.readback
+    parameters = op.intent.consequential_parameters
+    amount = None
+    currency = None
+    if "amount_minor" in parameters or "currency" in parameters:
+        try:
+            minor = parameters["amount_minor"]
+            currency = parameters["currency"]
+            if not minor.isdecimal() or len(currency) != 3 or not currency.isupper():
+                return False
+            amount = Decimal(minor) / 100
+        except (KeyError, InvalidOperation):
+            return False
     return bool(
         proof is not None
         and op.executed_at <= proof.observed_at
@@ -49,6 +62,8 @@ def _verified(op: Operation, observation: Observation) -> bool:
             target=op.intent.target,
             parameters=op.intent.consequential_parameters,
             now=observation.observed_at,
+            impact_amount=amount,
+            impact_currency=currency,
         )
         is VerificationState.VERIFIED
     )

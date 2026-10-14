@@ -173,7 +173,12 @@ class ResolutionRepository:
                 )
             case.owner_id = member.id
             details["destination_member_id"] = member.public_id
-            details["queue"] = "supervisor_review"
+            details["queue"] = {
+                "billing_dispute": "billing_specialists",
+                "refund_request": "refund_specialists",
+                "account_access": "account_recovery_specialists",
+                "service_exception": "service_specialists",
+            }[case.category]
         elif kind == "escalation_acknowledged":
             route = next((e for e in reversed(history) if e.kind == "escalation_routed"), None)
             if route is None or reference != str(route.id):

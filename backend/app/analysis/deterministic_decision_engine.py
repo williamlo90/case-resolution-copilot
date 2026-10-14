@@ -1,10 +1,11 @@
 import json
+from datetime import UTC, datetime
 from decimal import Decimal
 from hashlib import sha256
 from typing import Protocol
 
 from app.analysis.customer_response_drafting import draft_customer_response
-from app.analysis.sop_rules import sop_gaps
+from app.analysis.sop_rules import ControlledOperation, parse_rules, sop_gaps
 from app.domain.cases import (
     BusinessObjectRecord,
     BusinessObjectType,
@@ -12,6 +13,12 @@ from app.domain.cases import (
     CaseWorkspaceRecord,
     CustomerTier,
     SourceFreshness,
+)
+from app.domain.controlled_operations import (
+    OPERATIONS,
+    field,
+    has_operation_request,
+    operation_draft,
 )
 from app.domain.decision_briefs import (
     AnalysisCheckpointDraft,
@@ -28,10 +35,10 @@ from app.domain.decision_briefs import (
 )
 from app.domain.policies import EvidenceRetrievalResult, EvidenceRetrievalStatus
 
-DECISION_MODEL_VERSION = "deterministic-decision-engine-v4"
-DECISION_PROMPT_VERSION = "decision-brief-rules-v3"
+DECISION_MODEL_VERSION = "deterministic-decision-engine-v5"
+DECISION_PROMPT_VERSION = "decision-brief-rules-v4"
 DECISION_GRAPH_VERSION = "generic-decision-brief-v1"
-DECISION_RISK_RULE_VERSION = "generic-risk-rules-v3"
+DECISION_RISK_RULE_VERSION = "generic-risk-rules-v4"
 
 _CONFIRMED_OWNERSHIP_MATCHES = frozenset({"exact", "match", "matched", "verified"})
 
@@ -135,6 +142,29 @@ class DeterministicDecisionEngine:
         gaps = _information_gaps(workspace, evidence.status)
         policy_gaps = sop_gaps(workspace, evidence)
         gaps.extend(policy_gaps)
+        operation = field(workspace, "requested_operation")
+        if has_operation_request(workspace):
+            grants: set[str] = set()
+            for item in evidence.evidence:
+                try:
+                    rules = parse_rules(item.version.source_text)
+                except ValueError:
+                    continue  # The malformed authority already contributes a blocking SOP gap.
+                if rules:
+                    grants.update(
+                        rule.action_type
+                        for rule in rules.rules
+                        if isinstance(rule, ControlledOperation)
+                    )
+            if not operation or grants != {operation}:
+                gaps.append(
+                    _gap(
+                        workspace.case.public_id,
+                        "operation-authority",
+                        "Operation authority",
+                        "Exactly one published rule must authorize the requested operation.",
+                    )
+                )
         blocking = [gap for gap in gaps if gap.blocking]
         risks = _risk_checks(workspace, evidence.status, blocking)
         state = (
@@ -161,6 +191,9 @@ class DeterministicDecisionEngine:
             impact_amount=impact_amount,
             impact_currency=impact_currency,
         )
+        if operation and state is DecisionProposalState.READY_FOR_REVIEW:
+            actions = [operation_draft(workspace, operation)]
+            outcome = f"Prepare {actions[0].label.lower()} for human review"
         uncertainty = _uncertainty(evidence.status, blocking, workspace)
         rationale = _rationale(evidence.status, facts, blocking, risks)
         response = draft_customer_response(
@@ -218,7 +251,65 @@ def _facts(workspace: CaseWorkspaceRecord) -> list[VerifiedFact]:
         "ownership_proof": "Ownership proof level",
         "purchased_at": "Purchase timestamp",
         "mfa_state": "Multi-factor authentication",
+        "payment_settled": "Payment settled",
+        "secondary_record": "Secondary record",
+        "trial_notice": "Trial notice",
+        "approval_expired_at": "Approval expired at",
+        "requesting_role": "Requesting role",
+        "postponement_days": "Postponement days",
+        "repair_failed": "Repair failed",
+        "custody_loss": "Custody loss",
+        "supporting_record": "Supporting record",
+        "inspection_state": "Inspection state",
+        "upgrade_not_delivered": "Upgrade not delivered",
+        "activation_count": "Activation count",
+        "ownership_verified": "Ownership verified",
+        "key_owner": "Key owner",
+        "abuse_clearance": "Abuse clearance",
+        "transfer_consent": "Transfer consent",
+        "provider_identity": "Provider identity",
+        "requested_target": "Requested target",
+        "original_recipient": "Original recipient",
+        "duplicate_request_key": "Duplicate request key",
+        "address_validation": "Address validation",
+        "invoice_state": "Invoice state",
+        "locale_entitlement": "Locale entitlement",
+        "removed_seats": "Removed seats",
+        "po_authorization": "Po authorization",
+        "attendance_percent": "Attendance percent",
+        "coverage_not_started": "Coverage not started",
+        "name_entitlement": "Name entitlement",
+        "session_compromise": "Session compromise",
+        "email_challenge": "Email challenge",
     }
+    if has_operation_request(workspace):
+        operation_keys = {
+            "requested_operation",
+            "requested_target",
+            "original_recipient",
+            "authorized_recipient",
+            "authorized_reason_code",
+            "authorized_amount_minor",
+            "authorized_currency",
+            "authorized_access_scope",
+            "authorized_preserve_owner",
+            "challenge_destination",
+            "secondary_record",
+            "supporting_record",
+            "target_owner",
+            "target_current_currency",
+            "target_active_sessions",
+            "target_current_recovery_email",
+            "target_current_name",
+            "target_current_address",
+        }
+        operation_keys.update(key for spec in OPERATIONS.values() for key, _ in spec.conditions)
+        operation_keys.update(
+            f"requested_{key}" for spec in OPERATIONS.values() for key in spec.value_fields
+        )
+        field_labels.update(
+            {key: key.replace("_", " ").capitalize() for key in sorted(operation_keys)}
+        )
     for context in workspace.business_contexts:
         verified_at = context.source_checked_at or context.captured_at
         source = f"{context.source} / {context.source_reference}"
@@ -263,7 +354,10 @@ def _information_gaps(
                 ),
             )
         )
-    if policy_status is not EvidenceRetrievalStatus.RELEVANT:
+    if (
+        policy_status is not EvidenceRetrievalStatus.RELEVANT
+        and not any("requested_target" in row.fields for row in workspace.business_contexts)
+    ):
         gaps.append(
             _gap(
                 workspace.case.public_id,
@@ -288,6 +382,37 @@ def _information_gaps(
             )
         )
 
+    if has_operation_request(workspace):
+        # The typed published rule checks this operation's evidence instead of imposing
+        # unrelated legacy requirements such as two payments for an invoice-address edit.
+        return _deduplicate_gaps(gaps)
+    if any("requested_target" in row.fields for row in workspace.business_contexts):
+        reasons: list[tuple[str, str]] = []
+        if field(workspace, "secondary_record") == "contradicts_primary":
+            reasons.append(("resolved_record_conflict", "Resolve the conflicting source records."))
+        if field(workspace, "supporting_record") == "absent":
+            reasons.append(("verified_supporting_record", "Verify the required supporting record."))
+        expires = field(workspace, "approval_expired_at")
+        if expires is not None:
+            try:
+                expiry = datetime.fromisoformat(expires.replace("Z", "+00:00"))
+                if expiry.utcoffset() is None or expiry <= datetime.now(UTC):
+                    reasons.append(("fresh_approval", "A current reviewer approval is required."))
+            except ValueError:
+                reasons.append(("fresh_approval", "A valid reviewer approval date is required."))
+        if field(workspace, "requesting_role") == "specialist":
+            reasons.append(("authorized_reviewer", "A supervisor must authorize this request."))
+        if policy_status is EvidenceRetrievalStatus.CONFLICTING:
+            reasons.append(("policy_precedence", "Resolve the competing policy authorities."))
+        elif policy_status is not EvidenceRetrievalStatus.RELEVANT:
+            reasons.append(("current_policy", "Find current applicable published policy."))
+        if not reasons:
+            reasons.append(("supported_operation", "No reviewed operation is authorized."))
+        gaps.extend(
+            _gap(workspace.case.public_id, key, key.replace("_", " ").capitalize(), detail)
+            for key, detail in reasons
+        )
+        return _deduplicate_gaps(gaps)
     category = workspace.case.category
     if category is CaseCategory.BILLING_DISPUTE:
         payment_references = {

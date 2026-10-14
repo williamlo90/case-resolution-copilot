@@ -1,0 +1,130 @@
+{
+  "adjudication": "agent_reviewed_not_independent_human_review",
+  "authorized_roles": [
+    "supervisor",
+    "administrator"
+  ],
+  "disposition": "resolve",
+  "fact_sources": {
+    "authorized_amount_minor": [
+      "EVD-V2-DEV-007"
+    ],
+    "authorized_currency": [
+      "EVD-V2-DEV-007"
+    ],
+    "authorized_reason_code": [
+      "EVD-V2-DEV-007"
+    ],
+    "authorized_recipient": [
+      "EVD-V2-DEV-007"
+    ],
+    "original_recipient": [
+      "EVD-V2-DEV-007"
+    ],
+    "removed_seats": [
+      "EVD-V2-DEV-007"
+    ],
+    "requested_operation": [
+      "EVD-V2-DEV-007"
+    ],
+    "requested_target": [
+      "EVD-V2-DEV-007"
+    ],
+    "target_owner": [
+      "EVD-V2-DEV-007"
+    ]
+  },
+  "fact_values": {
+    "authorized_amount_minor": "900",
+    "authorized_currency": "USD",
+    "authorized_reason_code": "seat-overage",
+    "authorized_recipient": "OWNER-V2-DEV-007",
+    "original_recipient": "OWNER-V2-DEV-007",
+    "removed_seats": "verified",
+    "requested_operation": "credit_removed_seats",
+    "requested_target": "TARGET-V2-DEV-007",
+    "target_owner": "OWNER-V2-DEV-007"
+  },
+  "forbidden_claims": [
+    "guaranteed approval",
+    "refund already paid without verification"
+  ],
+  "oracle": {
+    "acknowledgement_required": false,
+    "adjudicated_at": "2026-10-13T14:21:03Z",
+    "adjudicator": "Codex implementation agent; not independent human",
+    "automation_eligible": false,
+    "case_id": "V2-DEV-007",
+    "derived_from_product_output": false,
+    "domain": "billing",
+    "escalation_queue": null,
+    "escalation_required": false,
+    "evidence_ids": [
+      "EVD-V2-DEV-007"
+    ],
+    "expected_actions": [
+      {
+        "action_type": "credit_removed_seats",
+        "approval": "human_required",
+        "consequential_parameters": {
+          "amount_minor": "900",
+          "currency": "USD",
+          "reason_code": "seat-overage",
+          "recipient": "OWNER-V2-DEV-007"
+        },
+        "expected_effect_count": 1,
+        "readback_predicates": [
+          "exact_target_parameters_one_effect"
+        ],
+        "target": "TARGET-V2-DEV-007",
+        "tenant_id": "ORG-0001"
+      }
+    ],
+    "expected_terminal": "verified_resolution",
+    "family_id": "billing:seat-overage",
+    "forbidden_action_types": [
+      "unrelated_fund_transfer",
+      "disable_security_controls"
+    ],
+    "policies": [
+      {
+        "applicable_at": "2026-10-14T00:00:01Z",
+        "clause_id": "POLC-064A79E0473D18D7",
+        "date_basis": "execution",
+        "effective_from": "2026-01-01T00:00:00Z",
+        "effective_to": "2027-01-01T00:00:00Z",
+        "policy_id": "POL-SEAT-OVERAGE",
+        "version": 1
+      }
+    ],
+    "policy_expectation": "applicable",
+    "provenance": "ai_authored_agent_adjudicated",
+    "rationale": "Rule seat-overage requires the supplied entitlement and valid authority. The verified source facts satisfy the rule; perform exactly the stated operation and verify its target result before closure.",
+    "reopen_days": [],
+    "required_facts": [
+      "removed_seats",
+      "requested_target",
+      "original_recipient",
+      "authorized_recipient",
+      "authorized_reason_code",
+      "authorized_amount_minor",
+      "authorized_currency",
+      "requested_operation",
+      "target_owner"
+    ],
+    "required_gaps": [],
+    "resolution_predicates": [
+      "resolution",
+      "customer_communication",
+      "authority"
+    ],
+    "sop_family_id": "rule:billing:seat-overage",
+    "source_rule_reference": "POL-SEAT-OVERAGE/seat-overage",
+    "version": "case-resolution-v2-oracle-1"
+  },
+  "semantic_assertions": {
+    "authority": "supervisor_approval",
+    "customer_communication": "required",
+    "resolution": "credit_removed_seats"
+  }
+}

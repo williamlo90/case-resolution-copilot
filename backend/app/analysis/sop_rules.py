@@ -9,6 +9,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.cases import CaseCategory, CaseWorkspaceRecord
+from app.domain.controlled_operations import OPERATIONS, OperationType, operation_gaps
 from app.domain.decision_briefs import InformationGap
 from app.domain.policies import EvidenceRetrievalResult
 
@@ -33,12 +34,22 @@ class EscalationThreshold(Rule):
     currency: Literal["USD"]
 
 
+class ControlledOperation(Rule):
+    kind: Literal["controlled_operation"]
+    action_type: OperationType
+    max_amount_minor: int = Field(ge=0)
+    currency: Literal["USD"]
+
+
 class Rules(Rule):
     schema_version: Literal[1]
     rules: tuple[
-        Annotated[RefundWindow | OwnershipProof | EscalationThreshold, Field(discriminator="kind")],
+        Annotated[
+            RefundWindow | OwnershipProof | EscalationThreshold | ControlledOperation,
+            Field(discriminator="kind"),
+        ],
         ...,
-    ] = Field(min_length=1, max_length=3)
+    ] = Field(min_length=1, max_length=4)
 
 
 def parse_rules(source: str) -> Rules | None:
@@ -60,6 +71,11 @@ def validate_rule_scope(source: str, categories: list[str]) -> None:
     if rules is None:
         return
     for rule in rules.rules:
+        if isinstance(rule, ControlledOperation):
+            if categories != [OPERATIONS[rule.action_type].category]:
+                raise ValueError("Controlled operation must match exactly one category")
+            if OPERATIONS[rule.action_type].scope and rule.max_amount_minor != 0:
+                raise ValueError("Identity operations cannot authorize a financial transfer")
         required = {"refund_window": "refund_request", "ownership_proof": "account_access"}.get(
             rule.kind
         )
@@ -79,7 +95,17 @@ def _value(workspace: CaseWorkspaceRecord, key: str) -> str | None:
 
 
 def _violation(rule: Rule, workspace: CaseWorkspaceRecord) -> str | None:
-    if isinstance(rule, RefundWindow):
+    if isinstance(rule, ControlledOperation):
+        missing = operation_gaps(workspace, rule.action_type)
+        if missing:
+            return "Required operation evidence: " + ", ".join(missing)
+        if not OPERATIONS[rule.action_type].scope and (
+            workspace.case.impact_amount is None
+            or workspace.case.impact_currency != rule.currency
+            or workspace.case.impact_amount * 100 > rule.max_amount_minor
+        ):
+            return "The operation exceeds the published currency or amount authority."
+    elif isinstance(rule, RefundWindow):
         if workspace.case.category is not CaseCategory.REFUND_REQUEST:
             return "Rule category does not match the case."
         raw = _value(workspace, "purchased_at")
