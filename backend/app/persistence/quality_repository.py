@@ -25,6 +25,7 @@ from app.persistence.models import (
     MembershipModel,
     OrganizationModel,
 )
+from app.persistence.models.resolution import CaseResolutionEventModel
 
 
 class QualityRepository:
@@ -42,18 +43,12 @@ class QualityRepository:
         if organization is None:
             raise QualityConflict("The quality workspace was not found.")
 
-        evidence_conditions = [
-            CaseQualityProjectionModel.organization_id == organization.id
-        ]
+        evidence_conditions = [CaseQualityProjectionModel.organization_id == organization.id]
         if category is not None:
-            evidence_conditions.append(
-                CaseQualityProjectionModel.category == category.value
-            )
+            evidence_conditions.append(CaseQualityProjectionModel.category == category.value)
         total = int(
             self._session.scalar(
-                select(func.count(CaseQualityProjectionModel.id)).where(
-                    *evidence_conditions
-                )
+                select(func.count(CaseQualityProjectionModel.id)).where(*evidence_conditions)
             )
             or 0
         )
@@ -78,9 +73,7 @@ class QualityRepository:
         return QualityDashboardRecord(
             metrics=metrics,
             operational=operational,
-            evidence=[
-                CaseQualityProjectionRecord.model_validate(model) for model in models
-            ],
+            evidence=[CaseQualityProjectionRecord.model_validate(model) for model in models],
             available_categories=list(QualityCategory),
             generated_at=datetime.now(UTC),
             source_updated_at=source_updated_at,
@@ -277,9 +270,7 @@ class QualityRepository:
                 )
                 .where(
                     CaseActionModel.organization_id == organization_id,
-                    CaseActionModel.status.in_(
-                        ["outcome_unknown", "recovery_required"]
-                    ),
+                    CaseActionModel.status.in_(["outcome_unknown", "recovery_required"]),
                 )
                 .distinct()
                 .limit(200)
@@ -289,14 +280,81 @@ class QualityRepository:
             self._session.scalar(
                 select(func.count(CaseActionModel.id)).where(
                     CaseActionModel.organization_id == organization_id,
-                    CaseActionModel.status.in_(
-                        ["outcome_unknown", "recovery_required"]
+                    CaseActionModel.status.in_(["outcome_unknown", "recovery_required"]),
+                )
+            )
+            or 0
+        )
+        event_counts = {
+            kind: count
+            for kind, count in self._session.execute(
+                select(CaseResolutionEventModel.kind, func.count(CaseResolutionEventModel.id))
+                .where(CaseResolutionEventModel.organization_id == organization_id)
+                .group_by(CaseResolutionEventModel.kind)
+            ).all()
+        }
+        case_count = int(
+            self._session.scalar(
+                select(func.count(CaseModel.id)).where(CaseModel.organization_id == organization_id)
+            )
+            or 0
+        )
+        action_total = int(
+            self._session.scalar(
+                select(func.count(CaseActionModel.id)).where(
+                    CaseActionModel.organization_id == organization_id
+                )
+            )
+            or 0
+        )
+        verified_total = int(
+            self._session.scalar(
+                select(func.count(func.distinct(CaseActionModel.id)))
+                .join(
+                    CaseResolutionEventModel,
+                    (CaseResolutionEventModel.organization_id == CaseActionModel.organization_id)
+                    & (
+                        CaseResolutionEventModel.data["action_id"].astext
+                        == CaseActionModel.public_id
                     ),
+                )
+                .where(
+                    CaseActionModel.organization_id == organization_id,
+                    CaseActionModel.status == "completed",
+                    CaseResolutionEventModel.kind == "action_verified",
                 )
             )
             or 0
         )
         return [
+            _percentage_metric(
+                key="verified_action",
+                label="Actions with verified read-back",
+                numerator=verified_total,
+                denominator=action_total,
+                filtered_case_ids=[],
+            ),
+            _percentage_metric(
+                key="safe_automation",
+                label="Verified automated resolutions",
+                numerator=0,
+                denominator=case_count,
+                filtered_case_ids=[],
+            ),
+            _percentage_metric(
+                key="eligible_automation",
+                label="Automation eligible coverage",
+                numerator=0,
+                denominator=0,
+                filtered_case_ids=[],
+            ),
+            _percentage_metric(
+                key="escalation_acknowledged",
+                label="Routed escalations acknowledged",
+                numerator=int(event_counts.get("escalation_acknowledged", 0)),
+                denominator=int(event_counts.get("escalation_routed", 0)),
+                filtered_case_ids=[],
+            ),
             _percentage_metric(
                 key="expected_decisions",
                 label="Expected decisions",
@@ -361,8 +419,7 @@ class QualityRepository:
                 .where(
                     CaseQualityProjectionModel.organization_id == organization_id,
                     CaseQualityProjectionModel.category == category.value,
-                    CaseQualityProjectionModel.result
-                    == QualityResult.NEEDS_ATTENTION.value,
+                    CaseQualityProjectionModel.result == QualityResult.NEEDS_ATTENTION.value,
                 )
                 .distinct()
                 .limit(200)
@@ -400,9 +457,7 @@ class QualityRepository:
             .where(CaseActionModel.organization_id == organization_id)
             .group_by(CaseActionModel.status)
         ).all()
-        action_counts: dict[str, int] = {
-            status: int(count) for status, count in action_count_rows
-        }
+        action_counts: dict[str, int] = {status: int(count) for status, count in action_count_rows}
         return QualityOperationalSummary(
             open_cases=open_cases,
             cases_waiting_for_review=waiting_reviews,
@@ -410,7 +465,15 @@ class QualityRepository:
             actions_failed_safe=int(action_counts.get("failed_safe", 0)),
             actions_outcome_unknown=int(action_counts.get("outcome_unknown", 0))
             + int(action_counts.get("recovery_required", 0)),
-            reopened_cases=None,
+            reopened_cases=int(
+                self._session.scalar(
+                    select(func.count(func.distinct(CaseResolutionEventModel.case_id))).where(
+                        CaseResolutionEventModel.organization_id == organization_id,
+                        CaseResolutionEventModel.kind == "reopened",
+                    )
+                )
+                or 0
+            ),
         )
 
     def _organization(self, public_id: str) -> OrganizationModel | None:
@@ -431,7 +494,7 @@ def _percentage_metric(
         return QualityMetricRecord(
             key=key,
             label=label,
-            value=0,
+            value=None,
             unit="percent",
             numerator=0,
             denominator=0,

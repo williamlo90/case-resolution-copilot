@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "oracle_terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation"
+      ],
+      "title": "Oracle Terminal",
+      "type": "string"
+    },
+    "manual_terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation",
+        "open"
+      ],
+      "title": "Manual Terminal",
+      "type": "string"
+    },
+    "assisted_terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation",
+        "open"
+      ],
+      "title": "Assisted Terminal",
+      "type": "string"
+    },
+    "manual_correct": {
+      "title": "Manual Correct",
+      "type": "boolean"
+    },
+    "assisted_correct": {
+      "title": "Assisted Correct",
+      "type": "boolean"
+    },
+    "manual_active_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Manual Active Seconds",
+      "type": "number"
+    },
+    "assisted_active_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Assisted Active Seconds",
+      "type": "number"
+    }
+  },
+  "required": [
+    "case_id",
+    "oracle_terminal",
+    "manual_terminal",
+    "assisted_terminal",
+    "manual_correct",
+    "assisted_correct",
+    "manual_active_seconds",
+    "assisted_active_seconds"
+  ],
+  "title": "PairedOutcome",
+  "type": "object"
+}

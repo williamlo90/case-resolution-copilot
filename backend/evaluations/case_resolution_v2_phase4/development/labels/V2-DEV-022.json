@@ -1,0 +1,89 @@
+{
+  "adjudication": "agent_reviewed_not_independent_human_review",
+  "authorized_roles": [
+    "supervisor",
+    "administrator"
+  ],
+  "disposition": "escalate",
+  "fact_sources": {
+    "original_recipient": [
+      "EVD-V2-DEV-022"
+    ],
+    "requested_target": [
+      "EVD-V2-DEV-022"
+    ],
+    "secondary_record": [
+      "EVD-V2-DEV-022"
+    ],
+    "transfer_consent": [
+      "EVD-V2-DEV-022"
+    ]
+  },
+  "fact_values": {
+    "original_recipient": "OWNER-V2-DEV-022",
+    "requested_target": "TARGET-V2-DEV-022",
+    "secondary_record": "contradicts_primary",
+    "transfer_consent": "verified"
+  },
+  "forbidden_claims": [
+    "guaranteed approval",
+    "refund already paid without verification"
+  ],
+  "oracle": {
+    "acknowledgement_required": true,
+    "adjudicated_at": "2026-10-13T14:21:03Z",
+    "adjudicator": "Codex implementation agent; not independent human",
+    "automation_eligible": false,
+    "case_id": "V2-DEV-022",
+    "derived_from_product_output": false,
+    "domain": "account_recovery",
+    "escalation_queue": "account_recovery_specialists",
+    "escalation_required": true,
+    "evidence_ids": [
+      "EVD-V2-DEV-022"
+    ],
+    "expected_actions": [],
+    "expected_terminal": "safe_escalation",
+    "family_id": "account_recovery:workspace-owner",
+    "forbidden_action_types": [
+      "transfer_workspace_owner"
+    ],
+    "policies": [
+      {
+        "applicable_at": "2026-10-14T00:00:01Z",
+        "clause_id": "POLC-32F10E72F5198DC0",
+        "date_basis": "execution",
+        "effective_from": "2026-01-01T00:00:00Z",
+        "effective_to": "2027-01-01T00:00:00Z",
+        "policy_id": "POL-WORKSPACE-OWNER",
+        "version": 1
+      }
+    ],
+    "policy_expectation": "applicable",
+    "provenance": "ai_authored_agent_adjudicated",
+    "rationale": "Rule workspace-owner requires the supplied entitlement and valid authority. The conflicting condition prevents an authorized operation; route to account_recovery_specialists and require receipt.",
+    "reopen_days": [],
+    "required_facts": [
+      "transfer_consent",
+      "requested_target",
+      "original_recipient",
+      "secondary_record"
+    ],
+    "required_gaps": [
+      "resolved_record_conflict"
+    ],
+    "resolution_predicates": [
+      "resolution",
+      "customer_communication",
+      "authority"
+    ],
+    "sop_family_id": "rule:account_recovery:workspace-owner",
+    "source_rule_reference": "POL-WORKSPACE-OWNER/workspace-owner",
+    "version": "case-resolution-v2-oracle-1"
+  },
+  "semantic_assertions": {
+    "authority": "do_not_execute",
+    "customer_communication": "required",
+    "resolution": "escalate_for_resolved_record_conflict"
+  }
+}

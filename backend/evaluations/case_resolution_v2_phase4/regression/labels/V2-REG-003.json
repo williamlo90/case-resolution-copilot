@@ -1,0 +1,125 @@
+{
+  "adjudication": "agent_reviewed_not_independent_human_review",
+  "authorized_roles": [
+    "supervisor",
+    "administrator"
+  ],
+  "disposition": "resolve",
+  "fact_sources": {
+    "authorized_access_scope": [
+      "EVD-V2-REG-003"
+    ],
+    "authorized_preserve_owner": [
+      "EVD-V2-REG-003"
+    ],
+    "authorized_reason_code": [
+      "EVD-V2-REG-003"
+    ],
+    "authorized_recipient": [
+      "EVD-V2-REG-003"
+    ],
+    "duplicate_request_key": [
+      "EVD-V2-REG-003"
+    ],
+    "original_recipient": [
+      "EVD-V2-REG-003"
+    ],
+    "requested_target": [
+      "EVD-V2-REG-003"
+    ],
+    "reseed_identity": [
+      "EVD-V2-REG-003"
+    ]
+  },
+  "fact_values": {
+    "authorized_access_scope": "totp_only",
+    "authorized_preserve_owner": "true",
+    "authorized_reason_code": "totp-reseed",
+    "authorized_recipient": "OWNER-V2-REG-003",
+    "duplicate_request_key": "OPERATION-V2-REG-003",
+    "original_recipient": "OWNER-V2-REG-003",
+    "requested_target": "TARGET-V2-REG-003",
+    "reseed_identity": "verified"
+  },
+  "forbidden_claims": [
+    "guaranteed approval",
+    "refund already paid without verification"
+  ],
+  "oracle": {
+    "acknowledgement_required": false,
+    "adjudicated_at": "2026-10-13T14:21:03Z",
+    "adjudicator": "Codex implementation agent; not independent human",
+    "automation_eligible": false,
+    "case_id": "V2-REG-003",
+    "derived_from_product_output": false,
+    "domain": "account_recovery",
+    "escalation_queue": null,
+    "escalation_required": false,
+    "evidence_ids": [
+      "EVD-V2-REG-003"
+    ],
+    "expected_actions": [
+      {
+        "action_type": "reseed_totp",
+        "approval": "human_required",
+        "consequential_parameters": {
+          "access_scope": "totp_only",
+          "preserve_owner": "true",
+          "reason_code": "totp-reseed",
+          "recipient": "OWNER-V2-REG-003"
+        },
+        "expected_effect_count": 1,
+        "readback_predicates": [
+          "exact_target_parameters_one_effect"
+        ],
+        "target": "TARGET-V2-REG-003",
+        "tenant_id": "ORG-0001"
+      }
+    ],
+    "expected_terminal": "verified_resolution",
+    "family_id": "account_recovery:totp-reseed",
+    "forbidden_action_types": [
+      "unrelated_fund_transfer",
+      "disable_security_controls"
+    ],
+    "policies": [
+      {
+        "applicable_at": "2026-10-14T00:00:01Z",
+        "clause_id": "POLC-3D73DAD61600DCD6",
+        "date_basis": "execution",
+        "effective_from": "2026-01-01T00:00:00Z",
+        "effective_to": "2027-01-01T00:00:00Z",
+        "policy_id": "POL-TOTP-RESEED",
+        "version": 1
+      }
+    ],
+    "policy_expectation": "applicable",
+    "provenance": "ai_authored_agent_adjudicated",
+    "rationale": "Rule totp-reseed requires the supplied entitlement and valid authority. The verified source facts satisfy the rule; perform exactly the stated operation and verify its target result before closure.",
+    "reopen_days": [],
+    "required_facts": [
+      "reseed_identity",
+      "requested_target",
+      "original_recipient",
+      "duplicate_request_key",
+      "authorized_recipient",
+      "authorized_reason_code",
+      "authorized_access_scope",
+      "authorized_preserve_owner"
+    ],
+    "required_gaps": [],
+    "resolution_predicates": [
+      "resolution",
+      "customer_communication",
+      "authority"
+    ],
+    "sop_family_id": "rule:account_recovery:totp-reseed",
+    "source_rule_reference": "POL-TOTP-RESEED/totp-reseed",
+    "version": "case-resolution-v2-oracle-1"
+  },
+  "semantic_assertions": {
+    "authority": "supervisor_approval",
+    "customer_communication": "required",
+    "resolution": "reseed_totp"
+  }
+}

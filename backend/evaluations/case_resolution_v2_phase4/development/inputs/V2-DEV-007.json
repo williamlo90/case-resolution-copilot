@@ -1,0 +1,51 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-DEV-007",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "billing",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "current",
+    "fault": "timeout_after_effect",
+    "lookup_result": "verified",
+    "operation_id": "OPERATION-V2-DEV-007"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "authorized_amount_minor": "900",
+        "authorized_currency": "USD",
+        "authorized_reason_code": "seat-overage",
+        "authorized_recipient": "OWNER-V2-DEV-007",
+        "original_recipient": "OWNER-V2-DEV-007",
+        "removed_seats": "verified",
+        "requested_operation": "credit_removed_seats",
+        "requested_target": "TARGET-V2-DEV-007",
+        "target_owner": "OWNER-V2-DEV-007"
+      },
+      "id": "EVD-V2-DEV-007",
+      "source": "synthetic-seat-overage-record"
+    }
+  ],
+  "family_id": "billing:seat-overage",
+  "policies": [
+    {
+      "clause_id": "POLC-064A79E0473D18D7",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-SEAT-OVERAGE",
+      "text": "Credit 900 minor USD units for seats removed before renewal; lookup a timed-out credit before another write.\n\n```case-resolution-rules\n{\"schema_version\": 1, \"rules\": [{\"kind\": \"controlled_operation\", \"action_type\": \"credit_removed_seats\", \"max_amount_minor\": 900, \"currency\": \"USD\"}]}\n```",
+      "version": "1"
+    }
+  ],
+  "request": "Credit seats removed before renewal; check a timed-out credit before another write. Target TARGET-V2-DEV-007.",
+  "sop_family_id": "rule:billing:seat-overage",
+  "tags": [
+    "billing",
+    "downstream_timeout"
+  ],
+  "tenant_id": "ORG-0001"
+}

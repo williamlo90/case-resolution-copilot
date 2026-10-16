@@ -1,0 +1,49 @@
+{
+  "case_id": "V2-DEV-008",
+  "family_id": "billing:purchase-order",
+  "sop_family_id": "rule:billing:purchase-order",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle purchase order for TARGET-V2-DEV-008.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-DEV-008",
+      "facts": {
+        "po_authorization": "valid",
+        "requested_target": "TARGET-V2-DEV-008",
+        "original_recipient": "OWNER-V2-DEV-008",
+        "authorized_recipient": "OWNER-V2-DEV-008",
+        "authorized_reason_code": "purchase-order",
+        "authorized_amount_minor": "0",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-purchase-order-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-PURCHASE-ORDER",
+      "version": "1",
+      "clause_id": "purchase-order",
+      "text": "Attach a purchase order only with valid PO authorization; later revocation must reopen the case.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "future_event": "new_contradictory_evidence",
+    "reopen_simulated_days": "7,30"
+  },
+  "tags": [
+    "billing",
+    "reopen"
+  ],
+  "critical": true
+}

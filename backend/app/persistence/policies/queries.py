@@ -27,6 +27,7 @@ from app.persistence.models import (
     OrganizationModel,
     PolicyModel,
 )
+from app.persistence.policy_authority import selected_version
 
 from ._base import (
     PolicyRepositoryBase,
@@ -35,6 +36,42 @@ from ._base import (
 
 
 class PolicyQueryRepository(PolicyRepositoryBase):
+    def has_pending_scope_conflict(
+        self,
+        *,
+        organization_public_id: str,
+        case_category: str,
+        products: set[str],
+        region: str,
+        channel: str,
+        customer_tier: str,
+        decision_scope: str,
+        as_of: datetime,
+    ) -> bool:
+        """Treat a rejected overlapping publication as unresolved case authority."""
+        organization_id = self._organization_id(organization_public_id)
+        if organization_id is None:
+            return False
+        version = GovernedPolicyVersionModel
+        return self._session.scalar(
+            select(PolicyModel.id)
+            .join(version, version.policy_id == PolicyModel.id)
+            .where(
+                PolicyModel.organization_id == organization_id,
+                PolicyModel.status == PolicyLifecycleStatus.CONFLICTING.value,
+                version.status == PolicyVersionStatus.IN_REVIEW.value,
+                version.decision_scope == decision_scope,
+                _json_dimension_match(version.case_categories, {case_category}),
+                _json_dimension_match(version.products, products),
+                _json_dimension_match(version.regions, {region}),
+                _json_dimension_match(version.channels, {channel}),
+                _json_dimension_match(version.customer_tiers, {customer_tier}),
+                or_(version.effective_from.is_(None), version.effective_from <= as_of),
+                or_(version.effective_to.is_(None), version.effective_to > as_of),
+            )
+            .limit(1)
+        ) is not None
+
     def list_policies(
         self,
         *,
@@ -163,6 +200,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
         query_embedding: list[float],
         embedding_version: str,
         candidate_limit: int,
+        decision_scope: str | None = None,
     ) -> PolicyRetrievalCandidatePage:
         if candidate_limit < 1 or candidate_limit > 256:
             raise ValueError("candidate_limit must be between 1 and 256")
@@ -180,6 +218,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
                 ]
             ),
             version.immutable.is_(True),
+            *((version.decision_scope == decision_scope,) if decision_scope is not None else ()),
         )
         category_match = _json_dimension_match(
             version.case_categories,
@@ -192,6 +231,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
             _json_dimension_match(version.customer_tiers, {customer_tier}),
         )
         effective_match = and_(
+            selected_version(as_of),
             or_(version.effective_from.is_(None), version.effective_from <= as_of),
             or_(version.effective_to.is_(None), version.effective_to > as_of),
         )
@@ -252,8 +292,7 @@ class PolicyQueryRepository(PolicyRepositoryBase):
             .join(
                 GovernedPolicyClauseModel,
                 and_(
-                    GovernedPolicyClauseModel.organization_id
-                    == version.organization_id,
+                    GovernedPolicyClauseModel.organization_id == version.organization_id,
                     GovernedPolicyClauseModel.policy_id == version.policy_id,
                     GovernedPolicyClauseModel.policy_version_id == version.id,
                 ),

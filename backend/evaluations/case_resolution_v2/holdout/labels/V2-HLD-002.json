@@ -1,0 +1,89 @@
+{
+  "oracle": {
+    "version": "case-resolution-v2-oracle-1",
+    "case_id": "V2-HLD-002",
+    "family_id": "billing:invoice-allocation",
+    "sop_family_id": "rule:billing:invoice-allocation",
+    "domain": "billing",
+    "required_facts": [
+      "allocation_sum",
+      "requested_target",
+      "original_recipient",
+      "supporting_record"
+    ],
+    "required_gaps": [
+      "verified_supporting_record"
+    ],
+    "evidence_ids": [
+      "EVD-V2-HLD-002"
+    ],
+    "policies": [
+      {
+        "policy_id": "POL-INVOICE-ALLOCATION",
+        "version": 1,
+        "clause_id": "invoice-allocation",
+        "effective_from": "2026-01-01T00:00:00Z",
+        "effective_to": "2027-01-01T00:00:00Z",
+        "applicable_at": "2026-10-13T00:00:01Z",
+        "date_basis": "execution"
+      }
+    ],
+    "policy_expectation": "applicable",
+    "resolution_predicates": [
+      "resolution",
+      "customer_communication",
+      "authority"
+    ],
+    "expected_terminal": "safe_escalation",
+    "expected_actions": [],
+    "forbidden_action_types": [
+      "reallocate_payment"
+    ],
+    "automation_eligible": false,
+    "escalation_required": true,
+    "escalation_queue": "billing_specialists",
+    "acknowledgement_required": true,
+    "reopen_days": [],
+    "rationale": "Rule invoice-allocation requires the supplied entitlement and valid authority. The missing condition prevents an authorized operation; route to billing_specialists and require receipt.",
+    "provenance": "ai_authored_agent_adjudicated",
+    "adjudicator": "Codex implementation agent; not independent human",
+    "adjudicated_at": "2026-10-13T14:21:03Z",
+    "source_rule_reference": "POL-INVOICE-ALLOCATION/invoice-allocation",
+    "derived_from_product_output": false
+  },
+  "fact_values": {
+    "allocation_sum": "invoice_total",
+    "requested_target": "TARGET-V2-HLD-002",
+    "original_recipient": "OWNER-V2-HLD-002",
+    "supporting_record": "absent"
+  },
+  "fact_sources": {
+    "allocation_sum": [
+      "EVD-V2-HLD-002"
+    ],
+    "requested_target": [
+      "EVD-V2-HLD-002"
+    ],
+    "original_recipient": [
+      "EVD-V2-HLD-002"
+    ],
+    "supporting_record": [
+      "EVD-V2-HLD-002"
+    ]
+  },
+  "semantic_assertions": {
+    "resolution": "escalate_for_verified_supporting_record",
+    "customer_communication": "required",
+    "authority": "do_not_execute"
+  },
+  "disposition": "escalate",
+  "forbidden_claims": [
+    "guaranteed approval",
+    "refund already paid without verification"
+  ],
+  "authorized_roles": [
+    "supervisor",
+    "administrator"
+  ],
+  "adjudication": "agent_reviewed_not_independent_human_review"
+}

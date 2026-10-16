@@ -1,0 +1,50 @@
+{
+  "case_id": "V2-HLD-007",
+  "family_id": "billing:chargeback-freeze",
+  "sop_family_id": "rule:billing:chargeback-freeze",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle chargeback freeze for TARGET-V2-HLD-007.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-007",
+      "facts": {
+        "dispute_state": "open",
+        "requested_target": "TARGET-V2-HLD-007",
+        "original_recipient": "OWNER-V2-HLD-007",
+        "duplicate_request_key": "OPERATION-V2-HLD-007",
+        "authorized_recipient": "OWNER-V2-HLD-007",
+        "authorized_reason_code": "chargeback-freeze",
+        "authorized_amount_minor": "0",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-chargeback-freeze-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-CHARGEBACK-FREEZE",
+      "version": "1",
+      "clause_id": "chargeback-freeze",
+      "text": "Place a single collections freeze while a chargeback is open; duplicate freeze requests must reuse the original operation.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "duplicate_delivery",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "operation_id": "OPERATION-V2-HLD-007"
+  },
+  "tags": [
+    "billing",
+    "duplicate_action"
+  ],
+  "critical": true
+}

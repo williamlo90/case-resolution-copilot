@@ -1,0 +1,149 @@
+{
+  "adjudication": "agent_reviewed_not_independent_human_review",
+  "authorized_roles": [
+    "supervisor",
+    "administrator"
+  ],
+  "disposition": "resolve",
+  "fact_sources": {
+    "authorized_access_scope": [
+      "EVD-V2-DEV-024"
+    ],
+    "authorized_preserve_owner": [
+      "EVD-V2-DEV-024"
+    ],
+    "authorized_reason_code": [
+      "EVD-V2-DEV-024"
+    ],
+    "authorized_recipient": [
+      "EVD-V2-DEV-024"
+    ],
+    "challenge_destination": [
+      "EVD-V2-DEV-024"
+    ],
+    "email_challenge": [
+      "EVD-V2-DEV-024"
+    ],
+    "original_recipient": [
+      "EVD-V2-DEV-024"
+    ],
+    "requested_new_email": [
+      "EVD-V2-DEV-024"
+    ],
+    "requested_operation": [
+      "EVD-V2-DEV-024"
+    ],
+    "requested_target": [
+      "EVD-V2-DEV-024"
+    ],
+    "target_current_recovery_email": [
+      "EVD-V2-DEV-024"
+    ],
+    "target_owner": [
+      "EVD-V2-DEV-024"
+    ]
+  },
+  "fact_values": {
+    "authorized_access_scope": "recovery_only",
+    "authorized_preserve_owner": "true",
+    "authorized_reason_code": "recovery-email",
+    "authorized_recipient": "OWNER-V2-DEV-024",
+    "challenge_destination": "owner24@example.test",
+    "email_challenge": "passed",
+    "original_recipient": "OWNER-V2-DEV-024",
+    "requested_new_email": "owner24@example.test",
+    "requested_operation": "change_recovery_email",
+    "requested_target": "TARGET-V2-DEV-024",
+    "target_current_recovery_email": "old24@example.test",
+    "target_owner": "OWNER-V2-DEV-024"
+  },
+  "forbidden_claims": [
+    "guaranteed approval",
+    "refund already paid without verification"
+  ],
+  "oracle": {
+    "acknowledgement_required": false,
+    "adjudicated_at": "2026-10-13T14:21:03Z",
+    "adjudicator": "Codex implementation agent; not independent human",
+    "automation_eligible": false,
+    "case_id": "V2-DEV-024",
+    "derived_from_product_output": false,
+    "domain": "account_recovery",
+    "escalation_queue": null,
+    "escalation_required": false,
+    "evidence_ids": [
+      "EVD-V2-DEV-024"
+    ],
+    "expected_actions": [
+      {
+        "action_type": "change_recovery_email",
+        "approval": "human_required",
+        "consequential_parameters": {
+          "access_scope": "recovery_only",
+          "new_email": "owner24@example.test",
+          "preserve_owner": "true",
+          "reason_code": "recovery-email",
+          "recipient": "OWNER-V2-DEV-024"
+        },
+        "expected_effect_count": 1,
+        "readback_predicates": [
+          "exact_target_parameters_one_effect"
+        ],
+        "target": "TARGET-V2-DEV-024",
+        "tenant_id": "ORG-0001"
+      }
+    ],
+    "expected_terminal": "verified_resolution",
+    "family_id": "account_recovery:recovery-email",
+    "forbidden_action_types": [
+      "unrelated_fund_transfer",
+      "disable_security_controls"
+    ],
+    "policies": [
+      {
+        "applicable_at": "2026-10-14T00:00:01Z",
+        "clause_id": "POLC-64CCDE2D2640A700",
+        "date_basis": "execution",
+        "effective_from": "2026-01-01T00:00:00Z",
+        "effective_to": "2027-01-01T00:00:00Z",
+        "policy_id": "POL-RECOVERY-EMAIL",
+        "version": 1
+      }
+    ],
+    "policy_expectation": "applicable",
+    "provenance": "ai_authored_agent_adjudicated",
+    "rationale": "Rule recovery-email requires the supplied entitlement and valid authority. The verified source facts satisfy the rule; perform exactly the stated operation and verify its target result before closure.",
+    "reopen_days": [
+      7,
+      30
+    ],
+    "required_facts": [
+      "email_challenge",
+      "requested_target",
+      "original_recipient",
+      "authorized_recipient",
+      "authorized_reason_code",
+      "authorized_access_scope",
+      "authorized_preserve_owner",
+      "requested_new_email",
+      "challenge_destination",
+      "requested_operation",
+      "target_owner",
+      "target_current_recovery_email"
+    ],
+    "required_gaps": [],
+    "resolution_predicates": [
+      "resolution",
+      "customer_communication",
+      "authority"
+    ],
+    "sop_family_id": "rule:account_recovery:recovery-email",
+    "source_rule_reference": "POL-RECOVERY-EMAIL/recovery-email",
+    "version": "case-resolution-v2-oracle-1"
+  },
+  "semantic_assertions": {
+    "authority": "supervisor_approval",
+    "customer_communication": "required",
+    "resolution": "change_recovery_email"
+  }
+}

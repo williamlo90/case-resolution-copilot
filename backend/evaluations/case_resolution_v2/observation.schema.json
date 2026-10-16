@@ -1,0 +1,652 @@
+{
+  "$defs": {
+    "ActionExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Action Type",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "consequential_parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Consequential Parameters",
+          "type": "object"
+        },
+        "approval": {
+          "enum": [
+            "human_required",
+            "policy_grant"
+          ],
+          "title": "Approval",
+          "type": "string"
+        },
+        "expected_effect_count": {
+          "const": 1,
+          "title": "Expected Effect Count",
+          "type": "integer"
+        },
+        "readback_predicates": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Readback Predicates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "action_type",
+        "target",
+        "tenant_id",
+        "consequential_parameters",
+        "approval",
+        "expected_effect_count",
+        "readback_predicates"
+      ],
+      "title": "ActionExpectation",
+      "type": "object"
+    },
+    "ActionReadback": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "maxLength": 128,
+          "minLength": 16,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "external_reference": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "External Reference",
+          "type": "string"
+        },
+        "action_type": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Action Type",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "observed_parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Observed Parameters",
+          "type": "object"
+        },
+        "status": {
+          "$ref": "#/$defs/VerificationState"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "effect_count": {
+          "minimum": 0,
+          "title": "Effect Count",
+          "type": "integer"
+        },
+        "impact_amount": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Impact Amount"
+        },
+        "impact_currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Impact Currency"
+        }
+      },
+      "required": [
+        "operation_id",
+        "external_reference",
+        "action_type",
+        "target",
+        "observed_parameters",
+        "status",
+        "observed_at",
+        "effect_count"
+      ],
+      "title": "ActionReadback",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Sha256",
+          "type": "string"
+        },
+        "approved_at": {
+          "format": "date-time",
+          "title": "Approved At",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "tenant_id",
+        "payload_sha256",
+        "approved_at",
+        "expires_at"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "Completion": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "verified_operation_ids": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Verified Operation Ids",
+          "type": "array"
+        },
+        "communication_reference": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Communication Reference",
+          "type": "string"
+        },
+        "attested_role": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Attested Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "tenant_id",
+        "occurred_at",
+        "verified_operation_ids",
+        "communication_reference",
+        "attested_role"
+      ],
+      "title": "Completion",
+      "type": "object"
+    },
+    "Escalation": {
+      "additionalProperties": false,
+      "properties": {
+        "queue": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Queue",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "routing_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Routing Id",
+          "type": "string"
+        },
+        "assigned_actor": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Assigned Actor",
+          "type": "string"
+        },
+        "acknowledged_actor": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Acknowledged Actor",
+          "type": "string"
+        },
+        "acknowledged_role": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Acknowledged Role",
+          "type": "string"
+        },
+        "routed_at": {
+          "format": "date-time",
+          "title": "Routed At",
+          "type": "string"
+        },
+        "acknowledged_at": {
+          "format": "date-time",
+          "title": "Acknowledged At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queue",
+        "tenant_id",
+        "routing_id",
+        "assigned_actor",
+        "acknowledged_actor",
+        "acknowledged_role",
+        "routed_at",
+        "acknowledged_at"
+      ],
+      "title": "Escalation",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value",
+        "evidence_ids"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "Operation": {
+      "additionalProperties": false,
+      "properties": {
+        "intent": {
+          "$ref": "#/$defs/ActionExpectation"
+        },
+        "operation_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "external_reference": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "External Reference",
+          "type": "string"
+        },
+        "executed_at": {
+          "format": "date-time",
+          "title": "Executed At",
+          "type": "string"
+        },
+        "approval": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Approval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "readback": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionReadback"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "intent",
+        "operation_id",
+        "external_reference",
+        "executed_at",
+        "approval",
+        "readback"
+      ],
+      "title": "Operation",
+      "type": "object"
+    },
+    "PolicyExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "clause_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Clause Id",
+          "type": "string"
+        },
+        "effective_from": {
+          "format": "date-time",
+          "title": "Effective From",
+          "type": "string"
+        },
+        "effective_to": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective To"
+        },
+        "applicable_at": {
+          "format": "date-time",
+          "title": "Applicable At",
+          "type": "string"
+        },
+        "date_basis": {
+          "enum": [
+            "transaction",
+            "request",
+            "execution"
+          ],
+          "title": "Date Basis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "version",
+        "clause_id",
+        "effective_from",
+        "effective_to",
+        "applicable_at",
+        "date_basis"
+      ],
+      "title": "PolicyExpectation",
+      "type": "object"
+    },
+    "VerificationState": {
+      "enum": [
+        "verified",
+        "pending",
+        "failed",
+        "unknown",
+        "mismatch"
+      ],
+      "title": "VerificationState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "case-resolution-v2-observation-1",
+      "title": "Version",
+      "type": "string"
+    },
+    "case_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "observed",
+        "provider_failure",
+        "invalid",
+        "missing"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "facts": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Fact"
+      },
+      "title": "Facts",
+      "type": "object"
+    },
+    "gaps": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Gaps",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "$ref": "#/$defs/PolicyExpectation"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "policy_status": {
+      "enum": [
+        "applicable",
+        "missing",
+        "conflicting"
+      ],
+      "title": "Policy Status",
+      "type": "string"
+    },
+    "semantic_assertions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Semantic Assertions",
+      "type": "object"
+    },
+    "disposition": {
+      "enum": [
+        "resolve",
+        "escalate",
+        "request_information",
+        "decline"
+      ],
+      "title": "Disposition",
+      "type": "string"
+    },
+    "proposed_actions": {
+      "items": {
+        "$ref": "#/$defs/ActionExpectation"
+      },
+      "title": "Proposed Actions",
+      "type": "array"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/Operation"
+      },
+      "title": "Operations",
+      "type": "array"
+    },
+    "claims": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Claims",
+      "type": "array"
+    },
+    "terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation",
+        "open"
+      ],
+      "title": "Terminal",
+      "type": "string"
+    },
+    "completion": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Completion"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "escalation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Escalation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "human_touches": {
+      "minimum": 0,
+      "title": "Human Touches",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "version",
+    "case_id",
+    "input_sha256",
+    "tenant_id",
+    "observed_at",
+    "status",
+    "facts",
+    "gaps",
+    "policies",
+    "policy_status",
+    "semantic_assertions",
+    "disposition",
+    "proposed_actions",
+    "operations",
+    "claims",
+    "terminal",
+    "completion",
+    "escalation",
+    "human_touches"
+  ],
+  "title": "Observation",
+  "type": "object"
+}

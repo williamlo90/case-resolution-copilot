@@ -1,193 +1,88 @@
-# Case Resolution Copilot - Application Pack
+# Case Resolution Copilot application pack
 
-Use this page as the source for CV, LinkedIn, Upwork, GitHub, and interview wording. Keep the
-version that fits the role instead of pasting every detail into one application.
+Use these statements for CV, LinkedIn and interview preparation. Select the bullets relevant to
+the role; this document does not modify the actual CV. Results and scope are linked in the
+[evidence index](../evidence/case-resolution-v2/README.md).
 
 ## Positioning
 
-**Project category:** Governed AI decision support for operational case resolution.
+Built a policy-governed AI case-resolution system that turns scattered evidence and dated SOPs
+into reviewed actions, verifies target outcomes, and preserves an auditable recovery trail.
 
-**Best-fit roles:** AI Engineer, AI Automation Engineer, Python Backend Engineer, Applied AI
-Engineer, and AI Platform Engineer.
+Best fit: Applied AI Engineer, AI Engineer, Python Backend Engineer, and AI Automation Engineer.
 
-**One-line description:**
+## Applied AI CV bullets
 
-> Built a policy-governed AI case-resolution system that turns fragmented business evidence into
-> reviewable decisions, requires human approval for consequential actions, and preserves an
-> auditable execution trail.
+- Built a governed case-resolution system with FastAPI, PostgreSQL/pgvector and LangGraph,
+  combining versioned SOP retrieval, human-approved actions, target read-back, acknowledged
+  escalation, and auditable case closure/reopening.
+- Achieved policy-correct decisions and correct completion on 40/40 sealed held-out synthetic
+  cases using PostgreSQL-backed product APIs and deterministic targets; verified 19/19 required
+  actions and 21/21 required escalations.
+- Recorded 83.7% lower raw median decision-workflow time (582 s to 95 s) in an earlier
+  developer-operated benchmark across three matched synthetic case pairs.
+- Validated dated SOP behavior through 18/18 exposed replay observations and packaged a Docker
+  demo with ten PostgreSQL release tests, bounded restore/restart checks, and zero HIGH/CRITICAL
+  findings across three validated demo images.
 
-This is stronger than describing the project as a chatbot or ticket dashboard. The core
-engineering problem is controlling how AI participates in decisions that may affect customer
-accounts or company funds.
+For a three-bullet CV, choose product, quality, and either timing or reliability to match the role.
+The timing benchmark's complete outcomes were 3/3 Copilot versus 0/3 manual; it is descriptive
+elapsed time, not speedup between equally successful resolutions. It is separate from the 40-case
+V2 quality cohort. Holdout labels were authored and reviewed by the implementation agent.
 
-## Thirty-Second Pitch
+## Backend and reliability emphasis
 
-> Case Resolution Copilot helps an operations team handle cases where the answer depends on
-> scattered records, policy versions, missing evidence, and approval limits. I built the product
-> with Next.js, FastAPI, PostgreSQL, LangGraph, Celery, and an optional OpenAI narrative layer. The
-> application owns the facts, risk checks, permissions, approval state, and action execution, so
-> the model cannot approve its own recommendation. I validated it with a 20-execution regression
-> suite, a bounded OpenAI canary, guarded PostgreSQL workflow tests, and a short-lived AWS
-> deployment architecture.
+- Implemented tenant-scoped authority, immutable approval snapshots, idempotent action execution,
+  explicit target verification, and unknown-outcome reconciliation that blocks blind retries.
+- Added dated SOP predicates and stale-approval invalidation, preserving pending-operation
+  identity and audit history through policy rollback and case reopening.
+- Verified additive migration and durable unknown-outcome handling with disposable PostgreSQL;
+  validated seeded logical restore and replacement of a faulted API with its known-good image.
 
-## Two-Minute Interview Version
+## Cloud emphasis
 
-> I built Case Resolution Copilot because difficult customer cases are usually decision problems,
-> not reply-writing problems. Evidence may be split across conversations, payments, orders, and
-> policy documents. A model can write a convincing answer while using stale rules or missing an
-> approval boundary.
->
-> The system creates a Decision Brief containing verified facts, missing information, applicable
-> policy, risk checks, uncertainty, a proposed action, and a response draft. LangGraph coordinates
-> the decision flow, but deterministic application code owns policy status, evidence binding,
-> permissions, and approval rules. Consequential actions are snapshot-bound, idempotent, and
-> produce durable receipts. If an external action times out with an unknown outcome, the system
-> blocks blind retry and requires reconciliation.
->
-> The backend is a FastAPI modular monolith backed by PostgreSQL and pgvector. Celery handles
-> asynchronous ingestion using Redis locally and SQS in the AWS profile. I also built a bounded
-> evaluation system. The final development-set regression passed 20 of 20 observations, a
-> two-call OpenAI canary preserved deterministic controls in all three test cases, and four
-> targeted PostgreSQL scenarios validated conflict blocking, immutable approvals, exactly-once
-> execution, and unknown-outcome recovery. The always-on demo uses Vercel and Neon; AWS was a
-> live-validated, teardown-safe deployment architecture rather than permanent production hosting.
+- Built and live-validated a reproducible AWS deployment architecture with ECS/Fargate,
+  RDS PostgreSQL/pgvector, S3, Lambda, SQS, CloudFront, IAM, Secrets Manager and CloudWatch,
+  including worker replacement, connected-path replay and verified teardown.
 
-## CV Bullets
+This refers to the September 25 infrastructure validation. The always-on demo uses Vercel/Neon;
+V2 has not been newly deployed or load-tested on AWS. Do not describe the demo image scan as an
+ECR scan of a current AWS release.
 
-### AI Engineer
+## Interview pitch
 
-- Built a policy-governed AI decision system with LangGraph and an optional OpenAI narrative
-  layer, keeping facts, policy applicability, risk, approval, and execution authority in
-  deterministic application controls.
-- Designed an auditable evaluation pipeline with frozen inputs and labels, SHA-256 integrity
-  checks, 20 repeated regression observations, a two-call provider canary, measured token cost,
-  and explicit claim boundaries.
-- Implemented governed retrieval over PostgreSQL/pgvector with versioned policy evidence,
-  expected-source checks, abstention behavior, and traceable source bindings.
+Complex support cases require evidence, policy interpretation and authorization. I built a
+workspace that turns those inputs into a reviewable Decision Brief, then binds approval to the
+exact policy, evidence and action payload. The model can help draft wording, but application
+controls own eligibility and execution authority. Actions require target read-back before closure;
+uncertain outcomes cannot be retried blindly.
 
-### Python Backend Engineer
+I evaluated the actual product APIs on 40 sealed synthetic cases, with 40/40 policy-correct and
+correct-completion outcomes. I also tested dated SOP evolution, persisted recovery and reproducible
+container packaging. A separate earlier developer benchmark recorded raw medians of 95 seconds
+with Copilot and 582 seconds manually. Cloud architecture was validated in a bounded AWS session;
+the hosted demo remains on Vercel and Neon.
 
-- Developed a tenant-scoped FastAPI and PostgreSQL backend with Clerk authentication, RBAC,
-  immutable review snapshots, optimistic concurrency, idempotency, durable action receipts, and
-  unknown-outcome reconciliation.
-- Implemented asynchronous ingestion with Celery, Redis/SQS delivery profiles, finite retries,
-  duplicate protection, job status, dead-letter handling, and controlled reprocessing.
-- Validated critical stateful paths against migrated PostgreSQL: conflicting evidence fails
-  closed, approval remains bound to an immutable proposal, execution is exactly once, and unknown
-  outcomes cannot be retried blindly.
+## LinkedIn or portfolio description
 
-### AI Automation And Cloud
+Case Resolution Copilot is a governed AI workspace for billing, refund and account-access cases.
+It combines Next.js, FastAPI, PostgreSQL/pgvector, LangGraph and optional OpenAI wording with
+versioned policy retrieval, human approval, controlled actions and verified outcomes. V2 adds
+dated SOP rules, acknowledged escalation, auditable closure/reopening, a sealed synthetic product
+evaluation, and a reproducible Docker release package. Supporting evidence includes a separate
+developer workflow benchmark and a live-validated AWS deployment architecture.
 
-- Built and live-validated a reproducible AWS deployment architecture using ECS/Fargate, RDS
-  PostgreSQL with pgvector, S3, Lambda, SQS, CloudFront, IAM, Secrets Manager, and CloudWatch, with
-  infrastructure designed for safe teardown and redeployment.
-- Separated the always-on Vercel/Neon demo from a short-lived AWS validation environment, allowing
-  cloud evidence without carrying unnecessary portfolio infrastructure cost.
-- Added structured health checks, correlated logs, queue failure visibility, migration tasks,
-  least-privilege boundaries, and automated teardown controls.
+## Evidence and wording boundaries
 
-## LinkedIn Project Description
+| Statement | Supporting evidence |
+| --- | --- |
+| 40/40 synthetic holdout | [V2 results and source identity](../evidence/case-resolution-v2/RESULTS.md) |
+| 18/18 dated SOP replay | [Exposed replay aggregate](../evidence/case-resolution-v2/results/sop-replay.json) |
+| 83.7% lower raw median time | [Original operator benchmark](../evidence/developer-workflow-benchmark/REPORT.md) |
+| Release and image checks | [Phase 6 evidence](../evidence/case-resolution-v2/PHASE6_RELEASE.md) |
+| AWS architecture live validation | [September 25 record](../evidence/aws-live-validation/README.md) |
 
-> Case Resolution Copilot is a production-oriented AI decision-support portfolio project for
-> complex operational cases. It combines a Next.js workspace with a FastAPI/PostgreSQL backend,
-> governed policy retrieval, LangGraph orchestration, optional OpenAI-assisted wording, human
-> approval, and controlled action execution. The project includes Celery-based asynchronous
-> ingestion, idempotency and reconciliation controls, four-role RBAC, auditable evaluation, and a
-> live-validated AWS deployment architecture. Evaluation evidence includes a 20-execution
-> synthetic regression suite, a bounded provider canary, targeted PostgreSQL workflow validation,
-> and a developer-operated matched workflow benchmark.
-
-## Upwork Portfolio Description
-
-### Title
-
-AI Case Resolution System with FastAPI, RAG, Human Approval, and AWS Architecture
-
-### Overview
-
-> I designed and built an AI-assisted operations system for cases that require evidence review,
-> policy interpretation, risk checks, and management approval. Instead of allowing an LLM to make
-> uncontrolled decisions, the system uses AI only for bounded assistance while the backend
-> enforces source traceability, authorization, approval state, idempotency, and auditability.
->
-> The solution includes a Next.js application, FastAPI APIs, PostgreSQL/pgvector retrieval,
-> LangGraph orchestration, OpenAI integration, Clerk authentication, Celery background jobs,
-> controlled external actions, and AWS-ready infrastructure. It is relevant to customer
-> operations, refund and billing review, account recovery, compliance workflows, internal service
-> requests, and other approval-heavy business processes.
-
-### Client-Relevant Capabilities
-
-- Convert conversations and business records into a structured decision brief.
-- Retrieve and cite the policy version applicable to a case.
-- Detect missing or conflicting evidence and abstain safely.
-- Route consequential decisions through role-based human approval.
-- Execute approved actions with idempotency, receipts, and recovery controls.
-- Process ingestion and indexing work asynchronously with observable job status.
-- Evaluate AI behavior with repeatable fixtures, safety checks, latency, and cost evidence.
-
-## GitHub Metadata
-
-**Repository description:**
-
-> Governed AI case-resolution workspace with FastAPI, Next.js, LangGraph, PostgreSQL/pgvector,
-> human approval, controlled actions, auditable evaluation, and AWS deployment architecture.
-
-**Suggested topics:**
-
-`ai-engineering`, `fastapi`, `nextjs`, `langgraph`, `rag`, `postgresql`, `pgvector`, `celery`,
-`human-in-the-loop`, `ai-agents`, `aws`, `evaluation`
-
-## Evidence Cheat Sheet
-
-| Claim | Evidence | Meaning |
-| --- | --- | --- |
-| `20/20` regression observations passed | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) | Implemented control-state, source-coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks passed on the final development-set regression |
-| `3/3` OpenAI canary cases passed | [Provider canary](../evidence/case-resolution-evaluation-v1/provider-canary-results.json) | Two bounded provider calls preserved server-owned controls; one policy-missing case correctly skipped the provider |
-| `4/4` targeted database scenarios passed | [Persisted workflow evidence](../evidence/case-resolution-evaluation-v1/persisted-workflow-results.json) | Critical review and controlled-action paths behaved correctly against migrated PostgreSQL |
-| `83.7%` lower raw median elapsed time | [Workflow benchmark](../evidence/developer-workflow-benchmark/REPORT.md) | One developer completed three matched synthetic cases per condition; this is descriptive, not a population estimate |
-| AWS architecture live-validated | [AWS evidence](../evidence/aws-live-validation/README.md) | A bounded short-lived environment passed connected checks and verified teardown; the product is not permanently hosted on AWS |
-
-## Interview Proof Map
-
-When asked about architecture, start with the authority boundary: AI drafts, application controls
-decide what is eligible, and a human authorizes consequential actions.
-
-When asked about reliability, explain idempotency, immutable review snapshots, single-flight
-generation, finite retries, durable receipts, and unknown-outcome reconciliation.
-
-When asked about RAG, explain policy filtering by tenant and applicability before similarity,
-versioned source bindings, source freshness, abstention, and expected-source evaluation.
-
-When asked about agents, explain why LangGraph is the production orchestration boundary while
-CrewAI and AutoGen remain isolated comparison prototypes. Framework count is not the achievement;
-controlled state transitions are.
-
-When asked about AWS, distinguish a live-validated deployment architecture from an always-on
-production claim. Explain ECS/Fargate for API and workers, RDS/pgvector for durable state and
-retrieval, SQS for Celery delivery, S3/Lambda for evidence workflows, Secrets Manager for runtime
-credentials, and CloudWatch for operations.
-
-When asked about evaluation, separate the four forms of evidence: deterministic development-set
-regression, provider safety canary, persisted workflow tests, and human workflow timing.
-
-## Claims To Avoid
-
-Do not say the project is generally production-ready, validated on real client cases, permanently
-hosted on AWS, or proven to improve customer productivity at population scale.
-
-Do not describe `20/20` as general model accuracy. It is a post-fix synthetic regression result on
-implemented deterministic checks.
-
-Do not describe the `83.7%` timing result as a guaranteed productivity improvement. It is a
-developer-operated matched benchmark with three synthetic cases per condition.
-
-## Recommended Application Strategy
-
-1. Lead with the one-line description and one role-specific group of CV bullets.
-2. Link the hosted application and engineering case study.
-3. Use one evidence number in the application, not all of them.
-4. For AI roles, emphasize governed model behavior and evaluation.
-5. For backend roles, emphasize state, concurrency, idempotency, and recovery.
-6. For automation or cloud roles, emphasize async jobs and the live-validated AWS architecture.
-7. Keep the deeper methodology links available for technical interviews.
+Use synthetic/controlled scope where a metric appears. No claim of real-client adoption,
+general model accuracy, hands-free case automation, new V2 operator time savings, AWS sustained
+load/availability, or measured production RTO/RPO follows from these results. The
+[claim ledger](../evidence/case-resolution-v2/CLAIM_LEDGER.md) maps the supported alternatives.

@@ -45,6 +45,7 @@ from app.persistence.models import (
     ProposalContextBindingModel,
     ProposalEvidenceBindingModel,
 )
+from app.persistence.policy_authority import is_current_authority
 
 REVIEW_HOLD_MINUTES = 30
 TERMINAL_REVIEW_STATUSES = frozenset(
@@ -230,13 +231,13 @@ class ReviewRepositoryBase:
         for_update: bool = False,
     ) -> MembershipModel:
         statement = select(MembershipModel).where(
-                MembershipModel.organization_id == organization_id,
-                MembershipModel.status == "active",
-                or_(
-                    MembershipModel.public_id == actor_id,
-                    MembershipModel.subject_id == actor_id,
-                ),
-            )
+            MembershipModel.organization_id == organization_id,
+            MembershipModel.status == "active",
+            or_(
+                MembershipModel.public_id == actor_id,
+                MembershipModel.subject_id == actor_id,
+            ),
+        )
         if for_update:
             statement = statement.with_for_update()
         member = self._session.scalar(statement)
@@ -483,7 +484,7 @@ class ReviewRepositoryBase:
                     )
                 evidence_fingerprints.append(evidence.fingerprint)
                 if (
-                    policy.status != "published"
+                    not is_current_authority(self._session, policy.id, now)
                     or policy.effective_from is None
                     or policy.effective_from > now
                     or (policy.effective_to is not None and policy.effective_to <= now)

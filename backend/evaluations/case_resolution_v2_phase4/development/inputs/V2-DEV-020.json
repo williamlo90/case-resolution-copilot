@@ -1,0 +1,53 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-DEV-020",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "account_recovery",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "fault": "duplicate_delivery",
+    "operation_id": "OPERATION-V2-DEV-020"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "authorized_access_scope": "all_sessions",
+        "authorized_preserve_owner": "true",
+        "authorized_reason_code": "session-revocation",
+        "authorized_recipient": "OWNER-V2-DEV-020",
+        "duplicate_request_key": "OPERATION-V2-DEV-020",
+        "original_recipient": "OWNER-V2-DEV-020",
+        "requested_operation": "revoke_compromised_sessions",
+        "requested_target": "TARGET-V2-DEV-020",
+        "session_compromise": "confirmed",
+        "target_active_sessions": "3",
+        "target_owner": "OWNER-V2-DEV-020"
+      },
+      "id": "EVD-V2-DEV-020",
+      "source": "synthetic-session-revocation-record"
+    }
+  ],
+  "family_id": "account_recovery:session-revocation",
+  "policies": [
+    {
+      "clause_id": "POLC-60B66B459D9B7408",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-SESSION-REVOCATION",
+      "text": "Revoke compromised sessions once; repeated requests reference the same revocation operation.\n\n```case-resolution-rules\n{\"schema_version\": 1, \"rules\": [{\"kind\": \"controlled_operation\", \"action_type\": \"revoke_compromised_sessions\", \"max_amount_minor\": 0, \"currency\": \"USD\"}]}\n```",
+      "version": "1"
+    }
+  ],
+  "request": "Revoke compromised sessions once; repeated requests reference the same revocation operation. Target TARGET-V2-DEV-020.",
+  "sop_family_id": "rule:account_recovery:session-revocation",
+  "tags": [
+    "account_recovery",
+    "duplicate_action"
+  ],
+  "tenant_id": "ORG-0001"
+}

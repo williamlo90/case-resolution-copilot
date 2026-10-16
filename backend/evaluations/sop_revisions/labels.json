@@ -1,0 +1,236 @@
+{
+  "provenance": "ai_authored_agent_adjudicated",
+  "independent_human_review": false,
+  "labels": {
+    "REPLAY-REFUND-CHANGING:1": {
+      "allowed": false,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "items": "SOP review required"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": false,
+      "required_gap": "refund_window"
+    },
+    "REPLAY-REFUND-CHANGING:2": {
+      "allowed": true,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-REFUND-CHANGING",
+        "external_reference": "REPLAY-REFUND-CHANGING-TARGET"
+      },
+      "impact_amount": "75.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-REFUND-CHANGING:3": {
+      "allowed": false,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "items": "SOP review required"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": false,
+      "required_gap": "refund_window"
+    },
+    "REPLAY-REFUND-CONTROL:1": {
+      "allowed": true,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-REFUND-CONTROL",
+        "external_reference": "REPLAY-REFUND-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-REFUND-CONTROL:2": {
+      "allowed": true,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-REFUND-CONTROL",
+        "external_reference": "REPLAY-REFUND-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-REFUND-CONTROL:3": {
+      "allowed": true,
+      "action": "issue_refund",
+      "rationale": "refund: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-REFUND-CONTROL",
+        "external_reference": "REPLAY-REFUND-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-OWNERSHIP-CHANGING:1": {
+      "allowed": true,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-OWNERSHIP-CHANGING",
+        "external_reference": "REPLAY-OWNERSHIP-CHANGING-TARGET"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-OWNERSHIP-CHANGING:2": {
+      "allowed": false,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "items": "SOP review required"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": false,
+      "required_gap": "ownership_proof"
+    },
+    "REPLAY-OWNERSHIP-CHANGING:3": {
+      "allowed": true,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-OWNERSHIP-CHANGING",
+        "external_reference": "REPLAY-OWNERSHIP-CHANGING-TARGET"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-OWNERSHIP-CONTROL:1": {
+      "allowed": true,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-OWNERSHIP-CONTROL",
+        "external_reference": "REPLAY-OWNERSHIP-CONTROL-TARGET"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-OWNERSHIP-CONTROL:2": {
+      "allowed": true,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-OWNERSHIP-CONTROL",
+        "external_reference": "REPLAY-OWNERSHIP-CONTROL-TARGET"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-OWNERSHIP-CONTROL:3": {
+      "allowed": true,
+      "action": "start_verified_recovery",
+      "rationale": "ownership: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-OWNERSHIP-CONTROL",
+        "external_reference": "REPLAY-OWNERSHIP-CONTROL-TARGET"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-THRESHOLD-CHANGING:1": {
+      "allowed": true,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-THRESHOLD-CHANGING",
+        "external_reference": "REPLAY-THRESHOLD-CHANGING-TARGET"
+      },
+      "impact_amount": "75.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-THRESHOLD-CHANGING:2": {
+      "allowed": false,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "items": "SOP review required"
+      },
+      "impact_amount": null,
+      "impact_currency": null,
+      "review_required": false,
+      "required_gap": "escalation_threshold"
+    },
+    "REPLAY-THRESHOLD-CHANGING:3": {
+      "allowed": true,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-THRESHOLD-CHANGING",
+        "external_reference": "REPLAY-THRESHOLD-CHANGING-TARGET"
+      },
+      "impact_amount": "75.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-THRESHOLD-CONTROL:1": {
+      "allowed": true,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 1; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-THRESHOLD-CONTROL",
+        "external_reference": "REPLAY-THRESHOLD-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-THRESHOLD-CONTROL:2": {
+      "allowed": true,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 2; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-THRESHOLD-CONTROL",
+        "external_reference": "REPLAY-THRESHOLD-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    },
+    "REPLAY-THRESHOLD-CONTROL:3": {
+      "allowed": true,
+      "action": "reverse_duplicate_charge",
+      "rationale": "threshold: explicit predicate on frozen evidence under revision 3; no product output consulted.",
+      "parameters": {
+        "case_id": "REPLAY-THRESHOLD-CONTROL",
+        "external_reference": "REPLAY-THRESHOLD-CONTROL-TARGET"
+      },
+      "impact_amount": "40.00",
+      "impact_currency": "USD",
+      "review_required": true,
+      "required_gap": null
+    }
+  }
+}

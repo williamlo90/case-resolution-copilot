@@ -36,6 +36,7 @@ class PolicyEvidenceSearchStore(Protocol):
         query_embedding: list[float],
         embedding_version: str,
         candidate_limit: int,
+        decision_scope: str | None = None,
     ) -> PolicyRetrievalCandidatePage: ...
 
 
@@ -60,6 +61,11 @@ class V1PolicyRetrieval:
         del correlation_id
         context = case_context(workspace)
         query_text = f"{workspace.case.issue} {workspace.request.summary}"
+        scopes = {
+            row.fields["policy_scope"]
+            for row in workspace.business_contexts
+            if row.fields.get("policy_scope")
+        }
         search = self._store.search_retrieval_candidates(
             organization_public_id=actor.organization_id,
             case_category=context["category"],
@@ -71,6 +77,7 @@ class V1PolicyRetrieval:
             query_embedding=self._embedding_provider.embed(query_text),
             embedding_version=self._embedding_provider.version,
             candidate_limit=RETRIEVAL_CANDIDATE_LIMIT,
+            decision_scope=next(iter(scopes)) if len(scopes) == 1 else None,
         )
         guarded = _guard_search(search)
         if guarded is not None:

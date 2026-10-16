@@ -1,0 +1,44 @@
+{
+  "as_of": "2026-10-14T00:00:00Z",
+  "case_id": "V2-DEV-018",
+  "critical": true,
+  "deadline": "2026-10-15T00:00:00Z",
+  "domain": "account_recovery",
+  "environment": {
+    "actor_role": "supervisor",
+    "adapter": "phase4_runtime_required",
+    "approval_state": "expired",
+    "fault": "none"
+  },
+  "evidence": [
+    {
+      "facts": {
+        "approval_expired_at": "2026-10-12T23:00:00Z",
+        "original_recipient": "OWNER-V2-DEV-018",
+        "ownership_verified": "true",
+        "requested_target": "TARGET-V2-DEV-018"
+      },
+      "id": "EVD-V2-DEV-018",
+      "source": "synthetic-password-reset-record"
+    }
+  ],
+  "family_id": "account_recovery:password-reset",
+  "policies": [
+    {
+      "clause_id": "POLC-DAE5798FCF92D90F",
+      "date_basis": "execution",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "policy_id": "POL-PASSWORD-RESET",
+      "text": "Issue a password-reset token only to the verified original owner; expired reset authority must be escalated.",
+      "version": "1"
+    }
+  ],
+  "request": "Issue a password reset token to the verified original account owner.",
+  "sop_family_id": "rule:account_recovery:password-reset",
+  "tags": [
+    "account_recovery",
+    "expired_authority"
+  ],
+  "tenant_id": "ORG-0001"
+}

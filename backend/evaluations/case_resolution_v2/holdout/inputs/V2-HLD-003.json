@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-003",
+  "family_id": "billing:usage-cap",
+  "sop_family_id": "rule:billing:usage-cap",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle usage cap for TARGET-V2-HLD-003.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-003",
+      "facts": {
+        "contract_cap": "5000",
+        "requested_target": "TARGET-V2-HLD-003",
+        "original_recipient": "OWNER-V2-HLD-003",
+        "secondary_record": "contradicts_primary"
+      },
+      "source": "synthetic-usage-cap-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-USAGE-CAP",
+      "version": "1",
+      "clause_id": "usage-cap",
+      "text": "Credit usage charges above the signed 5000-unit cap; the metered excess in this case is 1700 minor USD units.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "billing",
+    "conflicting_evidence"
+  ],
+  "critical": true
+}

@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-030",
+  "family_id": "account_recovery:corporate-offboarding",
+  "sop_family_id": "rule:account_recovery:corporate-offboarding",
+  "domain": "account_recovery",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle corporate offboarding for TARGET-V2-HLD-030.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-030",
+      "facts": {
+        "employment_state": "terminated",
+        "requested_target": "TARGET-V2-HLD-030",
+        "original_recipient": "OWNER-V2-HLD-030",
+        "secondary_record": "contradicts_primary"
+      },
+      "source": "synthetic-corporate-offboarding-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-CORPORATE-OFFBOARDING",
+      "version": "1",
+      "clause_id": "corporate-offboarding",
+      "text": "Revoke corporate account access on verified termination; conflicting HR dates require security review first.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "account_recovery",
+    "conflicting_evidence"
+  ],
+  "critical": true
+}

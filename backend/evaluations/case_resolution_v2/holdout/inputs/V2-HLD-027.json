@@ -1,0 +1,49 @@
+{
+  "case_id": "V2-HLD-027",
+  "family_id": "refund:escrow-release",
+  "sop_family_id": "rule:refund:escrow-release",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle escrow release for TARGET-V2-HLD-027.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-027",
+      "facts": {
+        "milestone_acceptance": "verified",
+        "requested_target": "TARGET-V2-HLD-027",
+        "original_recipient": "OWNER-V2-HLD-027",
+        "authorized_recipient": "OWNER-V2-HLD-027",
+        "authorized_reason_code": "escrow-release",
+        "authorized_amount_minor": "9500",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-escrow-release-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-ESCROW-RELEASE",
+      "version": "1",
+      "clause_id": "escrow-release",
+      "text": "Release 9500 escrow units only for an accepted milestone; a later invalid acceptance requires a linked reopen.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "future_event": "new_contradictory_evidence",
+    "reopen_simulated_days": "7,30"
+  },
+  "tags": [
+    "refund",
+    "reopen"
+  ],
+  "critical": true
+}

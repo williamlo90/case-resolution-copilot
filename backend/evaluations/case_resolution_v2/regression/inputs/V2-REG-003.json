@@ -1,0 +1,50 @@
+{
+  "case_id": "V2-REG-003",
+  "family_id": "account_recovery:totp-reseed",
+  "sop_family_id": "rule:account_recovery:totp-reseed",
+  "domain": "account_recovery",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle totp reseed for TARGET-V2-REG-003.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-REG-003",
+      "facts": {
+        "reseed_identity": "verified",
+        "requested_target": "TARGET-V2-REG-003",
+        "original_recipient": "OWNER-V2-REG-003",
+        "duplicate_request_key": "OPERATION-V2-REG-003",
+        "authorized_recipient": "OWNER-V2-REG-003",
+        "authorized_reason_code": "totp-reseed",
+        "authorized_access_scope": "totp_only",
+        "authorized_preserve_owner": "true"
+      },
+      "source": "synthetic-totp-reseed-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-TOTP-RESEED",
+      "version": "1",
+      "clause_id": "totp-reseed",
+      "text": "Reseed TOTP only with verified original identity and approved recovery authority; avoid duplicate enrollment.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "duplicate_delivery",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "operation_id": "OPERATION-V2-REG-003"
+  },
+  "tags": [
+    "account_recovery",
+    "duplicate_action"
+  ],
+  "critical": true
+}

@@ -1,0 +1,143 @@
+{
+  "$defs": {
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "facts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Facts",
+          "type": "object"
+        },
+        "source": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "facts",
+        "source"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "family_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Family Id",
+      "type": "string"
+    },
+    "sop_family_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Sop Family Id",
+      "type": "string"
+    },
+    "domain": {
+      "enum": [
+        "billing",
+        "refund",
+        "account_recovery"
+      ],
+      "title": "Domain",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "request": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Request",
+      "type": "string"
+    },
+    "as_of": {
+      "format": "date-time",
+      "title": "As Of",
+      "type": "string"
+    },
+    "deadline": {
+      "format": "date-time",
+      "title": "Deadline",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Environment",
+      "type": "object"
+    },
+    "tags": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "critical": {
+      "title": "Critical",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "case_id",
+    "family_id",
+    "sop_family_id",
+    "domain",
+    "tenant_id",
+    "request",
+    "as_of",
+    "deadline",
+    "evidence",
+    "policies",
+    "environment",
+    "tags",
+    "critical"
+  ],
+  "title": "Scenario",
+  "type": "object"
+}

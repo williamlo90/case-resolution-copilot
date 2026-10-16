@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-HLD-012",
+  "family_id": "billing:installment-acceleration",
+  "sop_family_id": "rule:billing:installment-acceleration",
+  "domain": "billing",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle installment acceleration for TARGET-V2-HLD-012.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-012",
+      "facts": {
+        "acceleration_notice": "not_delivered",
+        "requested_target": "TARGET-V2-HLD-012",
+        "original_recipient": "OWNER-V2-HLD-012",
+        "secondary_record": "contradicts_primary"
+      },
+      "source": "synthetic-installment-acceleration-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-INSTALLMENT-ACCELERATION",
+      "version": "1",
+      "clause_id": "installment-acceleration",
+      "text": "Reverse a 2700-unit acceleration fee when required notice was not delivered; contradictory delivery logs require review.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "billing",
+    "conflicting_evidence"
+  ],
+  "critical": true
+}

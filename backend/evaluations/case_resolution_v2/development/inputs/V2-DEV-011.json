@@ -1,0 +1,44 @@
+{
+  "case_id": "V2-DEV-011",
+  "family_id": "refund:storage-loss",
+  "sop_family_id": "rule:refund:storage-loss",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle storage loss for TARGET-V2-DEV-011.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-DEV-011",
+      "facts": {
+        "custody_loss": "confirmed",
+        "requested_target": "TARGET-V2-DEV-011",
+        "original_recipient": "OWNER-V2-DEV-011",
+        "supporting_record": "absent"
+      },
+      "source": "synthetic-storage-loss-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-STORAGE-LOSS",
+      "version": "1",
+      "clause_id": "storage-loss",
+      "text": "Refund a 4500-unit storage fee for confirmed custody loss; require a custody incident record.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "refund",
+    "missing_evidence"
+  ],
+  "critical": true
+}

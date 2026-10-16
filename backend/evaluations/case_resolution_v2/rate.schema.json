@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "numerator": {
+      "minimum": 0,
+      "title": "Numerator",
+      "type": "integer"
+    },
+    "denominator": {
+      "minimum": 0,
+      "title": "Denominator",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "numerator",
+    "denominator"
+  ],
+  "title": "RateObservation",
+  "type": "object"
+}

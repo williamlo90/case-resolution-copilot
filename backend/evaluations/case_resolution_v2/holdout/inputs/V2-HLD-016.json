@@ -1,0 +1,50 @@
+{
+  "case_id": "V2-HLD-016",
+  "family_id": "refund:mixed-tender",
+  "sop_family_id": "rule:refund:mixed-tender",
+  "domain": "refund",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle mixed tender for TARGET-V2-HLD-016.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-016",
+      "facts": {
+        "cash_component_minor": "4500",
+        "requested_target": "TARGET-V2-HLD-016",
+        "original_recipient": "OWNER-V2-HLD-016",
+        "duplicate_request_key": "OPERATION-V2-HLD-016",
+        "authorized_recipient": "OWNER-V2-HLD-016",
+        "authorized_reason_code": "mixed-tender",
+        "authorized_amount_minor": "4500",
+        "authorized_currency": "USD"
+      },
+      "source": "synthetic-mixed-tender-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-MIXED-TENDER",
+      "version": "1",
+      "clause_id": "mixed-tender",
+      "text": "Refund only the 4500-unit cash component to the original payment; duplicate claims must not refund the voucher portion as cash.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2027-01-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "duplicate_delivery",
+    "actor_role": "supervisor",
+    "approval_state": "current",
+    "delivery_count": "2",
+    "operation_id": "OPERATION-V2-HLD-016"
+  },
+  "tags": [
+    "refund",
+    "duplicate_action"
+  ],
+  "critical": true
+}

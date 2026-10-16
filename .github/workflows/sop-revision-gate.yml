@@ -1,0 +1,72 @@
+name: SOP revision gate
+
+on:
+  push:
+    branches: [codex/case-resolution-v2]
+    paths:
+      - backend/**
+      - .github/workflows/sop-revision-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-and-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: replay
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: sop_replay
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U replay -d sop_replay"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://replay:disposable-ci-only@localhost:5432/sop_replay
+      SUPPORT_COPILOT_ALLOW_DESTRUCTIVE_TEST_DATABASE: "1"
+      PHASE3_CONCURRENCY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --group dev
+      - name: Decision controls and previous phase contracts
+        run: >-
+          uv run pytest -q
+          tests/unit/test_sop_revision_decisions.py
+          tests/unit/test_deterministic_decision_engine.py
+          tests/unit/test_governed_policy_service.py
+          tests/unit/test_case_service.py
+          tests/unit/test_case_resolution_v2_contracts.py
+          tests/unit/test_case_resolution_v2_scoring.py
+          tests/unit/test_case_resolution_v2_runner.py
+          --junitxml=../phase3-unit.xml
+      - name: PostgreSQL lifecycle and concurrent publication versus approval
+        run: >-
+          uv run pytest -q
+          tests/integration/test_sop_revision_lifecycle.py
+          tests/integration/test_resolution_lifecycle.py
+          tests/integration/test_governed_policy_api.py
+          --junitxml=../phase3-integration.xml
+      - name: Previous, revised, and rollback SOP replay
+        if: ${{ !cancelled() }}
+        run: uv run python -m scripts.replay_sop_revisions --output ../phase3-replay
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase3-evidence-${{ github.sha }}
+          path: |
+            phase3-unit.xml
+            phase3-integration.xml
+            phase3-replay/
+          retention-days: 30

@@ -18,22 +18,45 @@ The hosted application is invite-only. The public walkthrough contains labelled 
 
 ## Evidence Snapshot
 
-| Metric | Governed coverage | Supporting artifact |
-| ---: | --- | --- |
-| **4** | Specialist, Supervisor, Administrator, and Auditor roles | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
-| **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
-| **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](backend/evaluations/workflow/traceability.json) |
-| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
-| **3/3** | Bounded OpenAI narrative canary passed with deterministic controls preserved and `$0.001077` measured total cost | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
-| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](docs/evidence/developer-workflow-benchmark/REPORT.md) |
+| Result | Measured scope | Evidence |
+| --- | --- | --- |
+| **40/40** | Policy-correct decisions and correct completion on sealed held-out synthetic cases | [V2 evaluation results](docs/evidence/case-resolution-v2/RESULTS.md) |
+| **19/19 actions; 21/21 escalations** | Verified synthetic target actions and required routed/acknowledged escalations | [V2 evaluation results](docs/evidence/case-resolution-v2/RESULTS.md) |
+| **18/18** | Exposed decision replay across three SOP rule families and three dated versions per family | [SOP replay summary](docs/evidence/case-resolution-v2/results/sop-replay.json) |
+| **83.7%** | Lower raw median decision-workflow time in the earlier developer benchmark: 95 s versus 582 s | [Workflow benchmark](docs/evidence/developer-workflow-benchmark/REPORT.md) |
+| **10 passed; 0 HIGH/CRITICAL** | PostgreSQL release tests and findings across three validated demo images | [Release evidence](docs/evidence/case-resolution-v2/PHASE6_RELEASE.md) |
 
-The separate [historical hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
-shows the recorded synthetic workflow from Specialist submission through Supervisor approval,
-controlled execution, duplicate blocking, and Auditor inspection. These are engineering-coverage
-metrics and bounded product evidence, not customer-impact measurements.
+V2 evaluation uses PostgreSQL-backed product APIs, deterministic decision rules and synthetic action
+targets. Labels were authored and reviewed by the implementation agent. These results measure the
+controlled test scenarios, not general model accuracy or customer production outcomes.
 
-The time-saved figure is descriptive benchmark evidence from one operator and three matched
-synthetic cases per condition. It is not presented as a population-level productivity claim.
+The earlier timing benchmark used one operator and three matched synthetic cases per condition;
+complete outcomes were 3/3 with Copilot and 0/3 manually. Its timing is separate from the V2
+40-case evaluation and does not measure speedup between equally successful resolutions.
+
+For the evidence trail, see the [V2 release overview](docs/evidence/case-resolution-v2/README.md).
+
+## Latest Engineering Updates
+
+The V2 source extends the governed workflow with:
+
+- **Verified resolution lifecycle:** target read-back checks the approved operation, parameters,
+  amount, and effect count before closure; reopening and acknowledged escalation retain their
+  own audit events. See the [lifecycle contract](docs/evidence/case-resolution-v2/LIFECYCLE.md).
+- **Dated SOP rules:** refund windows, ownership requirements, and escalation thresholds affect
+  decisions; policy changes invalidate stale approvals, and rollback preserves action history.
+  See [SOP revision evidence](docs/evidence/case-resolution-v2/SOP_REVISIONS.md).
+- **Broader controlled operations:** invoice corrections, recovery-email changes, and session
+  revocation use explicit authorized parameters and a deterministic synthetic target. The
+  [V2 evaluation protocol](docs/evidence/case-resolution-v2/PHASE4_EVALUATION.md) covers the
+  decision, review, action, verification, and resolution APIs.
+
+- **Reproducible release package:** isolated Docker startup, migration/seed, restart, backup/restore,
+  and ten PostgreSQL integration tests passed; all three image scans had zero HIGH/CRITICAL findings.
+  See the [Phase 6 release evidence](docs/evidence/case-resolution-v2/PHASE6_RELEASE.md).
+
+These updates describe the V2 source. The hosted tour documents
+the earlier deployment; the decision-workflow timing benchmark above retains its original scope.
 
 ## Why It Exists
 
@@ -49,8 +72,9 @@ This product is organized around a more useful set of questions:
 ## Product Workflow
 
 ```text
-Case intake -> Triage -> Evidence and policy review -> Decision Brief
-            -> Human review -> Controlled action -> Receipt and reconciliation
+Case intake -> Evidence and applicable SOP -> Decision Brief -> Human approval
+            -> Controlled action -> Target read-back -> Verified closure
+            -> Safe escalation -> Recipient acknowledgement
 ```
 
 - **Cases** prioritizes work by risk, SLA, status, ownership, and source freshness.
@@ -164,20 +188,21 @@ Deterministic providers keep repository verification independent of paid credent
 
 ## Verification Evidence
 
-### Current reconstructed-source verification
+### V2 source and release verification
 
 | Evidence layer | Result |
-| --- | ---: |
-| Release-hardening static checks | Ruff, strict Mypy over 470 backend files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
-| Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
-| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
-| Migration and secret safety | Full Alembic SQL generation passed through revision `0024`; repository secret scan found 0 findings |
+| --- | --- |
+| Source checks | 12/12 passed; Ruff, Mypy over 525 Python files, TypeScript, ESLint, migration, secret, transport, acceptance and traceability checks |
+| Source regressions | 699 backend and 186 frontend tests passed |
+| Sealed product evaluation | 40/40 policy-correct and correct-completion outcomes on synthetic holdout cases |
+| Disposable PostgreSQL release journeys | 10 passed, including migration preservation and unknown-outcome safety after application recreation |
+| Isolated demo release | Startup/restart, seeded logical restore, known-good image/config replacement, and scans of three images passed |
 
-Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
-approval, exactly-once execution, and unknown-outcome reconciliation. This is not a rerun of the
-complete integration suite. Static Alembic SQL generation does not prove that every migration was
-promoted to production, and the bounded OpenAI canary does not prove Google activation.
+The [evidence index](docs/evidence/case-resolution-v2/README.md) records dates, exact tested revisions,
+CI links and scope. The hosted tour shows the earlier deployment; the V2 package is validated in
+isolated CI and has not been promoted to the hosted demo. The earlier
+[V1 regression and provider canary](docs/evidence/case-resolution-evaluation-v1/README.md) remain
+separate supporting evidence.
 
 ### Baseline coverage artifacts
 
@@ -219,6 +244,13 @@ The verifier runs serially and starts no browser, application server, container,
 external model call. See the [backend guide](backend/README.md), [frontend guide](frontend/README.md),
 and [resource policy](RESOURCE_SAFETY_POLICY.md).
 
+For a synthetic full-stack demo on a separate container host, use the
+[Phase 6 demo release guide](docs/runbooks/PHASE6_DEMO_RELEASE.md). Its Compose package builds the
+frontend for production serving, migrates and seeds a disposable database, and checks API and UI
+readiness. The [validated candidate run](https://github.com/williamlo90/case-resolution-copilot/actions/runs/38901537078)
+passed the bounded demo smoke, recovery, database, and image-scan checks. The existing hosted demo
+continues to use Vercel, Neon, and Clerk; Docker does not require a new always-on host.
+
 ## Claim Boundaries
 
 - This is a production-oriented portfolio project and controlled-pilot candidate, not a claim of
@@ -227,7 +259,7 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - No client-owned case source or controlled-action sandbox is connected.
 - Public benchmark records and synthetic controls test the evaluation system; they are not complete
   client cases and do not prove customer impact.
-- Current external gates include disposable-database verification, provider failure drills, restore
+- Current external gates include real-provider verification and failure drills, application restore
   cutover, production telemetry, accessibility research, penetration testing, bounded load testing,
   and complete anonymized client-case validation.
 
@@ -240,6 +272,7 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - [CV, LinkedIn, Upwork, and interview application pack](docs/portfolio/APPLICATION_PACK.md)
 - [API conventions](docs/api/CONVENTIONS.md)
 - [Evaluation strategy](docs/backend/EVALUATION_STRATEGY.md)
+- [V2 release and evidence index](docs/evidence/case-resolution-v2/README.md)
 - [Case Resolution Evaluation V1](docs/evidence/case-resolution-evaluation-v1/README.md)
 - [Wave 1 governed RAG evaluation](backend/evaluations/wave1_rag/README.md)
 - [AWS-ready deployment architecture](docs/architecture/AWS_READY_DEPLOYMENT.md)

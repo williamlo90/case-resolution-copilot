@@ -32,6 +32,8 @@ from app.persistence.models import (
     ResponseDraftModel,
     utc_now,
 )
+from app.persistence.policy_authority import lock_policy_authority
+from app.services.lifecycle_telemetry import LifecycleSpan, emit_span
 
 from ._base import (
     REVIEW_HOLD_MINUTES,
@@ -285,6 +287,7 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
             review_public_id,
             for_update=True,
         )
+        lock_policy_authority(self._session, review.organization_id)
         now = utc_now()
         if review.version != expected_version:
             raise ReviewVersionConflict(
@@ -377,6 +380,15 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
             snapshot_fingerprint=snapshot_fingerprint,
             decided_at=now,
         )
+        emit_span(
+            LifecycleSpan(
+                correlation_id=correlation_id,
+                subject_id=review.public_id,
+                stage="manual_wait",
+                duration_ms=max(0, (now - review.submitted_at).total_seconds() * 1000),
+                outcome="completed",
+            )
+        )
         self._session.add(decision_model)
         reservation.status = ReviewReservationStatus.CONSUMED.value
         reservation.consumed_at = now
@@ -429,8 +441,7 @@ class ReviewWorkflowRepository(ReviewRepositoryBase):
             select(ProposalResponseDraftModel).where(
                 ProposalResponseDraftModel.organization_id == review.organization_id,
                 ProposalResponseDraftModel.case_id == review.case_id,
-                ProposalResponseDraftModel.proposal_version_id
-                == review.proposal_version_id,
+                ProposalResponseDraftModel.proposal_version_id == review.proposal_version_id,
             )
         )
         if approved is None or approved.status != "ready":

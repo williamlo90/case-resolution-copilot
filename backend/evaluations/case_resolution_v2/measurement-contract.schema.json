@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "MetricSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Numerator",
+          "type": "string"
+        },
+        "denominator": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Denominator",
+          "type": "string"
+        },
+        "zero_denominator": {
+          "const": "N/A",
+          "title": "Zero Denominator",
+          "type": "string"
+        },
+        "unit": {
+          "enum": [
+            "fraction",
+            "USD/resolution"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator",
+        "zero_denominator",
+        "unit"
+      ],
+      "title": "MetricSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "case-resolution-v2-contract-1",
+      "title": "Version",
+      "type": "string"
+    },
+    "frozen_on": {
+      "const": "2026-10-13",
+      "title": "Frozen On",
+      "type": "string"
+    },
+    "status": {
+      "const": "design_frozen_not_evaluated",
+      "title": "Status",
+      "type": "string"
+    },
+    "holdout_families": {
+      "const": 40,
+      "title": "Holdout Families",
+      "type": "integer"
+    },
+    "time_study_families": {
+      "const": 12,
+      "title": "Time Study Families",
+      "type": "integer"
+    },
+    "minimum_correct_pairs": {
+      "const": 8,
+      "title": "Minimum Correct Pairs",
+      "type": "integer"
+    },
+    "sop_revisions": {
+      "const": 3,
+      "title": "Sop Revisions",
+      "type": "integer"
+    },
+    "primary_repeats": {
+      "const": 1,
+      "title": "Primary Repeats",
+      "type": "integer"
+    },
+    "policy_correctness_floor": {
+      "maximum": 0.95,
+      "minimum": 0.95,
+      "title": "Policy Correctness Floor",
+      "type": "number"
+    },
+    "completion_floor": {
+      "maximum": 0.9,
+      "minimum": 0.9,
+      "title": "Completion Floor",
+      "type": "number"
+    },
+    "critical_failures_allowed": {
+      "const": 0,
+      "title": "Critical Failures Allowed",
+      "type": "integer"
+    },
+    "timing_terminal_contract": {
+      "const": "same_oracle_both_conditions",
+      "title": "Timing Terminal Contract",
+      "type": "string"
+    },
+    "latency_min_samples": {
+      "const": 100,
+      "title": "Latency Min Samples",
+      "type": "integer"
+    },
+    "latency_stages": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Latency Stages",
+      "type": "array"
+    },
+    "taxonomy": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Taxonomy",
+      "type": "array"
+    },
+    "metrics": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MetricSpec"
+      },
+      "title": "Metrics",
+      "type": "object"
+    }
+  },
+  "required": [
+    "version",
+    "frozen_on",
+    "status",
+    "holdout_families",
+    "time_study_families",
+    "minimum_correct_pairs",
+    "sop_revisions",
+    "primary_repeats",
+    "policy_correctness_floor",
+    "completion_floor",
+    "critical_failures_allowed",
+    "timing_terminal_contract",
+    "latency_min_samples",
+    "latency_stages",
+    "taxonomy",
+    "metrics"
+  ],
+  "title": "MeasurementContract",
+  "type": "object"
+}

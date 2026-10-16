@@ -1,0 +1,182 @@
+{
+  "config_sha256": "a64541d759b7336460330bfd014a6f68ac73d02dca0fe6b9830646338923ecbe",
+  "entries": [
+    {
+      "case_id": "V2-DEV-001",
+      "family_id": "billing:billing-address",
+      "input_sha256": "fc85e0888bd32341128d369f2e83b8c341363b41e74996efc5650aa76995e466",
+      "label_sha256": "7f43693e2176e643cf14e323a25066d790b54c269479d255ad603476e89abc0a",
+      "sop_family_id": "rule:billing:billing-address"
+    },
+    {
+      "case_id": "V2-DEV-002",
+      "family_id": "billing:invoice-draft-currency",
+      "input_sha256": "cfed515c38f041f68a65bc37441b0c321807bb478cec343f49832b795597a145",
+      "label_sha256": "6d6a1ccbb578ff0f975ba81ea2e726f4f7bf0e4acb1c0cbc161eb9c28b94be80",
+      "sop_family_id": "rule:billing:invoice-draft-currency"
+    },
+    {
+      "case_id": "V2-DEV-003",
+      "family_id": "billing:service-suspension",
+      "input_sha256": "11eab1469f88608284ac46d7e62a97b6c0a7540b98e808b97db8c67c6a39980e",
+      "label_sha256": "e59316b3ef7f770bda2808b41723b5764b7f71648dddceba1bd14a7fbfef26a1",
+      "sop_family_id": "rule:billing:service-suspension"
+    },
+    {
+      "case_id": "V2-DEV-004",
+      "family_id": "billing:trial-conversion",
+      "input_sha256": "dd6fba880065275e79760714228e3711ed4407bb413538d25d565388ddf15c7a",
+      "label_sha256": "264f3a4e77f56d9a4c7457ada57cc3b68300ce3d230f416a08a2238d3401cd1c",
+      "sop_family_id": "rule:billing:trial-conversion"
+    },
+    {
+      "case_id": "V2-DEV-005",
+      "family_id": "billing:dunning-contact",
+      "input_sha256": "97b93f9f6cc82eae2518b5c8f607a94b482a321451b6a72aa2e5fde9069a13af",
+      "label_sha256": "5477f247d42913d2f9dbcf9b6c7547076ce86809755b7fc117e81416a6cfa031",
+      "sop_family_id": "rule:billing:dunning-contact"
+    },
+    {
+      "case_id": "V2-DEV-006",
+      "family_id": "billing:invoice-language",
+      "input_sha256": "27e0437978935ed344b09f76f8b516eb6f5df90fb7be56e8ca081b67a1065fdf",
+      "label_sha256": "e66cccbf07cda2bcfde759785323c58fa683b934f4382f866e8d6e82ab17584b",
+      "sop_family_id": "rule:billing:invoice-language"
+    },
+    {
+      "case_id": "V2-DEV-007",
+      "family_id": "billing:seat-overage",
+      "input_sha256": "72f0f6165ab59a1ac526787d3c8baa471fb69c238b73f36c48e83945f0f3ecb3",
+      "label_sha256": "4313e1107b177c17955f736359954a88332c41d11b8868a7fb829999faa518a5",
+      "sop_family_id": "rule:billing:seat-overage"
+    },
+    {
+      "case_id": "V2-DEV-008",
+      "family_id": "billing:purchase-order",
+      "input_sha256": "f5ae191238d43f732b0d4170a48174dc46e0787414951c974d3ffa33a11aefdc",
+      "label_sha256": "4903d6d4e1c1b63424a6e1e6156fe1c3ef439fa38e8e89a05dd0aecf35207d2e",
+      "sop_family_id": "rule:billing:purchase-order"
+    },
+    {
+      "case_id": "V2-DEV-009",
+      "family_id": "refund:event-postponement",
+      "input_sha256": "cfb71463a8f8ca21782c84cf655b505dd8febf8803420025c003029da41ef70f",
+      "label_sha256": "9434882843a5a12372e73266388fc604d73413cd9aa23073cd03d850c01b2cb7",
+      "sop_family_id": "rule:refund:event-postponement"
+    },
+    {
+      "case_id": "V2-DEV-010",
+      "family_id": "refund:warranty-repair",
+      "input_sha256": "e8a992f36c871ab6cfb0cf9416fbfa8b6e92a30972289b72e3198752f07e591d",
+      "label_sha256": "a797ec2ced2a34e417b81382c365a3f75b0bce3f446d663986c065e11be6af24",
+      "sop_family_id": "rule:refund:warranty-repair"
+    },
+    {
+      "case_id": "V2-DEV-011",
+      "family_id": "refund:storage-loss",
+      "input_sha256": "4eea79dadf9c074100d539202cfed29434c622f0a69e28c244e27abed5b01cb3",
+      "label_sha256": "889668764e666d223229abce794f4250933f557e5b8d0276634091aeb10f571c",
+      "sop_family_id": "rule:refund:storage-loss"
+    },
+    {
+      "case_id": "V2-DEV-012",
+      "family_id": "refund:course-withdrawal",
+      "input_sha256": "a331e40accdfa6a571915b17ef25b6de9d2017c95b41330d41b27e37ab2039a2",
+      "label_sha256": "cbfcf1d33434701cde06bdf59d6c00f2a7466fa17d235fceb6df962f5e4d9798",
+      "sop_family_id": "rule:refund:course-withdrawal"
+    },
+    {
+      "case_id": "V2-DEV-013",
+      "family_id": "refund:rental-deposit",
+      "input_sha256": "a7fc68e3b08f860cf15575acf8bd82b85a200873ab17a24823ba770889892bf5",
+      "label_sha256": "904f078ccd5c221f0f042636d33ea23e89c46da8686252232638f81076588229",
+      "sop_family_id": "rule:refund:rental-deposit"
+    },
+    {
+      "case_id": "V2-DEV-014",
+      "family_id": "refund:shipping-upgrade",
+      "input_sha256": "086204145592c288c6b635cb765ac32425c19aebac4c8283bb8f76f91f095253",
+      "label_sha256": "820e43d4168517cf91e9279947db3554e8c01c3ca2c38694f07272f43aade96a",
+      "sop_family_id": "rule:refund:shipping-upgrade"
+    },
+    {
+      "case_id": "V2-DEV-015",
+      "family_id": "refund:app-install",
+      "input_sha256": "8cb14d2b5872e09f495429cde505db2a3848b43fe58dc123e09c309e74d28021",
+      "label_sha256": "4fea913c74359e9530599a1dfb7ed90007b7bd47a1be55b660daa8bcba874fa5",
+      "sop_family_id": "rule:refund:app-install"
+    },
+    {
+      "case_id": "V2-DEV-016",
+      "family_id": "refund:insurance-premium",
+      "input_sha256": "9bcbdab088a65fe5a9ce1e87cea9749dd828b4e4c7ade4f80f0f4da317bb7724",
+      "label_sha256": "e56511fa74e2282c6385f4ea5b77e5d8f3b996eb9f9eec452fd438faf2f08af3",
+      "sop_family_id": "rule:refund:insurance-premium"
+    },
+    {
+      "case_id": "V2-DEV-017",
+      "family_id": "account_recovery:username-rename",
+      "input_sha256": "e31cb1ba7524efb00138d469bdff1adafe4c61d579142d9c11fc160fcd636fa0",
+      "label_sha256": "6cab4c7a382b366955c1a409acaa71bc4d55747b7696ab398fad36c615f78438",
+      "sop_family_id": "rule:account_recovery:username-rename"
+    },
+    {
+      "case_id": "V2-DEV-018",
+      "family_id": "account_recovery:password-reset",
+      "input_sha256": "5306e20774307d9dc9cd8d0a41ccb0986190663b140a17e3c2c7874474e408e3",
+      "label_sha256": "0c588b97d527b2ed0f0655682f5268c88f21b13e6a310f03b5a6c2f86dd6d6bd",
+      "sop_family_id": "rule:account_recovery:password-reset"
+    },
+    {
+      "case_id": "V2-DEV-019",
+      "family_id": "account_recovery:api-key-rotation",
+      "input_sha256": "b9dc6b25da283d212ef0fda9652991be100a66b989a2c687c80de7c0a401d916",
+      "label_sha256": "752f152ec0a8db75c17610f76237140fad34489855ed8d9c418cf5059179f2c8",
+      "sop_family_id": "rule:account_recovery:api-key-rotation"
+    },
+    {
+      "case_id": "V2-DEV-020",
+      "family_id": "account_recovery:session-revocation",
+      "input_sha256": "c76b7ab7274cd10289edaf0a9b30986f225756324bdc961fadd1631a753ebc97",
+      "label_sha256": "330ed9ecf4976b0fb3efefe3846718dbaf916c3a8866925e824e98b9af676318",
+      "sop_family_id": "rule:account_recovery:session-revocation"
+    },
+    {
+      "case_id": "V2-DEV-021",
+      "family_id": "account_recovery:login-rate-limit",
+      "input_sha256": "e5b8cd06f1a66e8978d0e68244dd253d88db2e3982b107aa2e6c6dc9225ad6f5",
+      "label_sha256": "df8e58cfebbf2a3abe98f31fe47265f239c65a823a5e9dfb572ed7b4e4cc6352",
+      "sop_family_id": "rule:account_recovery:login-rate-limit"
+    },
+    {
+      "case_id": "V2-DEV-022",
+      "family_id": "account_recovery:workspace-owner",
+      "input_sha256": "262d99ccec270fe36fba08dbcaadea9a4aca46587da8385fe6a3fea8c66efc79",
+      "label_sha256": "e08f33a197665c9209b562b75c525939853910e23b6a65087f9a4fd7e0b11eb1",
+      "sop_family_id": "rule:account_recovery:workspace-owner"
+    },
+    {
+      "case_id": "V2-DEV-023",
+      "family_id": "account_recovery:oauth-relink",
+      "input_sha256": "86f69eb81bae7796cb387b5da21864fd091bfe6d92ba439eeec82b43702fb444",
+      "label_sha256": "a99021243b5c4b413c8ff5452bac6d58c657efc98d0e5dec66022a2611987113",
+      "sop_family_id": "rule:account_recovery:oauth-relink"
+    },
+    {
+      "case_id": "V2-DEV-024",
+      "family_id": "account_recovery:recovery-email",
+      "input_sha256": "0b619de6d33e36a1c228b82df1881fc94ccd411e122eae5c7c62ece3fb5a60af",
+      "label_sha256": "50fb5cba5a71b74b1c63b19559ed3c90849948f337b092fef96d4d81b5ea7f2e",
+      "sop_family_id": "rule:account_recovery:recovery-email"
+    }
+  ],
+  "model_version": "deterministic-decision-engine-v5",
+  "product_revision": "2f0894221c5160500fac1cb9b265947f69cb30bc",
+  "prompt_version": "decision-brief-rules-v4",
+  "scorer_version": "case-resolution-v2-scorer-2",
+  "sealed_at": null,
+  "seed": 20261013,
+  "split": "development",
+  "state": "exposed",
+  "version": "case-resolution-v2-manifest-1"
+}

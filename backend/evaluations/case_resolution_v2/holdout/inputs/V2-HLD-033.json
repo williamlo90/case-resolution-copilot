@@ -1,0 +1,43 @@
+{
+  "case_id": "V2-HLD-033",
+  "family_id": "account_recovery:hardware-key",
+  "sop_family_id": "rule:account_recovery:hardware-key",
+  "domain": "account_recovery",
+  "tenant_id": "TENANT-SYNTHETIC",
+  "request": "Please handle hardware key for TARGET-V2-HLD-033.",
+  "as_of": "2026-10-13T00:00:00Z",
+  "deadline": "2026-10-14T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-V2-HLD-033",
+      "facts": {
+        "key_loss_report": "verified",
+        "requested_target": "TARGET-V2-HLD-033",
+        "original_recipient": "OWNER-V2-HLD-033"
+      },
+      "source": "synthetic-hardware-key-record"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "POL-HARDWARE-KEY",
+      "version": "1",
+      "clause_id": "hardware-key",
+      "text": "Replace a lost hardware key only under a currently effective key-replacement SOP, preserving existing account ownership.",
+      "effective_from": "2026-01-01T00:00:00Z",
+      "effective_to": "2026-10-01T00:00:00Z",
+      "date_basis": "execution"
+    }
+  ],
+  "environment": {
+    "adapter": "phase4_runtime_required",
+    "fault": "none",
+    "actor_role": "supervisor",
+    "approval_state": "current"
+  },
+  "tags": [
+    "account_recovery",
+    "stale_sop"
+  ],
+  "critical": true
+}

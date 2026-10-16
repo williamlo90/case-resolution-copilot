@@ -1,0 +1,53 @@
+{
+  "evidence_version": 1,
+  "scope": "exposed synthetic SOP decision regression; no completion/holdout claim",
+  "ci_run_url": "https://github.com/williamlo90/case-resolution-copilot/actions/runs/38507144879",
+  "source_revision": "2f0894221c5160500fac1cb9b265947f69cb30bc",
+  "run_date": "2026-10-14T03:37:49.751983+00:00",
+  "correct": 18,
+  "eligible": 18,
+  "case_count": 6,
+  "rule_families": 3,
+  "source_versions": 9,
+  "per_revision": {
+    "refund:v1": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "ownership:v1": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "threshold:v1": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "refund:v2": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "ownership:v2": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "threshold:v2": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "refund:v3": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "ownership:v3": {
+      "correct": 2,
+      "eligible": 2
+    },
+    "threshold:v3": {
+      "correct": 2,
+      "eligible": 2
+    }
+  },
+  "observation_sha256": "fc55b722dfd476bd8c7d2ee3a3bf717d68b3af6c492a2eb109bfb4a528994094",
+  "source_report_sha256": "b06c698585da53757de2dea2c57339a8164706b590704f2d582256f8007a8f66",
+  "label_review": "agent-authored and agent-reviewed; exposed synthetic regression"
+}

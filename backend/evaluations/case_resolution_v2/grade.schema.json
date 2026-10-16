@@ -1,0 +1,101 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "family_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Family Id",
+      "type": "string"
+    },
+    "domain": {
+      "title": "Domain",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "expected_terminal": {
+      "enum": [
+        "verified_resolution",
+        "safe_escalation",
+        "open"
+      ],
+      "title": "Expected Terminal",
+      "type": "string"
+    },
+    "observed_terminal": {
+      "anyOf": [
+        {
+          "enum": [
+            "verified_resolution",
+            "safe_escalation",
+            "open"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Observed Terminal"
+    },
+    "components": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "title": "Components",
+      "type": "object"
+    },
+    "policy_correct": {
+      "title": "Policy Correct",
+      "type": "boolean"
+    },
+    "correct_completion": {
+      "title": "Correct Completion",
+      "type": "boolean"
+    },
+    "automated_resolution": {
+      "title": "Automated Resolution",
+      "type": "boolean"
+    },
+    "verified_actions": {
+      "title": "Verified Actions",
+      "type": "integer"
+    },
+    "action_denominator": {
+      "title": "Action Denominator",
+      "type": "integer"
+    },
+    "failures": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Failures",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "family_id",
+    "domain",
+    "status",
+    "expected_terminal",
+    "observed_terminal",
+    "components",
+    "policy_correct",
+    "correct_completion",
+    "automated_resolution",
+    "verified_actions",
+    "action_denominator",
+    "failures"
+  ],
+  "title": "Grade",
+  "type": "object"
+}
