@@ -1,7 +1,7 @@
 # Checkpoint pembelajaran — Phase 2
 
 Tanggal: 13 Oktober 2026. Gate: **PASS — evaluator, mutation tests, dan corpus freeze**.
-Branch: `codex/case-resolution-v2`. SHA checkpoint adalah commit tunggal yang memuat file ini.
+Branch: `case-resolution-v2`. SHA checkpoint adalah commit tunggal yang memuat file ini.
 
 ## Tujuan
 

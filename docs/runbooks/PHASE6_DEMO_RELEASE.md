@@ -42,7 +42,7 @@ After any restart, inspect every `outcome_unknown` action before resuming execut
 - Binary rollback compatibility or a documented forward-fix/restore path is demonstrated on disposable data. Unknown-outcome recovery is verified after restart.
 - Review the [V2 production readiness tracker](../production-documentation/PRODUCTION_READINESS_TODO.md) before claiming a production release; external activation and live reliability gates remain explicit.
 
-Phase 6 receives one final Git checkpoint on `codex/case-resolution-v2`. Phase 5 is already closed through [historical benchmark reuse](../evidence/case-resolution-v2/PHASE5_BENCHMARK_REUSE.md); no operator timing session is required. The existing Vercel/Neon/Clerk demo remains the hosted path. Docker is the reproducible CI/demo package, not a requirement to purchase a new host. Use the [hosted-update handoff](#existing-hosted-demo) below when promoting V2.
+Phase 6 receives one final Git checkpoint on `case-resolution-v2`. Phase 5 is already closed through [historical benchmark reuse](../evidence/case-resolution-v2/PHASE5_BENCHMARK_REUSE.md); no operator timing session is required. The existing Vercel/Neon/Clerk demo remains the hosted path. Docker is the reproducible CI/demo package, not a requirement to purchase a new host. Use the [hosted-update handoff](#existing-hosted-demo) below when promoting V2.
 
 ## Existing hosted demo
 

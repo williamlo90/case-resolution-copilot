@@ -11,7 +11,7 @@ commits not in GitHub main and lacks later upstream changes; no reset/merge/stas
 In particular `1a88dbb` remains an ancestor of that main checkout even after the separate
 production-validation worktree was archived. Archiving that worktree did not remove this ancestor.
 
-For this checkpoint, `codex/case-resolution-v2` starts from GitHub main `dab033c` in the sibling
+For this checkpoint, `case-resolution-v2` starts from GitHub main `dab033c` in the sibling
 `case-resolution-copilot-v2` worktree. This avoids publishing the old harness as ancestry of
 the new checkpoint. Both worktrees belong to the same Git repository. The original spec and
 baseline hashes/status remain ignored in the main checkout under `local/implementation-specs/`.

@@ -1,7 +1,7 @@
 # Phase 6 — packaging dan release gate
 
 Tanggal: 16 Oktober 2026. Status: **PASS untuk engineering package demo sintetis**.
-Satu commit final pada branch `codex/case-resolution-v2` menjadi checkpoint phase ini.
+Satu commit final pada branch `case-resolution-v2` menjadi checkpoint phase ini.
 
 ## Tujuan
 

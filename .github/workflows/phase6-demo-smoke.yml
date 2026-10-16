@@ -2,7 +2,7 @@ name: Phase 6 isolated demo smoke
 
 on:
   push:
-    branches: [codex/phase6-release-candidate]
+    branches: [phase6-release-candidate]
     paths:
       - ".github/workflows/phase6-demo-smoke.yml"
       - "compose.demo.yaml"

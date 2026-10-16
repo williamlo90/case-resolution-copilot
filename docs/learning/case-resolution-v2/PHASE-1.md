@@ -1,6 +1,6 @@
 # Checkpoint pembelajaran â€” Phase 1
 
-Tanggal: 13 Oktober 2026. Gate: **PASS — lifecycle API dan kontrol terarah**. Branch: `codex/case-resolution-v2`.
+Tanggal: 13 Oktober 2026. Gate: **PASS — lifecycle API dan kontrol terarah**. Branch: `case-resolution-v2`.
 Identitas SHA adalah commit tunggal yang memuat checkpoint ini.
 
 ## Perubahan utama

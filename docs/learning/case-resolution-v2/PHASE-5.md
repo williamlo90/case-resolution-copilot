@@ -2,7 +2,7 @@
 
 Tanggal: 16 Oktober 2026. Status: **selesai pada cakupan revisi pemilik proyek**.
 Identitas checkpoint adalah commit tunggal yang memuat dokumen ini pada branch
-`codex/case-resolution-v2`.
+`case-resolution-v2`.
 
 ## Tujuan dan keputusan
 

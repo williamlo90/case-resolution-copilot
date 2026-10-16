@@ -1,7 +1,7 @@
 # Checkpoint pembelajaran — Phase 0
 
 Tanggal: 13 Oktober 2026. Gate: **PASS — kontrak desain dan skema**, bukan gate kualitas produk.
-Branch checkpoint: `codex/case-resolution-v2`. Identitas SHA tersedia pada commit yang memuat file ini.
+Branch checkpoint: `case-resolution-v2`. Identitas SHA tersedia pada commit yang memuat file ini.
 
 ## Tujuan dan kondisi awal
 
