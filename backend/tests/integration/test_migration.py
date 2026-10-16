@@ -74,6 +74,7 @@ def test_migration_creates_only_approved_core_tables(database: Database) -> None
         "policy_embedding_profiles",
         "governed_policy_clause_embeddings_v2",
         "policy_index_jobs",
+        "case_resolution_events",
     } <= tables
     assert "bookings" not in tables
     assert "customers" not in tables

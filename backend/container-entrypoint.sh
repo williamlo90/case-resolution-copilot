@@ -45,18 +45,18 @@ PY
 fi
 
 if [ "${SUPPORT_COPILOT_DEV_MIGRATE:-false}" = "true" ]; then
-  uv run alembic upgrade head
-  uv run python scripts/ingest_policies.py
+  .venv/bin/alembic upgrade head
+  .venv/bin/python -m scripts.ingest_policies
 fi
 
 if [ "${SUPPORT_COPILOT_DEV_SEED:-false}" = "true" ]; then
-  uv run python scripts/seed_identity.py
-  uv run python scripts/seed_cases.py
-  uv run python scripts/seed_policies.py
-  uv run python scripts/seed_connections.py
-  uv run python scripts/seed_operational_settings.py
-  uv run python scripts/seed_quality.py
-  uv run python scripts/project_notifications.py
+  .venv/bin/python -m scripts.seed_identity
+  .venv/bin/python -m scripts.seed_cases
+  .venv/bin/python -m scripts.seed_policies
+  .venv/bin/python -m scripts.seed_connections
+  .venv/bin/python -m scripts.seed_operational_settings
+  .venv/bin/python -m scripts.seed_quality
+  .venv/bin/python -m scripts.project_notifications
 fi
 
 exec "$@"

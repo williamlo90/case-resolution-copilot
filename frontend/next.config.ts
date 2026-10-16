@@ -7,6 +7,7 @@ const revisionHeaders = /^[0-9a-f]{40}$/.test(sourceRevision ?? "")
   : [];
 
 const nextConfig: NextConfig = {
+  output: process.env.SUPPORT_COPILOT_STANDALONE === "true" ? "standalone" : undefined,
   allowedDevOrigins: ["localhost", "127.0.0.1"],
   async headers() {
     return [

@@ -83,7 +83,7 @@ def test_readback_requires_aware_timestamp() -> None:
         ActionReadback.model_validate(data)
 
 
-def test_consequential_amount_is_part_of_payload_hash():
+def test_consequential_amount_is_part_of_payload_hash() -> None:
     from app.domain.resolution import payload_digest
 
     assert payload_digest("refund", "payment-1", {}, Decimal("10"), "USD") != payload_digest(

@@ -54,6 +54,10 @@ The V2 source extends the governed workflow with:
   [V2 evaluation protocol](docs/evidence/case-resolution-v2/PHASE4_EVALUATION.md) covers the
   decision, review, action, verification, and resolution APIs.
 
+- **Reproducible release package:** isolated Docker startup, migration/seed, restart, backup/restore,
+  and ten PostgreSQL integration tests passed; all three image scans had zero HIGH/CRITICAL findings.
+  See the [Phase 6 release evidence](docs/evidence/case-resolution-v2/PHASE6_RELEASE.md).
+
 These updates describe the V2 source. The hosted tour documents
 the earlier deployment; the decision-workflow timing benchmark above retains its original scope.
 
@@ -241,6 +245,13 @@ The verifier runs serially and starts no browser, application server, container,
 external model call. See the [backend guide](backend/README.md), [frontend guide](frontend/README.md),
 and [resource policy](RESOURCE_SAFETY_POLICY.md).
 
+For a synthetic full-stack demo on a separate container host, use the
+[Phase 6 demo release guide](docs/runbooks/PHASE6_DEMO_RELEASE.md). Its Compose package builds the
+frontend for production serving, migrates and seeds a disposable database, and checks API and UI
+readiness. The [validated candidate run](https://github.com/williamlo90/case-resolution-copilot/actions/runs/38901537078)
+passed the bounded demo smoke, recovery, database, and image-scan checks. The existing hosted demo
+continues to use Vercel, Neon, and Clerk; Docker does not require a new always-on host.
+
 ## Claim Boundaries
 
 - This is a production-oriented portfolio project and controlled-pilot candidate, not a claim of
@@ -249,7 +260,7 @@ and [resource policy](RESOURCE_SAFETY_POLICY.md).
 - No client-owned case source or controlled-action sandbox is connected.
 - Public benchmark records and synthetic controls test the evaluation system; they are not complete
   client cases and do not prove customer impact.
-- Current external gates include disposable-database verification, provider failure drills, restore
+- Current external gates include real-provider verification and failure drills, application restore
   cutover, production telemetry, accessibility research, penetration testing, bounded load testing,
   and complete anonymized client-case validation.
 
