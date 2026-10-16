@@ -219,6 +219,12 @@ The verifier runs serially and starts no browser, application server, container,
 external model call. See the [backend guide](backend/README.md), [frontend guide](frontend/README.md),
 and [resource policy](RESOURCE_SAFETY_POLICY.md).
 
+For a synthetic full-stack demo on a separate container host, use the
+[Phase 6 demo release guide](docs/runbooks/PHASE6_DEMO_RELEASE.md). Its Compose package builds the
+frontend for production serving, migrates and seeds a disposable database, and checks API and UI
+readiness. The isolated CI smoke and release evidence remain required before describing the package
+as a validated release.
+
 ## Claim Boundaries
 
 - This is a production-oriented portfolio project and controlled-pilot candidate, not a claim of

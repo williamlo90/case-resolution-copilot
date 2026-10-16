@@ -7,7 +7,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.domain.resolution import VerificationState
-from app.integrations.action_gateway import DeterministicActionGateway, GatewayBehavior
+from app.integrations.action_gateway import (
+    ActionGatewayRequest,
+    ActionLookupResult,
+    DeterministicActionGateway,
+    GatewayBehavior,
+)
 from app.persistence.database import Database
 from app.persistence.models import (
     CaseActionModel,
@@ -155,8 +160,20 @@ class _MutableReadbackGateway(DeterministicActionGateway):
     observed_status = VerificationState.VERIFIED
     changed_reference = False
 
-    def reconcile(self, **kwargs):
-        result = super().reconcile(**kwargs)
+    def reconcile(
+        self,
+        *,
+        adapter_key: str,
+        provider_type: str,
+        request: ActionGatewayRequest,
+        external_reference: str | None,
+    ) -> ActionLookupResult:
+        result = super().reconcile(
+            adapter_key=adapter_key,
+            provider_type=provider_type,
+            request=request,
+            external_reference=external_reference,
+        )
         if self.changed_reference and result.receipt is not None and result.readback is not None:
             result = result.model_copy(
                 update={
@@ -177,7 +194,9 @@ class _MutableReadbackGateway(DeterministicActionGateway):
         return result
 
 
-def test_timeout_effect_mismatch_and_later_invalidation(database, test_database_url):
+def test_timeout_effect_mismatch_and_later_invalidation(
+    database: Database, test_database_url: str
+) -> None:
     _seed_workspace(database)
     _seed_connections(database)
     app = _app(test_database_url)
@@ -207,6 +226,7 @@ def test_timeout_effect_mismatch_and_later_invalidation(database, test_database_
         assert retry.status_code == 409
         with database.session() as session:
             abandoned = session.scalar(select(CaseActionReconciliationModel))
+            assert abandoned is not None
             abandoned.outcome = "running"
             abandoned.checked_at = utc_now() - timedelta(minutes=6)
         gateway.observed_status = VerificationState.VERIFIED
@@ -255,7 +275,9 @@ def test_timeout_effect_mismatch_and_later_invalidation(database, test_database_
 
 
 @pytest.mark.parametrize("mutation", ["expired", "policy", "payload"])
-def test_stale_authority_blocks_external_execution(database, test_database_url, mutation):
+def test_stale_authority_blocks_external_execution(
+    database: Database, test_database_url: str, mutation: str
+) -> None:
     _seed_workspace(database)
     _seed_connections(database)
     with TestClient(_app(test_database_url)) as client:
@@ -263,6 +285,7 @@ def test_stale_authority_blocks_external_execution(database, test_database_url, 
         action_id = _approve_refund_action(client)
         with database.session() as session:
             action = session.scalar(select(CaseActionModel))
+            assert action is not None
             if mutation == "expired":
                 action.authorization_expires_at = utc_now() - timedelta(seconds=1)
             elif mutation == "policy":
@@ -278,16 +301,20 @@ def test_stale_authority_blocks_external_execution(database, test_database_url, 
         assert session.scalar(select(CaseActionModel.attempt_count)) == 0
 
 
-def test_additive_migration_preserves_old_case_without_fabricating_events(database):
+def test_additive_migration_preserves_old_case_without_fabricating_events(
+    database: Database,
+) -> None:
     config = Config("alembic.ini")
     command.downgrade(config, "20260813_0024")
     _seed_workspace(database)
     with database.session() as session:
         case = session.scalar(select(CaseModel).where(CaseModel.public_id == "CS-2047"))
+        assert case is not None
         case.status = "completed"
         old_id = case.id
     command.upgrade(config, "head")
     with database.session() as session:
         case = session.get(CaseModel, old_id)
+        assert case is not None
         assert case.status == "completed"
         assert list(session.scalars(select(CaseResolutionEventModel))) == []
