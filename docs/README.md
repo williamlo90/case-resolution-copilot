@@ -15,6 +15,7 @@ contracts and operating material used to build and evaluate the application.
 
 - [Case Resolution V2 measurement contract and Phase 0 audit](evidence/case-resolution-v2/CONTRACT.md)
 - [V2 Phase 0 learning checkpoint](learning/case-resolution-v2/PHASE-0.md)
+- [V2 Phase 5 learning checkpoint](learning/case-resolution-v2/PHASE-5.md)
 - [Architecture decisions](adr/README.md)
 - [API conventions](api/CONVENTIONS.md)
 - [Generic SaaS backend contract](backend/GENERIC_SAAS_CONTRACT.md)
@@ -68,6 +69,7 @@ contracts and operating material used to build and evaluate the application.
 - [Hosted deterministic workflow acceptance](evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 - [Hosted connected Gmail draft acceptance](evidence/hosted-connected-draft-acceptance/2026-08-23/README.md)
 - [Developer-operated decision readiness benchmark](evidence/developer-workflow-benchmark/README.md)
+- [V2 Phase 5 workflow benchmark reuse](evidence/case-resolution-v2/PHASE5_BENCHMARK_REUSE.md)
 
 The screenshot evidence from 2026-08-05 predates the repository reconstruction and records the
 predecessor hosted deployment of the same product. The 2026-08-23 connected-draft record tests the

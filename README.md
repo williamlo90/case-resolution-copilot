@@ -32,8 +32,30 @@ shows the recorded synthetic workflow from Specialist submission through Supervi
 controlled execution, duplicate blocking, and Auditor inspection. These are engineering-coverage
 metrics and bounded product evidence, not customer-impact measurements.
 
-The time-saved figure is descriptive benchmark evidence from one operator and three matched
-synthetic cases per condition. It is not presented as a population-level productivity claim.
+The timing result comes from the August 24, 2026 decision-workflow benchmark: one operator,
+three matched synthetic cases per condition, and raw medians of 95 s with Copilot versus 582 s
+manually. Complete workflow outcomes were 3/3 with Copilot and 0/3 manually. It describes elapsed
+time in that benchmark, rather than time savings between equally successful resolutions.
+
+Phase 5 is closed through [reuse of this completed benchmark](docs/evidence/case-resolution-v2/PHASE5_BENCHMARK_REUSE.md).
+
+## Latest Engineering Updates
+
+The V2 source extends the governed workflow with:
+
+- **Verified resolution lifecycle:** target read-back checks the approved operation, parameters,
+  amount, and effect count before closure; reopening and acknowledged escalation retain their
+  own audit events. See the [lifecycle contract](docs/evidence/case-resolution-v2/LIFECYCLE.md).
+- **Dated SOP rules:** refund windows, ownership requirements, and escalation thresholds affect
+  decisions; policy changes invalidate stale approvals, and rollback preserves action history.
+  See [SOP revision evidence](docs/evidence/case-resolution-v2/SOP_REVISIONS.md).
+- **Broader controlled operations:** invoice corrections, recovery-email changes, and session
+  revocation use explicit authorized parameters and a deterministic synthetic target. The
+  [V2 evaluation protocol](docs/evidence/case-resolution-v2/PHASE4_EVALUATION.md) covers the
+  decision, review, action, verification, and resolution APIs.
+
+These updates describe the V2 source. The hosted tour documents
+the earlier deployment; the decision-workflow timing benchmark above retains its original scope.
 
 ## Why It Exists
 
@@ -164,7 +186,7 @@ Deterministic providers keep repository verification independent of paid credent
 
 ## Verification Evidence
 
-### Current reconstructed-source verification
+### Baseline reconstructed-source verification
 
 | Evidence layer | Result |
 | --- | ---: |

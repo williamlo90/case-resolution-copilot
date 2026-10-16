@@ -107,5 +107,9 @@ wrong approval, duplicate effects, false closure and wrong escalation acknowledg
 Phase 3 owns dated policy evolution and captured product failure regressions. Phase 4 owns actual
 holdout observations, validated adapter execution, provider canaries, cost/latency and simulated reopen
 follow-up. `reopen_days` in the oracle declares required future windows; Phase 2 does not score or claim
-7/30-day reopen outcomes. Phase 5 creates a separate timing cohort. The frozen contract thresholds are
+7/30-day reopen outcomes. The original Phase 5 roadmap proposed a separate timing cohort. The frozen contract thresholds are
 unchanged; no benchmark score or CV number is filled by this checkpoint.
+
+The [October 16 Phase 5 scope decision](PHASE5_BENCHMARK_REUSE.md) closes Phase 5 through
+historical decision-workflow benchmark reuse. A new timing cohort is optional future work;
+the frozen evaluator and measurement requirements for any new V2 timing claim remain unchanged.

@@ -47,4 +47,5 @@ sebelum memakai angka dalam portfolio.
 
 Uji ini memakai target sintetis, label yang ditinjau agent, dan CI PostgreSQL;
 hasilnya tidak membuktikan pembayaran produksi, independensi adjudikasi, atau
-penghematan waktu operator. Pengukuran waktu berpasangan adalah Phase 5.
+penghematan waktu operator. [Phase 5](PHASE-5.md) ditutup melalui penggunaan kembali
+benchmark workflow historis pada cakupan revisi; pengukuran waktu V2 baru bersifat opsional.

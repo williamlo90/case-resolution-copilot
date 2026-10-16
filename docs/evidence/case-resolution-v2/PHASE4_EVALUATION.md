@@ -40,7 +40,8 @@ end-to-end and API latency sample counts with p50/p90/p95 only when at least
 latency and infrastructure or combined cost stay N/A without measurements.
 Simulated reopen is not 30 days of production observation. Human approval is
 required for every consequential action; the workflow does not establish a
-hands-free automation rate or the Phase 5 handling-time claim.
+hands-free automation rate or a new handling-time claim. [Phase 5](PHASE5_BENCHMARK_REUSE.md)
+reuses the completed historical decision-workflow benchmark with its original measurement scope.
 
 The runnable result is the `phase4-gate.json`, `report.json`,
 `operations-report.json`, sealed observations and run contract attached to
