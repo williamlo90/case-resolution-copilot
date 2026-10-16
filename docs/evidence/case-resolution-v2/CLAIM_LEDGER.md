@@ -1,26 +1,27 @@
-# V2 claim-to-evidence ledger
+# V2 claim to evidence ledger
 
-2026-10-16: Phase 5 is complete through [historical benchmark reuse](PHASE5_BENCHMARK_REUSE.md).
-The original timing result retains its decision-workflow scope. New V2 timing and production
-claims are not established by that result; V2 quality evidence remains separate. CV Goals stays unchanged.
-The source spec table has five rows; the ledger separates operational cost/latency from
-rollback/recovery into six independently checkable components.
+Final documentation audit: October 16, 2026. Application quality, exposed SOP regression,
+historical operator timing, container validation and AWS architecture evidence are separate lanes.
+The actual CV and its goals document are unchanged; use the
+[application pack](../../portfolio/APPLICATION_PACK.md) for a later CV task.
 
-| ID | Intended claim | Required artifact and metric | Owner phase | Current boundary |
-| --- | --- | --- | --- | --- |
-| C1 | Versioned Decision Brief, deterministic risk and human authority | Persisted input→policy/evidence→brief→bound approval→read-back trace; role/stale-payload negative tests | 1, 3, 4 | Phase 1 bounded lifecycle tests pass; real provider and full product evidence still pending |
-| C2 | Historical decision-workflow timing: 95 s Copilot vs 582 s manual; 83.7% lower raw median | Original report, protocol, raw results and persisted state; one operator, three synthetic cases per condition | 5, revised scope | Complete under benchmark reuse: 3/3 Copilot vs 0/3 manual complete outcomes. Not a both-correct V2 resolution speedup; do not combine with V2 holdout quality |
-| C3 | Safe automation, actual escalation, reopen and verified actions | Operation/routing/ack/resolution-cycle events; all-case automation denominator; simulated 7/30d rates | 1, 4 | No automation claim from an approval-required workflow; no escalation claim from disposition |
-| C4 | Policy correctness across N dated SOP revisions | At least 3 revisions, applicability interval, before/after/rollback cases, actual failure→fix→regression trace; counts per revision and aggregate | 2, 3, 4 | [Phase 3](SOP_REVISIONS.md) supplies exposed deterministic replay; exact-commit CI artifact supplies counts. No holdout or end-to-end completion claim |
-| C5 | p95 and cost per verified resolution | Stage traces with counts; timed profile; model usage/dated price sheet; measured costs divided by correct verified resolutions | 1, 4, 6, 7 | Engine milliseconds, tiny canary and cost/case cannot substitute |
-| C6 | Rollback and uncertain-outcome recovery | Image/config/SOP identity, pending-operation snapshot, restart/read-back trace, effect count, restore evidence when required | 1, 3, 6, 7 | [Phase 6](PHASE6_RELEASE.md) validates known-good image/config replacement, seeded logical restore, and persisted unknown-outcome retry blocking after application recreation. Previous-release binary compatibility, populated action-ledger restore/cutover and real-provider recovery remain separate gates |
+| ID | Supported statement | Exact evidence | Boundary |
+| --- | --- | --- | --- |
+| C1 | Governed decisions and correct terminal outcomes on 40/40 held-out synthetic cases | [Results](RESULTS.md), [aggregate](results/phase4-holdout.json); Oct 14, source `1463826`; [CI 38513662226](https://github.com/williamlo90/case-resolution-copilot/actions/runs/38513662226) | Actual PostgreSQL-backed APIs, deterministic decisions/targets, agent-reviewed labels; not general LLM accuracy or client outcomes |
+| C2 | Historical raw median workflow time 95 s Copilot vs 582 s manual, 83.7% lower | [Original report](../developer-workflow-benchmark/REPORT.md); Aug 24, product `fb54f38`, one operator, three synthetic pairs | Complete outcomes 3/3 vs 0/3; no same-outcome V2 speedup; do not combine with the 40-case quality cohort |
+| C3 | 19/19 verified actions, 21/21 required acknowledged escalations, four duplicate dispatches blocked | [Holdout aggregate](results/phase4-holdout.json); Oct 14, source `1463826` | All consequential actions approval-required; no hands-free automation claim. Day-7/day-30 reopen 4/4 each is simulated replay, not a production rate |
+| C4 | 18/18 exposed decision observations across six cases, three SOP families and three dated versions per family | [Replay aggregate](results/sop-replay.json); Oct 14, source `2f08942`; [CI 38507144879](https://github.com/williamlo90/case-resolution-copilot/actions/runs/38507144879) | Nine source versions, 2/2 per family/version; decision regression, not completion or holdout. [Failure/fix trace](SOP_REVISIONS.md) retained |
+| C5 | API p95 100.8 ms from 468 samples in synthetic CI | [Holdout aggregate](results/phase4-holdout.json); Oct 14, source `1463826` | No cloud/API SLA, end-to-end p95, worker/provider percentile, or combined cost per resolution claim. Provider calls/cost zero in deterministic lane; infrastructure cost unmeasured |
+| C6 | Known-good image/config replacement, seeded logical restore and persisted unknown-outcome safety | [Phase 6 evidence](PHASE6_RELEASE.md); Oct 16, candidate `5dbbbdb`; [CI 38901537078](https://github.com/williamlo90/case-resolution-copilot/actions/runs/38901537078) | Ten PostgreSQL journeys passed; empty action ledger in restore fixture. Previous-binary compatibility, populated restore/cutover, real-provider recovery and RTO/RPO remain separate gates |
 
-Finalization requires exact numerator, denominator, date, source commit, environment and artifact
-link per row. Mark unsupported claims with a truthful narrower alternative; never fill CV
-placeholders from targets. Only a separate CV task may edit the final CV. No external testers,
-customer adoption, production traffic or independent human review are presumed.
+## Deployment and review status
 
-Phase 2 adds the [evaluator and frozen synthetic corpus](EVALUATOR.md). Its mutation tests validate
-scorer sensitivity only. No product observations, holdout accuracy, independent human label review
-or timing improvement were claimed at that checkpoint. Phase 5 now reuses the historical
-decision-workflow benchmark under the scope documented above.
+The existing hosted demo remains Vercel/Neon/Clerk at the revision documented in the
+[release check](PHASE6_RELEASE.md). V2 source and container validation do not imply hosted promotion.
+The [AWS architecture validation](../aws-live-validation/README.md) remains dated September 25
+at source `0a92c4b`; no new V2 AWS deployment/load claim is made. Phase 7 live execution was
+omitted after the scope audit because it was unnecessary for the selected claims.
+
+The [evidence index](README.md) provides the reviewer path. Frozen contracts, original reports,
+labels and observations retain their original meaning; new wording does not change measured data.
+No production traffic, external testers, independent human adjudication, or client adoption is presumed.

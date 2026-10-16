@@ -17,6 +17,7 @@ contracts and operating material used to build and evaluate the application.
 - [V2 Phase 0 learning checkpoint](learning/case-resolution-v2/PHASE-0.md)
 - [V2 Phase 5 learning checkpoint](learning/case-resolution-v2/PHASE-5.md)
 - [V2 Phase 6 learning checkpoint](learning/case-resolution-v2/PHASE-6.md)
+- [V2 Phase 8 learning checkpoint](learning/case-resolution-v2/PHASE-8.md)
 - [Architecture decisions](adr/README.md)
 - [API conventions](api/CONVENTIONS.md)
 - [Generic SaaS backend contract](backend/GENERIC_SAAS_CONTRACT.md)
@@ -58,6 +59,8 @@ contracts and operating material used to build and evaluate the application.
 
 ## Portfolio Evidence
 
+- [V2 release and evidence index](evidence/case-resolution-v2/README.md)
+- [V2 evaluation results](evidence/case-resolution-v2/RESULTS.md)
 - [Engineering case study](portfolio/CASE_STUDY.md)
 - [Application pack for CV, LinkedIn, Upwork, and interviews](portfolio/APPLICATION_PACK.md)
 - [Frozen Governed RAG V2 benchmark](../backend/evaluations/retrieval_v2/README.md)

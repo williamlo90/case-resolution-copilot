@@ -1,242 +1,57 @@
-# Case Resolution Copilot - Engineering Case Study
+# Case Resolution Copilot
 
-For role-specific CV bullets, recruiter copy, and interview positioning, see the
-[application pack](APPLICATION_PACK.md).
+Case Resolution Copilot helps support operators resolve billing, refund and account-access cases
+whose facts are spread across conversations, business records and changing policies. It combines
+a review workspace with deterministic authorization and outcome checks.
 
-## Product Thesis
+## Operator workflow
 
-Most support tools optimize ticket handling and reply speed. Complex cases requiring judgment have
-a different problem: facts are incomplete, policies change over time, authority is limited, and an
-incorrect action may affect a customer account or company finances.
+The operator inspects evidence and the applicable SOP, prepares a source-linked Decision Brief,
+and obtains human approval for consequential changes. The system executes the approved payload,
+reads the target state back, and permits closure only after verification and recorded communication.
+Cases requiring specialist handling are routed and acknowledged; reopening preserves the earlier
+resolution history. Unknown target outcomes block blind retry.
 
-Case Resolution Copilot is a policy-governed decision workspace for those cases. It helps an
-operator understand what happened, identify missing evidence, retrieve the applicable policy
-version, prepare a proposed resolution, obtain human approval, and execute a controlled action
-with an auditable recovery path.
+The Next.js workspace connects to a tenant-scoped FastAPI/PostgreSQL backend. LangGraph coordinates
+the decision flow; optional OpenAI wording cannot grant approval or override application controls.
+Typed, dated SOP rules govern refund windows, ownership proof and escalation thresholds. Policy,
+evidence or payload changes invalidate stale authority.
 
-It is not designed to let an LLM make consequential decisions by itself.
+## Measured results
 
-![Production Cases queue](../evidence/production-demo/01-cases-queue.png)
-
-## Governed Coverage At A Glance
-
-| Metric | What it demonstrates | Evidence |
-| ---: | --- | --- |
-| **4** | Governed roles: Specialist, Supervisor, Administrator, and Auditor | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
-| **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
-| **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](../../backend/evaluations/workflow/traceability.json) |
-| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
-| **3/3** | Bounded OpenAI narrative canary passed with controls preserved and `$0.001077` measured total cost | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
-| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) |
-
-These figures describe governed workflow coverage, traceability, and bounded workflow timing. The
-time-saved figure is descriptive evidence from one operator and three matched synthetic cases per
-condition; it is not a population-level productivity or customer-impact claim.
-
-## Users And Workflow
-
-| Role | Primary responsibility |
+| Evaluation | Result and scope |
 | --- | --- |
-| Specialist | Investigate a case, gather facts, and prepare a resolution |
-| Supervisor | Review proposals and authorize eligible actions |
-| Administrator | Manage team access, policies, settings, and high-risk authority |
-| Auditor | Inspect cases, evidence, quality results, and audit records without changing them |
+| [V2 product holdout](../evidence/case-resolution-v2/RESULTS.md) | 40/40 policy-correct and correct-completion outcomes; 19/19 verified actions and 21/21 acknowledged escalations on synthetic targets |
+| [Dated SOP replay](../evidence/case-resolution-v2/results/sop-replay.json) | 18/18 exposed observations across six cases, three rule families and three dated versions per family |
+| [Earlier workflow benchmark](../evidence/developer-workflow-benchmark/REPORT.md) | Raw median 95 s Copilot vs 582 s manual, 83.7% lower; one developer and three matched pairs; complete outcomes 3/3 vs 0/3 |
+| [Release validation](../evidence/case-resolution-v2/PHASE6_RELEASE.md) | 699 backend and 186 frontend tests; ten PostgreSQL release journeys; startup/restart, seeded restore, image/config recovery, and zero HIGH/CRITICAL findings across three demo images |
 
-The core workflow is:
+The holdout exercised actual PostgreSQL-backed APIs with deterministic decisions and synthetic
+action targets. Labels were agent-authored and agent-reviewed. Results describe these scenarios,
+not general model accuracy or real-client outcomes. The earlier timing benchmark is separate;
+it does not establish speedup between equally successful V2 resolutions.
 
-```mermaid
-flowchart LR
-    A["Case intake"] --> B["Investigation"]
-    B --> C["Policy evidence"]
-    C --> D["Decision Brief"]
-    D --> E["Human review"]
-    E --> F["Controlled action"]
-    F --> G["Receipt and audit trail"]
-    F --> H["Unknown outcome"]
-    H --> I["Reconciliation without blind retry"]
-```
+## Engineering decisions
 
-## What Was Built
+- **Verify outcomes:** receipts acknowledge requests; target read-back must match the operation,
+  destination, parameters, amount and effect count before counting success.
+- **Preserve authority:** immutable review snapshots bind approval to policy, evidence and payload.
+  Restoring old SOP content creates a new version and does not revive an old approval.
+- **Recover without repeating effects:** after application recreation, uncertain action state
+  remains uncertain unless independent target evidence establishes the outcome.
+- **Improve through replay:** a published refund-window rule initially failed to block an invalid
+  proposal. Typed predicates corrected the decision and the case became a regression test.
+  See the [failure and fix](../evidence/case-resolution-v2/SOP_REVISIONS.md).
 
-- A Next.js operational workspace for Cases, Reviews, Actions, Policies, Quality, Connections,
-  Team, and Settings.
-- A FastAPI modular backend with tenant-scoped PostgreSQL persistence.
-- Clerk authentication with backend-owned organizations, memberships, roles, and permissions.
-- Versioned policy governance with applicability rules and immutable evidence bindings.
-- OpenAI-assisted Decision Brief wording wrapped by deterministic facts, policy, risk, and approval
-  controls.
-- Immutable review snapshots so an approval applies to one exact proposal and evidence version.
-- Signed case-intake and controlled-action adapters with replay protection, idempotency,
-  attributable receipts, and unknown-outcome reconciliation.
-- Structured correlated logs, health/readiness contracts, and a bounded pilot-SLO evaluator.
-- Celery async delivery using Redis locally and SQS on AWS for durable inbox and policy-index jobs,
-  including a dead-letter queue, finite retries,
-  status inspection, duplicate-safe execution, and explicit reprocessing.
-- A credential-free governed RAG evaluator with expected-source checks, latency metrics, and
-  sanitized failure events.
-- A live-validated, reproducible ECS/Fargate architecture with RDS PostgreSQL/pgvector, SQS and
-  a dead-letter queue, versioned S3 evidence, Lambda, CloudFront/ALB, least-privilege IAM,
-  CloudWatch, migrations, and an EventBridge Scheduler plus Step Functions auto-destroy watchdog.
-  A bounded AWS run passed connected ingestion and infrastructure checks, then completed verified
-  teardown; the always-on product demo is not hosted on AWS.
-- A LangGraph production orchestration boundary and LangChain Core prompt/schema-format utility,
-  plus isolated CrewAI and AutoGen comparison prototypes that do not affect production behavior.
+## Delivery and review
 
-## Architecture
+The always-on demo uses Vercel, Neon and Clerk. Its hosted screenshots show the earlier deployment;
+V2 is packaged and validated in isolated CI, with a [hosted-update handoff](../runbooks/PHASE6_DEMO_RELEASE.md).
+A separate [September AWS deployment](../evidence/aws-live-validation/README.md) validated ECS/Fargate,
+RDS/pgvector, S3/Lambda/SQS/Celery, worker replacement and teardown. That infrastructure evidence is
+retained; no new V2 AWS load or production-availability claim is made.
 
-```mermaid
-flowchart TB
-    U["Support operator"] --> W["Next.js on Vercel"]
-    W --> C["Clerk session"]
-    W --> A["FastAPI on Vercel"]
-    A --> P["Neon PostgreSQL"]
-    A --> M["OpenAI narrative provider"]
-    A --> S["Signed case source adapter"]
-    A --> X["Controlled action adapter"]
-    A --> L["Structured audit and request logs"]
-```
-
-The browser never owns role authority. FastAPI verifies the Clerk session subject, resolves the
-active internal membership, and authorizes every protected operation from server-owned
-permissions.
-
-The diagram above is the always-on hosted demo: Vercel plus Neon. AWS is a separate, short-lived
-validation target designed to prove ECS/Fargate, RDS/pgvector, SQS, S3/Lambda, CloudFront/ALB, IAM,
-CloudWatch, and automated teardown without maintaining a second always-on environment.
-
-## Important Engineering Decisions
-
-### Human approval is a system boundary
-
-The model can help organize evidence and draft language, but it cannot grant authority. Reviews
-bind the proposal version, policy evidence, risk state, reviewer, and decision into an immutable
-snapshot.
-
-### Unknown outcomes are not ordinary failures
-
-When an external action times out after a request may have reached the provider, the system does
-not retry blindly. It records an unknown side-effect state and uses receipt lookup or
-reconciliation to establish the outcome.
-
-### Policy evidence is versioned
-
-A case records the policy version and evidence that supported the recommendation. Publishing a new
-policy does not silently rewrite historical reasoning.
-
-### Evaluation claims stay task-specific
-
-Public complaint, ombudsman, and transaction datasets remain separate. The project does not combine
-unrelated records into fictional complete business cases or report a misleading aggregate score.
-
-## How This Was Verified
-
-### Current reconstructed source
-
-| Evidence | Result |
-| --- | ---: |
-| Release-hardening static checks | Ruff, Mypy over 470 backend files, TypeScript, and ESLint passed |
-| Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
-| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
-| Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
-
-Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
-approval, exactly-once execution, and unknown-outcome reconciliation. The complete integration
-suite was not rerun.
-
-### Baseline matrices
-
-- The [acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) records
-  54 controls and 71 acceptance variants.
-- The [workflow traceability map](../../backend/evaluations/workflow/traceability.json) records 8
-  scenarios, 19 traceable proofs, and 21 workflow variants.
-
-These are committed baseline coverage artifacts, not a fresh full-release or database rerun.
-
-### Historical hosted evidence
-
-The [deterministic hosted acceptance](../evidence/hosted-e2e-acceptance/2026-08-05/README.md)
-records Specialist submission, Supervisor approval, a completed controlled action with a durable
-receipt, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It was
-captured from the predecessor hosted deployment and is not evidence that the reconstructed commit
-is currently deployed.
-
-### Developer-operated workflow benchmark
-
-In a matched synthetic benchmark, Case Resolution Copilot produced `3/3` complete safe workflow
-outcomes versus `0/3` manually under the same scoring boundary. Raw median elapsed time was `95 s`
-with Copilot versus `582 s` manually, which is `487 s` lower (`83.7%`, `6.1x`). See the
-[workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) for the scoring
-boundary and timing table.
-
-### Historical benchmark evidence
-
-The predecessor deterministic public baseline processed 86 separated records and produced:
-
-| Suite | Records | Accuracy | Macro F1 |
-| --- | ---: | ---: | ---: |
-| CFPB response category | 36 | 0.500 | 0.417 |
-| Financial Ombudsman disposition | 10 | 0.600 | 0.508 |
-| UCI cancellation relationship | 40 | 1.000 | 1.000 |
-
-The UCI result validates an exact matching adapter rule, not general AI reasoning. The baseline is
-not the production Decision Brief model.
-
-Its recorded model-capability lane then produced:
-
-| Suite | Records | Accuracy | Macro F1 | Abstain |
-| --- | ---: | ---: | ---: | ---: |
-| CFPB response category | 36 | 0.000 | 0.000 | 1.000 |
-| Financial Ombudsman disposition | 10 | 0.400 | 0.546 | 0.500 |
-| UCI cancellation relationship | 40 | 1.000 | 1.000 | 0.000 |
-
-On the five FOS records it answered, model accuracy was `0.800`; all 32 FOS evidence quotes were
-grounded. The model treated CFPB as underdetermined, as instructed, and abstained, but the v1
-request layout also caused some CFPB citations to quote instructions or JSON keys. Prompt v2 fixes
-that layout and has not been rescored. These are separate model-capability metrics, not an
-end-to-end product score.
-
-## Historical Hosted Evidence
-
-- Frontend and backend were observed on Vercel in Singapore.
-- Neon PostgreSQL runs in Singapore at deployed revision `20260730_0019`; disposable migration,
-  integration, and query-plan verification preceded active promotion under a seven-day rollback
-  checkpoint.
-- Production Clerk sign-in, protected routing, database-backed case and policy reads, and one
-  OpenAI-assisted Decision Brief refresh passed.
-- Separate Specialist, Supervisor, Administrator, and Auditor identities passed live read and
-  denial journeys.
-- Auditor export authority and read-only conversation behavior were observed live.
-- The authenticated hosted gate passed queue-to-workspace navigation, all workspace tabs, seven
-  operations routes, and desktop/mobile overflow checks after closing a queue adapter defect.
-- A separate deterministic hosted journey completed specialist submission, supervisor approval,
-  one controlled action, durable receipt capture, duplicate protection, and auditor read-only
-  inspection.
-- A screenshot-backed production walkthrough records the queue, Decision Brief, conversation,
-  evidence, activity, policies, quality, actions, and role-denial states.
-
-### Defects found during hosted acceptance
-
-**Blocked connection state was hidden.** The action detail contract initially rejected the valid
-`not_configured` state while the queue discarded its execution blocker. The reconstructed source
-accepts the state and surfaces `Connection unavailable` instead of hiding why execution is blocked.
-
-**An approved terminal review appeared undecided.** After action execution changed the case, stale
-case messaging took precedence over the review's terminal `approved` state. The UI now keeps the
-approval visibly complete and explains that later case changes do not rewrite the recorded review;
-a focused regression covers this state.
-
-## Current Verdict
-
-The project is a **controlled-pilot release candidate** and a production-oriented portfolio
-project. It is not valid to claim general production readiness or validation on complete internal
-business cases.
-
-The remaining evidence boundaries are concise: the reconstructed full release and complete
-guarded PostgreSQL suite still require reruns, external case and action providers remain simulated,
-and no customer-impact claim has been established.
-
-## Resume Summary
-
-> Built an AI-assisted case decision system using Next.js, FastAPI, PostgreSQL, Clerk, and an
-> optional OpenAI provider, with governed policy retrieval, human approval, audit trails,
-> controlled-action recovery, four-role access control, and a blind public-data evaluation lane.
+Start with the [evidence index](../evidence/case-resolution-v2/README.md), use the
+[demo runbook](../runbooks/PHASE6_DEMO_RELEASE.md) for reproduction, or review the
+[application wording](APPLICATION_PACK.md). Live-provider activation, previous-binary compatibility
+and application restore cutover remain separate activation gates.

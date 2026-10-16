@@ -48,3 +48,6 @@ The runnable result is the `phase4-gate.json`, `report.json`,
 the [Phase 4 workflow runs](https://github.com/williamlo90/case-resolution-copilot/actions/workflows/phase4-product-evaluation.yml).
 The artifact's exact commit and gate status govern any numerical claim; the
 existence of this protocol alone is not a passing result.
+
+The finalized [results page](RESULTS.md) and [committed aggregate](results/phase4-holdout.json)
+record the passing October 14 run, including its exact source and artifact hashes.
