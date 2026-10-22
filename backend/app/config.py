@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     auth_mode: Literal["deterministic_development", "provider"] = "deterministic_development"
     model_provider: Literal["deterministic", "openai"] = "deterministic"
+    operator_study_enabled: bool = False
+    operator_study_owner_subject: str = ""
+    operator_study_database_scope: str = ""
     embedding_provider: Literal["deterministic", "openai"] = "deterministic"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     api_host: str = "127.0.0.1"
@@ -167,9 +170,7 @@ class Settings(BaseSettings):
             self.policy_v2_embedding_provider == "openai"
             and self.openai_embedding_model != OPENAI_POLICY_MODEL
         ):
-            raise ValueError(
-                f"OpenAI policy profile requires {OPENAI_POLICY_MODEL}"
-            )
+            raise ValueError(f"OpenAI policy profile requires {OPENAI_POLICY_MODEL}")
         expected_policy_profile = (
             OPENAI_POLICY_PROFILE
             if self.policy_v2_embedding_provider == "openai"
@@ -179,10 +180,7 @@ class Settings(BaseSettings):
             raise ValueError(
                 "policy embedding provider and profile key must describe the same index"
             )
-        if (
-            self.policy_retrieval_mode != "v1"
-            and self.policy_v2_embedding_provider == "openai"
-        ):
+        if self.policy_retrieval_mode != "v1" and self.policy_v2_embedding_provider == "openai":
             raise ValueError(
                 "live OpenAI policy retrieval requires the external activation coordinator"
             )

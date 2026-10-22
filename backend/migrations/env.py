@@ -19,6 +19,7 @@ config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"
 target_metadata = Base.metadata
 
 EXTERNALLY_MANAGED_TABLES = {
+    "operator_study_state",  # Opt-in disposable study schema, initialized by its guarded bootstrap.
     "checkpoint_blobs",
     "checkpoint_migrations",
     "checkpoint_writes",

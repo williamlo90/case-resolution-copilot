@@ -124,6 +124,12 @@ def _translate(error: Exception) -> AppError:
 
 
 def _decision_engine(request: Request) -> DecisionEngine:
+    if getattr(getattr(request.app.state, "settings", None), "operator_study_enabled", False):
+        from app.operator_study.context import manual_engine
+
+        override = manual_engine.get()
+        if override is not None:
+            return override
     return getattr(request.app.state, "decision_engine", DeterministicDecisionEngine())
 
 

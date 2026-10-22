@@ -74,7 +74,7 @@ def case_from_input(scenario: Scenario) -> CaseCreate:
             source=source.id,
             source_reference=source.id,
             status="current",
-            fields={**source.facts, "policy_scope": f"phase4:{scenario.family_id}"},
+            fields={**source.facts, "policy_scope": f"phase4:{scenario.family_id}".lower()},
             captured_at=scenario.as_of,
             freshness=SourceFreshness.CURRENT,
             checked_at=scenario.as_of,

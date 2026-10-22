@@ -255,6 +255,33 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.policy_indexing_service = policy_indexing_service
     app.state.action_gateway = action_gateway
     app.state.inbox_runtime = inbox_runtime
+    if runtime_settings.operator_study_enabled:
+        from sqlalchemy.engine import make_url
+
+        from app.operator_study.context import StudyAuthProvider
+        from app.operator_study.gateway import PersistentStudyGateway
+        from app.operator_study.routes import router as operator_study_router
+
+        study_database_name = (
+            make_url(runtime_settings.database_url).database or ""
+            if runtime_settings.database_url
+            else ""
+        )
+        if (
+            database is None
+            or runtime_settings.operator_study_database_scope != "disposable"
+            or not study_database_name.startswith("operator_study_")
+            or not runtime_settings.operator_study_owner_subject.startswith("user_")
+            or (
+                runtime_settings.environment != "test" and os.environ.get("VERCEL_ENV") != "preview"
+            )
+        ):
+            raise ValueError(
+                "Operator study requires an explicit disposable study database and preview identity"
+            )
+        app.state.auth_provider = StudyAuthProvider(auth_provider)
+        app.state.action_gateway = PersistentStudyGateway(database)
+        app.include_router(operator_study_router)
     app.include_router(
         create_health_router(
             runtime_settings.service_name,

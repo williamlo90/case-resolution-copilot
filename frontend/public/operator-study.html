@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case Resolution V2 — Operator Test</title>
+<style>
+body{font:16px/1.55 system-ui,sans-serif;margin:0;background:#f4f6f8;color:#182536}header,main{max-width:1100px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;gap:20px}h1{font-size:25px;margin:0}h2{font-size:20px}nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}button,select,input,textarea{font:inherit}button{padding:9px 15px;border:1px solid #a7b7c7;border-radius:5px;background:white;color:#18334f;cursor:pointer}button:disabled{opacity:.5;cursor:wait}button.primary{background:#173f65;color:white}section,.box{background:white;padding:22px;border:1px solid #dbe1e8;border-radius:7px;margin:12px 0}label{display:block;margin:12px 0}textarea,input,select{box-sizing:border-box;max-width:100%;padding:8px;border:1px solid #a7b7c7;border-radius:4px}textarea{display:block;width:100%;min-height:80px}input{width:100%}input[type=checkbox]{width:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f6f8;padding:14px;font:14px/1.5 ui-monospace,monospace}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px solid #e2e7ed;text-align:left;padding:7px;overflow-wrap:anywhere}#feedback{white-space:pre-wrap}#feedback.error{border-color:#b33232;color:#8d2323}.actions{display:flex;flex-wrap:wrap;gap:8px}.muted{color:#536679}a{color:#164e7c}.hidden{display:none!important}#clock{font:24px ui-monospace,monospace}
+</style>
+<header><div><h1>Case Resolution V2</h1><div id="status">Studi hosted · Latihan sebelum sesi utama</div></div><div id="clock">00:00</div></header>
+<main>
+<div id="offline" class="box">Stasiun hosted Vercel. Sesi dan hasil tersimpan di database pengujian terpisah.</div>
+<div id="intro" class="box"><p><a href="/operator-study.html?packet=training">Latihan</a> · <a href="/operator-study.html?packet=primary">Sesi utama</a> · <button id="export" type="button">Download hasil JSON</button></p><p>Format: baca sumber → siapkan keputusan → periksa approval dan hasil → simpan.</p><p>Manual: gunakan sumber, Ctrl+F, dan kalkulator. Copilot: gunakan tombol Generate Brief. Kedua mode memakai aturan selesai yang sama.</p><button id="start" class="primary" disabled>Mulai kasus berikutnya</button></div>
+<div id="workspace" class="hidden">
+<nav id="tabs"></nav>
+<section id="ticket" class="view"><h2>1. Helpdesk Ticket</h2><p id="request"></p><div id="meta" class="muted"></div></section>
+<section id="crm" class="view hidden"><h2>2. Customer / CRM Record</h2><div id="crm-data"></div></section>
+<section id="business" class="view hidden"><h2>3. Business Records</h2><div id="business-data"></div></section>
+<section id="policy" class="view hidden"><h2>4. Policy Library</h2><div id="policy-data"></div></section>
+<section id="decision" class="view hidden"><h2>5. Decision Brief</h2>
+<button id="generate">Generate Copilot Brief</button><div id="brief"></div>
+<form id="form">
+<div id="evidence-checks"></div><div id="policy-checks"></div>
+<label>Status kebijakan <select id="policy-status"><option value="">Pilih</option><option value="applicable">Applicable</option><option value="missing">Missing</option><option value="conflicting">Conflicting</option></select></label>
+<label>Keputusan <select id="disposition"><option value="">Pilih</option><option value="resolve">Resolve</option><option value="escalate">Escalate</option></select></label>
+<label>Action type <select id="action-type"><option value="">Pilih jika resolve</option></select></label>
+<label>Parameter tindakan (JSON; external_reference = target). Isi tepat dari sumber. Untuk eskalasi, biarkan {}.<textarea id="parameters" spellcheck="false">{}</textarea></label>
+<label>Blocking items (kode dipisahkan koma; kosong jika tidak ada)<input id="gaps" placeholder=""></label>
+<details><summary>Referensi nama kolom dan kode umum</summary><p>Parameter: external_reference, recipient, reason_code, amount_minor, currency, new_address, locale, purchase_order, new_name, new_email, access_scope, preserve_owner. Sertakan hanya parameter yang diperlukan operasi.</p><p>Blocking items: resolved_record_conflict, verified_supporting_record, authorized_reviewer, fresh_approval, current_policy, policy_precedence. Catat seluruh penghalang yang Anda identifikasi.</p></details>
+<label>Alasan keputusan<textarea id="reason" required></textarea></label>
+<label>Komunikasi kepada pelanggan (rencana / status sebenarnya)<textarea id="communication" required></textarea></label>
+<button class="primary" type="submit">Submit keputusan</button></form>
+</section>
+<section id="outcome" class="view hidden"><h2>6. Approval dan hasil</h2><p>Untuk resolve: Approve → Execute → Inspect Read-back → Record Communication → Close. Untuk eskalasi: Acknowledge → Record Communication. Baca hasil setiap langkah.</p>
+<div class="actions"><button data-command="approve">Approve sebagai reviewer</button><button data-command="execute">Execute</button><button data-command="reconcile">Reconcile jika unknown</button><button data-command="readback">Inspect Read-back</button><button data-command="acknowledge">Acknowledge escalation</button><button data-command="communicate">Record Communication</button><button data-command="close">Close Case</button></div>
+<p class="muted">Role reviewer dan penerima eskalasi disimulasikan oleh operator yang sama. Komunikasi dicatat pada target sintetis; email eksternal tidak dikirim.</p>
+</section>
+<div class="box"><label>Insiden / catatan<textarea id="notes" placeholder="Catat error, gangguan, atau pekerjaan belum selesai."></textarea></label><button id="finish" class="primary">Finish dan simpan hasil</button><p class="muted">Batas 20 menit per kasus. Kasus belum selesai tetap disimpan. Jeda hanya di antara kasus. Jika halaman termuat ulang, sesi dipulihkan dari database dan timer berlanjut.</p></div>
+</div>
+<button id="retry" type="button">Periksa / ulangi perintah yang belum terkonfirmasi</button>
+<div id="feedback" class="box hidden" role="status" aria-live="polite"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const operations=['correct_billing_address','change_draft_currency','regenerate_invoice_locale','credit_removed_seats','attach_purchase_order','refund_course_fee','refund_unstarted_premium','rename_account','revoke_compromised_sessions','change_recovery_email'];
+for(const operation of operations){const option=document.createElement('option');option.value=operation;option.textContent=operation;$('action-type').append(option)}
+const selectedPacket=new URLSearchParams(location.search).get('packet')??'training';
+const packet=['primary','practice','training'].includes(selectedPacket)?selectedPacket:'training';
+let active=null,started=0,busy=false;
+function message(value,error=false){$('feedback').classList.remove('hidden');$('feedback').classList.toggle('error',error);$('feedback').textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}
+async function api(kind,body={}){
+if(busy)throw Error('Tunggu perintah sebelumnya selesai.');busy=true;
+const key='study-pending-'+packet, identity=JSON.stringify({kind,body});
+let pending=JSON.parse(sessionStorage.getItem(key)||'null');
+if(pending&&pending.identity!==identity){busy=false;throw Error('Perintah sebelumnya belum terkonfirmasi. Ulangi perintah itu dahulu; jangan membuat tindakan pengganti.');}
+if(!pending){pending={identity,id:crypto.randomUUID()};sessionStorage.setItem(key,JSON.stringify(pending));}
+try{const response=await fetch('/study/api/'+kind+'?packet='+packet,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,request_id:pending.id})});
+const result=await response.json();if(response.status<500)sessionStorage.removeItem(key);if(!response.ok)throw Error(result.detail||'Perintah gagal');return result;
+}finally{busy=false}}
+
+function show(id){document.querySelectorAll('.view').forEach(view=>view.classList.toggle('hidden',view.id!==id))}
+for(const [id,label] of [['ticket','Ticket'],['crm','CRM'],['business','Business Records'],['policy','Policy'],['decision','Decision Brief'],['outcome','Outcome']]){const button=document.createElement('button');button.textContent=label;button.type='button';button.onclick=()=>show(id);$('tabs').append(button)}
+function table(row){const box=document.createElement('div');const title=document.createElement('h3');title.textContent=row.id;box.append(title);const grid=document.createElement('table');for(const [key,value] of Object.entries(row.facts)){const line=document.createElement('tr');const a=document.createElement('th'),b=document.createElement('td');a.textContent=key;b.textContent=value;line.append(a,b);grid.append(line)}box.append(grid);return box}
+function checkbox(parent,name,value,text){const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.name=name;input.value=value;label.append(input,document.createTextNode(' '+text));$(parent).append(label)}
+async function state(){const response=await fetch('/study/api/state?packet='+packet);if(!response.ok)throw Error('Stasiun belum siap');const data=await response.json();const pending=JSON.parse(sessionStorage.getItem('study-pending-'+packet)||'null');if(pending&&data.last_command?.request_id===pending.id){sessionStorage.removeItem('study-pending-'+packet);message(data.last_command.result,data.last_command.status>=400);}$('status').textContent=`${data.completed}/${data.total} tersimpan · ${data.profile} · berikutnya ${data.next?data.next.case_id+' ('+data.next.condition+')':'selesai'}`;$('start').disabled=data.active||!data.next||!data.ready;if(data.active_task){renderTask(data.active_task);message('Sesi aktif dipulihkan dari database; timer tetap berjalan.');}else if(active){active=null;started=0;$('clock').textContent='00:00';$('workspace').classList.add('hidden');$('intro').classList.remove('hidden');}if(!data.ready)message('Sesi utama masih dikunci sampai pemeriksaan latihan selesai.');return data}
+function renderTask(task){
+active=task;started=performance.now()-(task.elapsed_seconds||0)*1000;
+$('intro').classList.add('hidden');$('workspace').classList.remove('hidden');$('form').reset();$('parameters').value='{}';$('notes').value='';$('brief').replaceChildren();
+$('request').textContent=active.scenario.request;$('meta').textContent=active.case_id+' · '+active.condition+' · '+active.scenario.domain;
+for(const id of ['crm-data','business-data','policy-data','evidence-checks','policy-checks'])$(id).replaceChildren();
+active.scenario.evidence.forEach((row,index)=>{$(index===0?'crm-data':'business-data').append(table(row));checkbox('evidence-checks','evidence',row.id,'Saya memeriksa '+row.id)});
+for(const policy of active.scenario.policies){const title=document.createElement('h3'),text=document.createElement('pre');title.textContent=policy.policy_id+' v'+policy.version;text.textContent=policy.effective_from+' → '+policy.effective_to+'\n\n'+policy.text;$('policy-data').append(title,text);checkbox('policy-checks','policy',policy.policy_id,'Kebijakan yang saya pilih: '+policy.policy_id)}
+$('generate').disabled=active.condition==='manual'||Boolean(task.decision);
+if(task.decision){const pre=document.createElement('pre');pre.textContent=JSON.stringify(task.decision,null,2);$('brief').append(pre);$('reason').value=task.decision.proposal.rationale;$('communication').value=task.decision.response_draft.body;$('gaps').value=task.decision.missing_information.filter(x=>x.blocking).map(x=>x.label.toLowerCase().replaceAll(' ','_')).join(',');$('policy-status').value=task.decision.analysis.policy_status==='relevant'?'applicable':task.decision.analysis.policy_status==='conflicting'?'conflicting':'missing';if(task.actions?.length===1){$('disposition').value='resolve';$('action-type').value=task.actions[0].type;$('parameters').value=JSON.stringify(task.actions[0].parameters,null,2)}else{$('disposition').value='escalate'}}
+if(task.submitted){for(const key of ['reason','communication','disposition'])$(key).value=task.submitted[key]??'';$('action-type').value=task.submitted.action_type??'';$('policy-status').value=task.submitted.policy_status??'';$('parameters').value=JSON.stringify(task.submitted.parameters??{},null,2);$('gaps').value=(task.submitted.gaps??[]).join(',');document.querySelectorAll('input[name=evidence],input[name=policy]').forEach(x=>x.checked=(x.name==='evidence'?task.submitted.evidence_ids:task.submitted.policy_ids).includes(x.value));}
+show(task.submitted?'outcome':'ticket');
+}
+$('retry').onclick=async()=>{try{await state();const pending=JSON.parse(sessionStorage.getItem('study-pending-'+packet)||'null');if(!pending){message('Semua perintah sudah terkonfirmasi.');return;}const intent=JSON.parse(pending.identity);message(await api(intent.kind,intent.body));await state();}catch(error){message(error.message,true)}};
+$('start').onclick=async()=>{try{renderTask(await api('start',{browser:navigator.userAgent}));message('Timer berjalan. Selesaikan kasus lalu Finish.')}catch(error){message(error.message,true)}};
+$('export').onclick=async()=>{try{const response=await fetch('/study/api/export?packet='+packet);if(!response.ok)throw Error('Ekspor belum tersedia');const result=await response.json();const url=URL.createObjectURL(new Blob([JSON.stringify(result,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='case-resolution-'+packet+'-evidence.json';a.click();URL.revokeObjectURL(url)}catch(error){message(error.message,true)}};
+$('generate').onclick=async()=>{try{const result=await api('brief');const decision=result.decision;const pre=document.createElement('pre');pre.textContent=JSON.stringify(decision,null,2);$('brief').replaceChildren(pre);$('reason').value=decision.proposal.rationale;$('communication').value=decision.response_draft.body;$('gaps').value=decision.missing_information.filter(gap=>gap.blocking).map(gap=>gap.label.toLowerCase().replaceAll(' ','_')).join(',');$('disposition').value=result.actions.length?'resolve':'escalate';$('policy-status').value=decision.analysis.policy_status==='relevant'?'applicable':decision.analysis.policy_status==='conflicting'?'conflicting':'missing';if(result.actions.length===1){$('action-type').value=result.actions[0].type;$('parameters').value=JSON.stringify(result.actions[0].parameters,null,2)}message('Brief siap. Verifikasi sumber dan keputusan sebelum submit.')}catch(error){message(error.message,true)}};
+$('form').onsubmit=async event=>{event.preventDefault();try{if(!$('policy-status').value)throw Error('Pilih status kebijakan.');const payload={disposition:$('disposition').value,action_type:$('action-type').value,parameters:JSON.parse($('parameters').value),gaps:$('gaps').value.split(',').map(x=>x.trim()).filter(Boolean),reason:$('reason').value,communication:$('communication').value,evidence_ids:[...document.querySelectorAll('input[name=evidence]:checked')].map(x=>x.value),policy_ids:[...document.querySelectorAll('input[name=policy]:checked')].map(x=>x.value),policy_status:$('policy-status').value};message(await api('submit',payload));show('outcome')}catch(error){message(error.message,true)}};
+document.querySelectorAll('[data-command]').forEach(button=>button.onclick=async()=>{try{message(await api(button.dataset.command))}catch(error){message(error.message,true)}});
+$('finish').onclick=async()=>{try{const result=await api('finish',{notes:$('notes').value});active=null;started=0;$('clock').textContent='00:00';$('workspace').classList.add('hidden');$('intro').classList.remove('hidden');message(result);const current=await state();if(current.completed%6===0&&current.completed<current.total)message('Enam kasus tersimpan. Istirahat minimal 10 menit sebelum blok berikutnya.')}catch(error){message(error.message,true)}};
+setInterval(()=>{if(!active)return;const elapsed=Math.floor((performance.now()-started)/1000);$('clock').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');if(elapsed>=1200&&!busy){$('finish').click()}},1000);
+if(location.protocol==='http:'||location.protocol==='https:'){$('offline').classList.add('hidden');state().catch(error=>message(error.message,true))}
+window.addEventListener('beforeunload',event=>{if(active){event.preventDefault();event.returnValue='Tugas masih aktif';}});
+</script></html>
