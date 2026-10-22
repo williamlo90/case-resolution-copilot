@@ -47,7 +47,17 @@ export function InboxConnectionControls({
   const [state, formAction, pending] = useActionState(
     async (previousState: InboxControlState, formData: FormData) => {
       const operation = String(formData.get("operation")) as ControlOperation;
-      return (actions[operation] ?? unavailableControl)(previousState, formData);
+      const result = await (actions[operation] ?? unavailableControl)(
+        previousState,
+        formData,
+      );
+      return {
+        ...result,
+        connectionState:
+          result.status === "error" || result.connectionState === "unchanged"
+            ? previousState.connectionState
+            : result.connectionState,
+      };
     },
     initialState,
   );

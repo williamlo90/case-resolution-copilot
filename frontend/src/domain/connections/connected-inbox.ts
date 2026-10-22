@@ -155,10 +155,9 @@ export function resolveConnectedInboxStatus(
   ) {
     return "setup_required";
   }
-  if (
-    ["degraded", "unavailable"].includes(status.health) ||
-    ["delayed", "failed"].includes(status.syncStatus)
-  ) {
+  // Synchronization history is shown separately; it does not invalidate a
+  // connected inbox. A sync result requiring reauthorization is handled above.
+  if (["degraded", "unavailable"].includes(status.health)) {
     return "needs_attention";
   }
   return "ready";
