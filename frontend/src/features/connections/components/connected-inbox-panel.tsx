@@ -28,6 +28,19 @@ const statusPresentation = {
   setup_required: { label: "Setup required", tone: "neutral" },
 } as const;
 
+const syncResultLabels = {
+  syncing: "Updating",
+  delayed: "Delayed",
+  failed: "Failed",
+  reauthorize: "Sign in again",
+} as const;
+
+function syncResultLabel(status: InboxConnectionStatus): string {
+  if (status.syncStatus !== "current") return syncResultLabels[status.syncStatus];
+  if (status.lastErrorCode) return "Needs attention";
+  return status.lastSuccessfulSyncAt ? "Succeeded" : "Not yet";
+}
+
 function StartInboxConnection({
   action,
   reconnect = false,
@@ -111,6 +124,15 @@ export function ConnectedInboxPanel({
   const canCreateDrafts = inboxStatus
     ? inboxStatus.capabilities.includes("draft_create")
     : (inbox?.canCreateDrafts ?? false);
+  const syncNeedsAttention = Boolean(
+    inboxStatus && (
+      ["delayed", "failed"].includes(inboxStatus.syncStatus) ||
+      inboxStatus.lastErrorCode
+    ),
+  );
+  const lastSyncResult = inboxStatus
+    ? syncResultLabel(inboxStatus)
+    : undefined;
 
   return (
     <section aria-labelledby="connected-inbox-heading" className="border border-border bg-surface px-5 py-5 sm:px-6">
@@ -148,7 +170,10 @@ export function ConnectedInboxPanel({
                 {canCreateDrafts ? "Conversation and draft access" : "Conversation access only"}
               </p>
             </div>
-            <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs text-muted">Connection</span>
+              <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+            </div>
           </div>
         ) : null}
       </div>
@@ -174,12 +199,23 @@ export function ConnectedInboxPanel({
             </dd>
           </div>
           <div>
-            <dt className="text-muted">Latest update</dt>
+            <dt className="text-muted">Last sync result</dt>
             <dd className="mt-1 font-medium text-primary">
-              {inboxStatus.lastErrorCode ? "Needs attention" : "No reported issue"}
+              {lastSyncResult}
             </dd>
           </div>
         </dl>
+      ) : null}
+
+      {effectiveStatus === "ready" && syncNeedsAttention ? (
+        <p
+          role="note"
+          aria-label="Previous inbox update"
+          className="mt-5 border border-warning/30 bg-warning-bg px-3 py-3 text-xs text-warning"
+        >
+          Your Gmail connection is active. The previous inbox update needs attention.
+          Update now refreshes messages in connected cases.
+        </p>
       ) : null}
 
       {!inbox ? (

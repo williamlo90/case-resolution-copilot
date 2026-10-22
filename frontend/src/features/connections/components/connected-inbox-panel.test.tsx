@@ -1,4 +1,7 @@
-import type { ConnectedInbox } from "@/domain/connections/connected-inbox";
+import type {
+  ConnectedInbox,
+  InboxConnectionStatus,
+} from "@/domain/connections/connected-inbox";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ConnectedInboxPanel } from "./connected-inbox-panel";
@@ -13,6 +16,19 @@ const readyInbox: ConnectedInbox = {
   canReadConversations: true,
   canCreateDrafts: true,
   version: 1,
+};
+
+const connectedStatus: InboxConnectionStatus = {
+  connectionId: readyInbox.id,
+  accountAddress: readyInbox.accountAddress,
+  importMode: "manual",
+  health: "healthy",
+  credentialStatus: "connected",
+  syncStatus: "current",
+  capabilities: ["conversation_read"],
+  lastCheckedAt: readyInbox.lastCheckedAt,
+  lastSuccessfulSyncAt: "2026-08-14T07:00:00.000Z",
+  lastErrorCode: null,
 };
 
 describe("ConnectedInboxPanel", () => {
@@ -50,6 +66,68 @@ describe("ConnectedInboxPanel", () => {
       container.querySelector<HTMLInputElement>('input[name="include_drafts"]')
         ?.value,
     ).toBe("true");
+  });
+
+  it.each([
+    ["failed", "Failed"],
+    ["delayed", "Delayed"],
+  ] as const)("allows draft consent while preserving a %s previous update", (syncStatus, label) => {
+    const { container } = render(
+      <ConnectedInboxPanel
+        inbox={{ ...readyInbox, canCreateDrafts: false }}
+        inboxStatus={{ ...connectedStatus, syncStatus, lastErrorCode: "provider_unavailable" }}
+        connectedWorkspace
+        startAuthorizationAction={async (state) => state}
+      />,
+    );
+
+    expect(screen.getByText("Ready", { selector: "span" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Add draft access" })).toBeEnabled();
+    expect(container.querySelector<HTMLInputElement>('input[name="include_drafts"]')?.value).toBe("true");
+    expect(screen.getByText("Last sync result")).toBeVisible();
+    expect(screen.getByText(label, { selector: "dd" })).toBeVisible();
+    expect(screen.getByText("2026-08-14 07:00 UTC")).toBeVisible();
+    expect(screen.getByRole("note", { name: "Previous inbox update" })).toHaveTextContent("previous inbox update needs attention");
+  });
+
+  it("keeps draft consent unavailable without an administrator action", () => {
+    render(
+      <ConnectedInboxPanel
+        inbox={{ ...readyInbox, canCreateDrafts: false }}
+        inboxStatus={{ ...connectedStatus, syncStatus: "failed" }}
+        connectedWorkspace
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Add draft access" })).not.toBeInTheDocument();
+  });
+
+  it("keeps draft consent unavailable when authorization has expired", () => {
+    render(
+      <ConnectedInboxPanel
+        inbox={{ ...readyInbox, canCreateDrafts: false }}
+        inboxStatus={{ ...connectedStatus, credentialStatus: "expired", syncStatus: "failed" }}
+        connectedWorkspace
+        startAuthorizationAction={async (state) => state}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Sign in again" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Add draft access" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("note", { name: "Previous inbox update" })).not.toBeInTheDocument();
+  });
+
+  it("shows no completed update when the connected inbox has never synchronized", () => {
+    render(
+      <ConnectedInboxPanel
+        inbox={readyInbox}
+        inboxStatus={{ ...connectedStatus, lastSuccessfulSyncAt: null }}
+        connectedWorkspace
+      />,
+    );
+
+    expect(screen.getAllByText("Not yet", { selector: "dd" })).toHaveLength(2);
+    expect(screen.queryByText("Succeeded")).not.toBeInTheDocument();
   });
 
   it("shows recovery instead of inbox operations for expired access", () => {
