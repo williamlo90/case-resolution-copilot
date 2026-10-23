@@ -23,7 +23,7 @@ export async function PracticeWorkspacePage({sessionId,area,resourceId,tab}:{ses
   return <>
     <WorkflowGuidance view={view} area={area} policyAction={policyAction}/>
     {area==="cases" ? <CaseWorkspace key={sessionId} workspace={workspace}
-      prepareBriefAction={!["completed","needs_review"].includes(workspace.case.status) && !action ? step("generate","specialist",workspace.case.version) : undefined}
+      prepareBriefAction={workspace.availableCommands.includes("revise_resolution") && !action ? step("generate","specialist",workspace.case.version) : undefined}
       submitReviewAction={workspace.proposal ? step("submit","specialist",workspace.case.version) : undefined}
       resolution={resolution} resolutionAction={step("close","reviewer",resolution.version)}
       simulated initialTab={tab==="resolution" ? "resolution" : "brief"}

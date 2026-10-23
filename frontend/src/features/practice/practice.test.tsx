@@ -25,3 +25,18 @@ it("creates nothing on page load and retries failed creation with the same key",
   await waitFor(()=>expect(createV2Demo).toHaveBeenCalledTimes(2));
   expect(vi.mocked(createV2Demo).mock.calls[0][1]).toBe(vi.mocked(createV2Demo).mock.calls[1][1]);
 });
+
+it("distinguishes an accepted receipt from timeout and verified readback", async () => {
+  const {practiceOutcome} = await import("./outcome");
+  const action = {action:{id:"AC-1",status:"outcome_unknown"},receipt:null as {external_reference:string}|null};
+  const lifecycle = {events:[] as {kind:string;data:Record<string,unknown>}[]};
+  expect(practiceOutcome({action,lifecycle})).toBe("uncertain");
+  action.receipt={external_reference:"RECEIPT-1"};
+  expect(practiceOutcome({action,lifecycle})).toBe("acknowledged");
+  action.action.status="completed";
+  expect(practiceOutcome({action,lifecycle})).toBe("unchecked");
+  lifecycle.events.push({kind:"action_verified",data:{action_id:"AC-other"}});
+  expect(practiceOutcome({action,lifecycle})).toBe("unchecked");
+  lifecycle.events.push({kind:"action_verified",data:{action_id:"AC-1"}});
+  expect(practiceOutcome({action,lifecycle})).toBe("verified");
+});

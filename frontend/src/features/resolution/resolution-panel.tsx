@@ -72,7 +72,7 @@ export function ResolutionPanel({ data, commandAction, simulated = false }: { da
     <aside className="space-y-6 border-t border-border pt-6 xl:border-l xl:border-t-0 xl:pl-7 xl:pt-0">
       <h3 className="flex items-center gap-2 text-base font-semibold text-primary"><ShieldCheck size={18} />Next step</h3>
       {primary && commandAction ? <ResolutionForm key={`${data.case_id}-${data.version}-${primary}`} kind={primary} data={data} action={commandAction} simulated={simulated} /> :
-        <p className="text-sm leading-6 text-secondary">{complete ? "This case is complete." : verified ? "An authorized reviewer can close this case." : "Open the action to check its target outcome. Closure becomes available only after verification succeeds."}</p>}
+        <p className="text-sm leading-6 text-secondary">{complete ? "This case is complete." : verified ? "An authorized reviewer can close this case." : !data.actions.length ? "Analyze the case and submit the proposed action for review. Its result must be verified before closure." : "Open the action to check its target outcome. Closure becomes available only after verification succeeds."}</p>}
     </aside>
   </section>;
 }
