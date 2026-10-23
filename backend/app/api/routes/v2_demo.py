@@ -11,6 +11,7 @@ from starlette.datastructures import State
 
 from app.api.dependencies.identity import current_actor
 from app.api.errors import AppError
+from app.api.presenters.cases import present_case_workspace
 from app.api.presenters.decision_briefs import present_decision_brief
 from app.api.routes import actions, cases, decision_briefs, policies, resolution, reviews
 from app.api.schemas.actions import ExecuteActionRequest, ReconcileActionRequest
@@ -54,6 +55,7 @@ class DemoCommand(BaseModel):
         "acknowledge",
     ]
     role: DemoRole
+    decision: ReviewDecision = ReviewDecision.APPROVE
     expected_version: int = Field(ge=1)
     command_id: str = Field(min_length=16, max_length=128)
     snapshot_fingerprint: str | None = Field(default=None, min_length=64, max_length=64)
@@ -105,6 +107,13 @@ def _view(request: Request, owner: ActorContext, data: dict[str, Any]) -> dict[s
     actor = demo_actor(owner, data["organization_id"], "reviewer")
     review_id, action_id = _ids(store, data)
     with store.database.session() as session:
+        product_workspace = present_case_workspace(
+            cases._workspace_query(session).get(
+                actor=demo_actor(owner, data["organization_id"], "specialist"),
+                case_id=data["case_id"],
+            ),
+            organization_id=data["organization_id"],
+        ).model_dump(mode="json")
         workspace = CaseService(CaseRepository(session)).get_case(
             actor=actor, case_id=data["case_id"]
         )
@@ -119,6 +128,7 @@ def _view(request: Request, owner: ActorContext, data: dict[str, Any]) -> dict[s
             else None
         )
     return {
+        "workspace": product_workspace,
         "session": {k: data[k] for k in ("session_id", "scenario", "case_id", "created_at")},
         "case": {
             "id": workspace.case.public_id,
@@ -240,7 +250,7 @@ def _command(
             DecideReviewRequest(
                 expected_version=command.expected_version,
                 snapshot_fingerprint=_required(command.snapshot_fingerprint, "snapshot selection"),
-                decision=ReviewDecision.APPROVE,
+                decision=command.decision,
                 reason=command.reason,
             ),
             scoped,

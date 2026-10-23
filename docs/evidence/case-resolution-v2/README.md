@@ -30,7 +30,9 @@ the original runs. This documentation phase did not rerun the holdout or any pai
 
 The [demo release guide](../../runbooks/PHASE6_DEMO_RELEASE.md) provides the isolated Docker
 Config/Up/Smoke/Down path and evaluator CLI. It also documents how to update the existing
-Vercel/Neon/Clerk demo. V2 has not been promoted to that hosted deployment.
+Vercel/Neon/Clerk demo. The V2 backend and authenticated synthetic walkthrough are integrated
+into the hosted application. See the [interactive walkthrough](INTERACTIVE_DEMO.md) for the
+existing-screen workflow; deployment checks remain tied to the corresponding GitHub revision.
 
 AWS infrastructure remains the previously live-validated architecture. The Phase 7 audit found
 no executable infrastructure changes since that run; 43 AWS/worker/config unit tests and parsing
@@ -39,9 +41,7 @@ is needed for this release scope. Live cloud load/reliability validation was not
 
 ## Checkpoints and integration
 
-The phase checkpoints are retained on `case-resolution-v2`; Phase 7 live execution was intentionally
-omitted. [Phase 8](../../learning/case-resolution-v2/PHASE-8.md) records the final documentation gate.
-Integrate through a pull request into `main` while preserving phase commits. The separate candidate
-branch identifies container validation; obsolete working branches can be removed after their
-required evidence and integration state are retained. No merge or hosted promotion is implied
-by the presence of this release documentation.
+The phase checkpoints were merged into `main` with their individual commits preserved.
+Phase 7 live execution was intentionally omitted. [Phase 8](../../learning/case-resolution-v2/PHASE-8.md)
+records the final documentation gate. Subsequent UI changes use pull requests and the same
+required quality gate; the V2 walkthrough also runs disposable PostgreSQL integration tests.

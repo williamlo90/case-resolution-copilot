@@ -28,6 +28,7 @@ export const demoCommandSchema = z.object({
     "acknowledge",
   ]),
   role: demoRoleSchema,
+  decision: z.enum(["approve", "request_changes", "reject", "escalate"]).optional(),
   expected_version: z.number().int().positive(),
   command_id: z.string().min(16).max(128),
   snapshot_fingerprint: z.string().length(64).nullable(),
@@ -178,21 +179,3 @@ export const demoEnvelopeSchema = z.object({ data: demoViewSchema });
 export const demoSessionsSchema = z.object({
   items: z.array(demoSessionSchema),
 });
-
-export const scenarios: { id: DemoScenario; title: string; task: string }[] = [
-  {
-    id: "verified_reopen",
-    title: "1 · Verified resolution & reopen",
-    task: "Prepare → submit → reserve → approve → execute → read back → close → reopen. Prove a receipt alone cannot close the case.",
-  },
-  {
-    id: "sop_revision",
-    title: "2 · SOP revision & rollback",
-    task: "Approve under v1 → publish v2 → try the old action → publish rollback v3 → try again. Both attempts must be blocked with zero effects.",
-  },
-  {
-    id: "timeout_recovery",
-    title: "3 · Timeout & safe recovery",
-    task: "Approve → execute (timeout after commit) → try execute again → reconcile. The original operation must have exactly one effect. Then close with verified proof.",
-  },
-];

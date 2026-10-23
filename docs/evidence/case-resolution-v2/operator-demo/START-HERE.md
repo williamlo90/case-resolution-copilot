@@ -1,6 +1,6 @@
 # V2 walkthrough pack
 
-**Manual: local static workspace. Assisted: existing Vercel app, `/demo/v2`.**
+**Manual: local static workspace. Assisted: existing Vercel app, **Cases / Reviews / Actions / Policies**.**
 
 There are **3 scenarios × 2 modes = 6 tasks**. Start with scenario 1 only. There is no need to finish all tasks in one sitting.
 
@@ -23,12 +23,15 @@ The workspace deliberately does not generate decisions or check policy eligibili
 
 ## Assisted counterpart
 
-1. Sign in to the existing Case Resolution app and open **V2 demo** in the navigation.
-2. Choose the matching scenario and **Create fresh session**. Agent smoke sessions must not be used as your fresh run.
-3. Read the visible task and source evidence. As **Specialist**, generate and inspect the Decision Brief, then submit it.
-4. Switch to **Reviewer**, reserve the review, supply a reason and approve its snapshot.
-5. Follow that scenario's remaining task. For SOP changes, switch to **Policy manager** to publish, then back to Reviewer to attempt execution. For timeout recovery, reload saved state before reconciliation.
-6. Inspect the target effect count and lifecycle, then **Download trace**. References such as `SIM-MESSAGE-01` attest to a simulated message; they do not send Gmail.
+1. Sign in and open **Cases > Try a practice case**. Choose the matching scenario to create isolated sample records. Saved sessions can be resumed from the same section.
+2. Read the request and evidence. Click **Analyze case**, inspect the Decision Brief, then **Submit for review**.
+3. Follow **Open review as reviewer**. Reserve the review, enter a reason and approve. The banner names the simulated role on each page; normal account permissions stay unchanged.
+4. Open the approved action. Execute once, then **Check target outcome**. A receipt alone does not enable closure. The verification summary shows the amount, confirmation reference and number of recorded changes.
+5. Follow **Review evidence and close case**. In **Resolution**, enter a reason and a simulated communication reference such as `SIM-MESSAGE-01`, then close. For scenario 1, reopen with a new reason and evidence reference such as `NEW-EVIDENCE-01`.
+6. For the SOP scenario, after approval follow the policy link, publish the USD 100 limit, then inspect the blocked action. Restore the USD 500 limit as a new revision and confirm the old approval remains blocked. No refund should execute.
+7. For the timeout scenario, execute once and observe **Outcome uncertain**. Reload the page, then **Check target outcome**. The original refund should be verified with one recorded change; close from the case.
+
+Use the existing product screens throughout. The former technical `/demo/v2` page redirects to Cases. References attest to simulated communication and do not send Gmail. Save screenshots of the result and the practice case URL for review; session history persists in the existing database.
 
 ## Terms
 
@@ -42,4 +45,4 @@ The workspace deliberately does not generate decisions or check policy eligibili
 
 This pack demonstrates V2 functionality. Optional stopwatch observations are exploratory: the repeated scenario content and single-operator role simulation do not constitute a held-out controlled timing comparison. Historical benchmark evidence retains its original scope.
 
-No answer key is shown before the operator completes a task. A facilitator validates the exported evidence against the scenario goals above. Results stay local until reviewed; do not commit operator downloads by default.
+A facilitator reviews the saved result against the scenario goals above. Keep operator screenshots and manual downloads local; do not commit them by default.

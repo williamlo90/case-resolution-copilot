@@ -58,6 +58,41 @@ class ResolutionRepository:
             )
         )
 
+    def controls(
+        self, actor: ActorContext, case: CaseModel, history: list[Event]
+    ) -> dict[str, Any]:
+        """Read-only projection; the command rechecks every condition in its transaction."""
+        blocker = None
+        proofs: list[str] = []
+        if case.status != "in_progress":
+            blocker = "Complete and verify the required actions before closing this case."
+        else:
+            try:
+                proofs = self.closure_proofs(case, history)
+            except LifecycleConflict as exc:
+                blocker = str(exc)
+        available = []
+        if Permission.CASE_MANAGE in actor.permissions:
+            if case.status == "completed":
+                available.append("reopened")
+            elif blocker is None and Permission.REVIEW_DECIDE in actor.permissions:
+                available.append("completed")
+        actions = self.session.scalars(
+            select(CaseActionModel).where(
+                CaseActionModel.organization_id == case.organization_id,
+                CaseActionModel.case_id == case.id,
+            )
+        ).all()
+        return {
+            "closure": {
+                "eligible": blocker is None,
+                "blocker": blocker,
+                "verification_ids": proofs,
+            },
+            "available_commands": available,
+            "actions": [{"id": a.public_id, "status": a.status} for a in actions],
+        }
+
     def append(
         self,
         case: CaseModel,

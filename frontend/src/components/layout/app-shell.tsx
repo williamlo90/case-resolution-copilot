@@ -2,7 +2,8 @@
 
 import { UserButton } from "@clerk/nextjs";
 import { Bell, Menu, X } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { PracticeContext } from "@/features/practice/context";
 import { useModalDialog } from "@/components/accessibility/use-modal-dialog";
 import { WorkspaceLink as Link } from "@/components/navigation/workspace-link";
 import { PresentationProvider } from "@/components/providers/presentation-provider";
@@ -34,6 +35,8 @@ export function AppShell({
   providerAuthentication = false,
 }: AppShellProps) {
   const pathname = usePathname();
+  const requestedPractice = useSearchParams()?.get("practice");
+  const practice = requestedPractice && /^VD-[A-F0-9]{16}$/.test(requestedPractice) ? requestedPractice : null;
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const mobileDialogRef = useRef<HTMLElement>(null);
   const mobileCloseButtonRef = useRef<HTMLButtonElement>(null);
@@ -69,14 +72,14 @@ export function AppShell({
     .slice(0, 2)
     .toUpperCase();
   const navigationProps = {
-    organizationName: context.organization.name,
-    workspaceMode,
+    organizationName: practice ? "Practice workspace" : context.organization.name,
+    workspaceMode: practice ? "Practice" : workspaceMode,
     actorName: context.actor.name,
     actorRole: context.actor.role ?? "service",
   };
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <PracticeContext value={practice}><div className="min-h-screen bg-canvas">
       <a
         href="#main-content"
         className="fixed left-3 top-3 z-[60] -translate-y-20 rounded-md bg-action px-3 py-2 text-sm font-semibold text-white focus:translate-y-0"
@@ -201,6 +204,6 @@ export function AppShell({
           </PresentationProvider>
         </main>
       </div>
-    </div>
+    </div></PracticeContext>
   );
 }

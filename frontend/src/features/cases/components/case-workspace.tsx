@@ -28,6 +28,9 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { ResolutionPanel } from "@/features/resolution/resolution-panel";
+import { resolutionHeading } from "@/features/resolution/presentation";
+import type { Resolution } from "@/features/resolution/contract";
 import { CaseDecisionBrief } from "./case-decision-brief";
 import {
   CaseDecisionRail,
@@ -37,13 +40,14 @@ import type { InboxDraftAction } from "@/features/connections/action-contracts";
 import { GmailDraftControl } from "@/features/connections/components/gmail-draft-control";
 import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
 
-type WorkspaceTab = "brief" | "conversation" | "evidence" | "activity";
+type WorkspaceTab = "brief" | "conversation" | "evidence" | "activity" | "resolution";
 
 const tabs: readonly WorkspaceTabItem<WorkspaceTab>[] = [
   { id: "brief", label: "Decision brief", icon: FileText },
   { id: "conversation", label: "Conversation", icon: MessageSquareText },
   { id: "evidence", label: "Evidence", icon: FileCheck2 },
   { id: "activity", label: "Activity", icon: History },
+  { id: "resolution", label: "Resolution", icon: FileCheck2 },
 ];
 
 const CaseConversationPanel = dynamic(
@@ -95,6 +99,10 @@ export function CaseWorkspace({
   deliverDraftAction,
   reconcileDraftAction,
   initialDraftDelivery,
+  resolution,
+  resolutionAction,
+  simulated = false,
+  initialTab = "brief",
 }: {
   workspace: CaseWorkspaceModel;
   workflowActions?: readonly WorkflowControl[];
@@ -109,8 +117,12 @@ export function CaseWorkspace({
   deliverDraftAction?: InboxDraftAction;
   reconcileDraftAction?: InboxDraftAction;
   initialDraftDelivery?: InboxDraftDelivery | null;
+  resolution?: Resolution;
+  resolutionAction?: ServerCommand;
+  simulated?: boolean;
+  initialTab?: WorkspaceTab;
 }) {
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>("brief");
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>(initialTab);
   const status = resolveCaseWorkspaceStatus(workspace, initialDraftDelivery);
 
   return (
@@ -161,8 +173,12 @@ export function CaseWorkspace({
             </div>
           </div>
 
+          {resolution ? <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-canvas px-4 py-3">
+            <p className="text-sm font-medium text-primary">{resolutionHeading(resolution)}</p>
+            <button type="button" onClick={() => setActiveTab("resolution")} className="text-sm font-semibold text-info hover:underline">{resolution.status === "completed" ? "View closure or reopen" : resolution.closure.eligible ? "Review evidence and close" : "View outcome and next step"}</button>
+          </div> : null}
           <WorkspaceTabs
-            items={tabs}
+            items={resolution ? tabs : tabs.filter(tab => tab.id !== "resolution")}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             label="Case workspace sections"
@@ -172,6 +188,9 @@ export function CaseWorkspace({
       </header>
 
       <div className="mx-auto max-w-[1540px]">
+        {activeTab === "resolution" && resolution ? <div id="case-panel-resolution" role="tabpanel" aria-labelledby="case-panel-tab-resolution">
+          <ResolutionPanel data={resolution} commandAction={resolutionAction} simulated={simulated} />
+        </div> : null}
         {activeTab === "brief" ? (
           <div
             id="case-panel-brief"
