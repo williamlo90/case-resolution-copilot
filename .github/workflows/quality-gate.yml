@@ -7,7 +7,6 @@ on:
     paths:
       - ".github/workflows/quality-gate.yml"
       - "README.md"
-      - "compose.demo.yaml"
       - "backend/**"
       - "!backend/*.md"
       - "!backend/**/*.md"
@@ -20,8 +19,6 @@ on:
       - "docs/runbooks/**"
       - "docs/architecture/**"
       - "deploy/aws/**"
-      - "deploy/demo/**"
-      - "scripts/demo-compose.ps1"
       - "infra/aws/**"
   workflow_dispatch:
 

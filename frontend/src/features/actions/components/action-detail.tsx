@@ -59,7 +59,8 @@ function CommandPanel({
           {commands.includes("record_manual_outcome") ? (
             <label className="grid gap-2 text-xs font-semibold text-primary">
               Recovery observation
-              <select name="outcome" defaultValue="not_completed" className="h-10 rounded-md border border-border bg-surface px-3 text-sm font-normal">
+              <select name="outcome" defaultValue="completed" className="h-10 rounded-md border border-border bg-surface px-3 text-sm font-normal">
+                <option value="completed">Completed with external evidence</option>
                 <option value="not_completed">No completion evidence yet</option>
               </select>
             </label>

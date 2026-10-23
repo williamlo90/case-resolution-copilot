@@ -9,7 +9,7 @@ export const QualityCategorySchema = z.enum([
 export const QualityMetricSchema = z.object({
   key: z.string().min(1),
   label: z.string().min(1),
-  value: z.number().nullable(),
+  value: z.number(),
   unit: z.string().min(1),
   numerator: z.number().int().nonnegative().nullable(),
   denominator: z.number().int().nonnegative().nullable(),

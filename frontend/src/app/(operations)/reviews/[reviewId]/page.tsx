@@ -2,16 +2,12 @@ import { getReviewRepository } from "@/data/reviews/review-repository-provider";
 import { getAdministrationRepository } from "@/data/administration/administration-repository-provider";
 import { ReviewWorkspace } from "@/features/reviews/components/review-workspace";
 import { notFound } from "next/navigation";
-import { practiceId, type PageSearch } from "@/features/practice/data";
-import { PracticeWorkspacePage } from "@/features/practice/workspace-page";
 import { decideReview, reserveReview } from "../../_actions/reviews";
 
 export const dynamic = "force-dynamic";
 
-export default async function ReviewWorkspacePage({ params, searchParams }: { params: Promise<{ reviewId: string }>; searchParams: PageSearch }) {
+export default async function ReviewWorkspacePage({ params }: { params: Promise<{ reviewId: string }> }) {
   const { reviewId } = await params;
-  const practice = practiceId((await searchParams).practice);
-  if (practice) return <PracticeWorkspacePage sessionId={practice} area="reviews" resourceId={reviewId}/>;
   const repository = getReviewRepository();
   const [snapshot, context] = await Promise.all([
     repository.getReviewSnapshot(reviewId),

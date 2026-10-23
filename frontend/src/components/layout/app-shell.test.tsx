@@ -4,7 +4,6 @@ import { AppShell } from "./app-shell";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/cases",
-  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("AppShell", () => {

@@ -13,7 +13,6 @@ def test_eventually_consistent_lookup_misses_never_unlock_retry() -> None:
         reconciliation_outcome_for_lookup(
             found=found,
             absence_is_terminal=False,
-            verified=found is True,
         )
         for found in observations
     ]
@@ -27,31 +26,13 @@ def test_eventually_consistent_lookup_misses_never_unlock_retry() -> None:
 
 
 def test_only_explicit_terminal_absence_can_unlock_a_safe_retry() -> None:
-    assert (
-        reconciliation_outcome_for_lookup(
-            found=False,
-            absence_is_terminal=True,
-        )
-        is ReconciliationOutcome.CONFIRMED_ABSENT
-    )
+    assert reconciliation_outcome_for_lookup(
+        found=False,
+        absence_is_terminal=True,
+    ) is ReconciliationOutcome.CONFIRMED_ABSENT
 
 
 def test_manual_not_completed_note_keeps_the_outcome_unknown() -> None:
-    assert (
-        reconciliation_outcome_for_manual_record(ManualActionOutcome.NOT_COMPLETED)
-        is ReconciliationOutcome.STILL_UNKNOWN
-    )
-
-
-def test_found_receipt_without_verified_readback_is_unknown() -> None:
-    assert (
-        reconciliation_outcome_for_lookup(found=True, absence_is_terminal=False)
-        is ReconciliationOutcome.STILL_UNKNOWN
-    )
-
-
-def test_manual_completed_note_is_not_target_verification() -> None:
-    assert (
-        reconciliation_outcome_for_manual_record(ManualActionOutcome.COMPLETED)
-        is ReconciliationOutcome.STILL_UNKNOWN
-    )
+    assert reconciliation_outcome_for_manual_record(
+        ManualActionOutcome.NOT_COMPLETED
+    ) is ReconciliationOutcome.STILL_UNKNOWN

@@ -12,7 +12,6 @@ from app.domain.cases import (
     CaseStatus,
     CaseWorkspaceRecord,
     DraftConcurrencyConflict,
-    InvalidCaseTransition,
     MessageAuthorType,
     MessageChannel,
 )
@@ -79,8 +78,6 @@ class CaseCommandRepository(CaseRepositoryBase):
         target: CaseStatus,
         correlation_id: str,
     ) -> CaseWorkspaceRecord:
-        if target is CaseStatus.COMPLETED:
-            raise InvalidCaseTransition("Use verified lifecycle closure to complete a case.")
         case = self._required_case(organization_public_id, case_public_id)
         previous_status = case.status
         updated = self._update_case(

@@ -13,7 +13,6 @@ from app.persistence.models import (
     GovernedPolicyVersionModel,
     PolicyModel,
 )
-from app.persistence.policy_authority import selected_version
 
 from ._base import _json_dimension_match
 
@@ -67,7 +66,7 @@ def build_retrieval_filters(
         base=base,
         category=category,
         applicable=context,
-        active_match=and_(context, effective, selected_version(as_of)),
+        active_match=and_(context, effective),
     )
 
 
@@ -115,7 +114,8 @@ def active_index_is_complete(
         .join(
             GovernedPolicyVersionModel,
             and_(
-                GovernedPolicyVersionModel.organization_id == PolicyModel.organization_id,
+                GovernedPolicyVersionModel.organization_id
+                == PolicyModel.organization_id,
                 GovernedPolicyVersionModel.policy_id == PolicyModel.id,
             ),
         )
@@ -130,18 +130,15 @@ def active_index_is_complete(
         .where(*filters.active)
     )
     total = session.scalar(base) or 0
-    indexed = (
-        session.scalar(
-            base.join(
-                embedding,
-                and_(
-                    embedding.organization_id == clause.organization_id,
-                    embedding.clause_id == clause.id,
-                    embedding.profile_id == profile_id,
-                    embedding.source_content_hash == clause.content_hash,
-                ),
-            )
+    indexed = session.scalar(
+        base.join(
+            embedding,
+            and_(
+                embedding.organization_id == clause.organization_id,
+                embedding.clause_id == clause.id,
+                embedding.profile_id == profile_id,
+                embedding.source_content_hash == clause.content_hash,
+            ),
         )
-        or 0
-    )
+    ) or 0
     return total > 0 and total == indexed

@@ -11,6 +11,7 @@ from app.domain.actions import (
     ManualActionOutcome,
 )
 from app.domain.identity import ActorContext, Permission
+from app.domain.retired_actions import RETIRED_ACTION_TYPES
 from app.integrations.action_gateway import (
     ActionGateway,
     ActionGatewayError,
@@ -20,7 +21,6 @@ from app.integrations.action_gateway import (
 from app.persistence.action_repository import ActionRepository
 from app.persistence.database import Database
 from app.security.authorization import require_permission
-from app.services.lifecycle_telemetry import stage_span
 
 
 class ActionQueryStore(Protocol):
@@ -157,7 +157,7 @@ class ActionCommandService:
         correlation_id: str,
     ) -> ActionQueueItemRecord:
         require_permission(actor, Permission.ACTION_RECONCILE)
-        with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+        with self._database.session() as session:
             lease = ActionRepository(session).prepare_reconciliation(
                 organization_public_id=actor.organization_id,
                 action_public_id=action_id,
@@ -170,18 +170,15 @@ class ActionCommandService:
             action_type=lease.action_type,
             target=lease.target,
             parameters=lease.parameters,
-            impact_amount=lease.impact_amount,
-            impact_currency=lease.impact_currency,
             idempotency_key=lease.idempotency_key,
         )
         try:
-            with stage_span(correlation_id, action_id, "tool"):
-                result = self._gateway.reconcile(
-                    adapter_key=lease.adapter_key,
-                    provider_type=lease.provider_type,
-                    request=request,
-                    external_reference=lease.external_reference,
-                )
+            result = self._gateway.reconcile(
+                adapter_key=lease.adapter_key,
+                provider_type=lease.provider_type,
+                request=request,
+                external_reference=lease.external_reference,
+            )
         except Exception:
             result = ActionLookupResult(
                 found=None,
@@ -191,11 +188,7 @@ class ActionCommandService:
                     "and retry is still blocked."
                 ),
             )
-        with (
-            stage_span(correlation_id, action_id, "verification"),
-            stage_span(correlation_id, action_id, "db"),
-            self._database.session() as session,
-        ):
+        with self._database.session() as session:
             return ActionRepository(session).finish_reconciliation(
                 lease=lease,
                 result=result,
@@ -213,7 +206,7 @@ class ActionCommandService:
         correlation_id: str,
     ) -> ActionQueueItemRecord:
         require_permission(actor, Permission.ACTION_RECONCILE)
-        with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+        with self._database.session() as session:
             return ActionRepository(session).record_manual_outcome(
                 organization_public_id=actor.organization_id,
                 action_public_id=action_id,
@@ -234,7 +227,7 @@ class ActionCommandService:
         correlation_id: str,
     ) -> ActionQueueItemRecord:
         require_permission(actor, Permission.ACTION_RECONCILE)
-        with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+        with self._database.session() as session:
             return ActionRepository(session).escalate(
                 organization_public_id=actor.organization_id,
                 action_public_id=action_id,
@@ -254,7 +247,7 @@ class ActionCommandService:
         correlation_id: str,
     ) -> ActionQueueItemRecord:
         require_permission(actor, Permission.ACTION_EXECUTE)
-        with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+        with self._database.session() as session:
             lease = ActionRepository(session).prepare_execution(
                 organization_public_id=actor.organization_id,
                 action_public_id=action_id,
@@ -268,19 +261,16 @@ class ActionCommandService:
             action_type=lease.action_type,
             target=lease.target,
             parameters=lease.parameters,
-            impact_amount=lease.impact_amount,
-            impact_currency=lease.impact_currency,
             idempotency_key=lease.idempotency_key,
         )
         try:
-            with stage_span(correlation_id, action_id, "tool"):
-                receipt = self._gateway.execute(
-                    adapter_key=lease.adapter_key,
-                    provider_type=lease.provider_type,
-                    request=request,
-                )
+            receipt = self._gateway.execute(
+                adapter_key=lease.adapter_key,
+                provider_type=lease.provider_type,
+                request=request,
+            )
         except ActionGatewayError as exc:
-            with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+            with self._database.session() as session:
                 return ActionRepository(session).finish_execution_error(
                     lease=lease,
                     error=exc,
@@ -293,13 +283,13 @@ class ActionCommandService:
                 side_effect_state=ActionSideEffectState.POSSIBLE,
                 retryable=False,
             )
-            with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+            with self._database.session() as session:
                 return ActionRepository(session).finish_execution_error(
                     lease=lease,
                     error=unknown,
                     correlation_id=correlation_id,
                 )
-        with stage_span(correlation_id, action_id, "db"), self._database.session() as session:
+        with self._database.session() as session:
             return ActionRepository(session).finish_execution_success(
                 lease=lease,
                 receipt=receipt,
@@ -312,6 +302,8 @@ def available_action_commands(
     actor: ActorContext,
     item: ActionQueueItemRecord,
 ) -> list[ActionCommand]:
+    if item.bundle.action.type in RETIRED_ACTION_TYPES:
+        return []
     status = item.bundle.action.status
     latest_attempt = item.bundle.attempts[-1] if item.bundle.attempts else None
     has_unknown_outcome = bool(
@@ -325,9 +317,7 @@ def available_action_commands(
         elif status is ActionStatus.FAILED_SAFE:
             commands.append(ActionCommand.RETRY_SAFE)
     if actor.can(Permission.ACTION_RECONCILE):
-        if status is ActionStatus.COMPLETED:
-            commands.append(ActionCommand.RECONCILE)
-        elif status is ActionStatus.OUTCOME_UNKNOWN or (
+        if status is ActionStatus.OUTCOME_UNKNOWN or (
             status is ActionStatus.RECOVERY_REQUIRED and has_unknown_outcome
         ):
             if item.bundle.connection.adapter_key != "unconfigured":

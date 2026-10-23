@@ -51,7 +51,7 @@ class CaseQualityProjectionRecord(BaseModel):
 class QualityMetricRecord(BaseModel):
     key: str
     label: str
-    value: int | float | None
+    value: int | float
     unit: str
     numerator: int | None = None
     denominator: int | None = None

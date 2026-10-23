@@ -18,7 +18,6 @@ from app.persistence.models import (
     OrganizationModel,
     utc_now,
 )
-from app.persistence.policy_authority import lock_policy_authority
 
 from ._base import (
     ActionRepositoryBase,
@@ -46,7 +45,6 @@ class ActionExecutionRepository(ActionRepositoryBase):
             action_public_id,
             for_update=True,
         )
-        lock_policy_authority(self._session, action.organization_id)
         now = utc_now()
         self._reconcile_abandoned(action=action, now=now)
         if action.version != expected_version:
@@ -145,8 +143,6 @@ class ActionExecutionRepository(ActionRepositoryBase):
             action_type=action.type,
             target=action.target,
             parameters=dict(action.typed_parameters),
-            impact_amount=action.impact_amount,
-            impact_currency=action.impact_currency,
             idempotency_key=action.idempotency_key,
             adapter_key=connection.adapter_key,
             provider_type=connection.provider_type,
@@ -173,25 +169,26 @@ class ActionExecutionRepository(ActionRepositoryBase):
             receipt=receipt,
             now=now,
         )
-        attempt.outcome = ActionAttemptOutcome.UNKNOWN.value
-        attempt.side_effect_state = ActionSideEffectState.POSSIBLE.value
-        attempt.detail = "The target acknowledged the request; read-back verification is required."
+        attempt.outcome = ActionAttemptOutcome.SUCCEEDED.value
+        attempt.side_effect_state = ActionSideEffectState.CONFIRMED.value
+        attempt.detail = "The target confirmed the change and returned an attributable receipt."
         attempt.response_fingerprint = _hash(receipt.model_dump(mode="json"))
         attempt.finished_at = now
-        action.status = ActionStatus.OUTCOME_UNKNOWN.value
+        action.status = ActionStatus.COMPLETED.value
         action.execution_blocker = None
         action.observed_outcome = (
-            f"Target acknowledged {stored_receipt.external_reference}; verification pending "
+            f"Target confirmed {stored_receipt.external_reference} "
             f"with status {stored_receipt.status}."
         )
         action.version += 1
         action.updated_at = now
+        self._advance_case_after_completion(action, now=now)
         self._add_audit(
             action=action,
-            event_type="case.action_acknowledged",
+            event_type="case.action_completed",
             actor_type="member",
             actor_id=attempt.actor_public_id,
-            summary="The target acknowledged the request; its outcome is not yet verified.",
+            summary="The target confirmed the controlled action.",
             data={
                 "attempt_id": attempt.public_id,
                 "receipt_id": stored_receipt.public_id,

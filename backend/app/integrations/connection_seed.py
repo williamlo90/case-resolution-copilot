@@ -6,7 +6,6 @@ from app.domain.connections import (
     ConnectionSeed,
     CredentialStatus,
 )
-from app.domain.controlled_operations import OPERATIONS
 
 
 def deterministic_connection_seeds(
@@ -27,12 +26,10 @@ def deterministic_connection_seeds(
             write_capabilities=[
                 "reverse_duplicate_charge",
                 "issue_refund",
-                *[name for name, spec in OPERATIONS.items() if spec.provider == "billing"],
             ],
             action_types=[
                 "reverse_duplicate_charge",
                 "issue_refund",
-                *[name for name, spec in OPERATIONS.items() if spec.provider == "billing"],
             ],
             affected_work=["billing_dispute", "refund_request"],
             last_checked_at=timestamp,
@@ -46,14 +43,8 @@ def deterministic_connection_seeds(
             health=ConnectionHealth.HEALTHY,
             credential_status=CredentialStatus.DEMO,
             read_capabilities=["lookup_account"],
-            write_capabilities=[
-                "start_verified_recovery",
-                *[name for name, spec in OPERATIONS.items() if spec.provider == "identity"],
-            ],
-            action_types=[
-                "start_verified_recovery",
-                *[name for name, spec in OPERATIONS.items() if spec.provider == "identity"],
-            ],
+            write_capabilities=["start_verified_recovery"],
+            action_types=["start_verified_recovery"],
             affected_work=["account_access"],
             last_checked_at=timestamp,
         ),
