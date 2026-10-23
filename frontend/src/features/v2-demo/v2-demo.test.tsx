@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   commandV2Demo,
   createV2Demo,
+  loadV2Demo,
 } from "@/app/(operations)/_actions/v2-demo";
 import type { DemoView } from "./contract";
 import { V2Demo } from "./v2-demo";
@@ -76,6 +77,53 @@ const view: DemoView = {
 
 describe("V2 interactive operator controls", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("clears the previous case's role, reason and communication reference when resuming another session", async () => {
+    const another = {
+      ...view,
+      session: { ...view.session, session_id: "VD-FEDCBA0987654321" },
+    };
+    vi.mocked(createV2Demo).mockResolvedValue({
+      data: view,
+      error: null,
+      code: null,
+    });
+    vi.mocked(loadV2Demo).mockResolvedValue({
+      data: another,
+      error: null,
+      code: null,
+    });
+    render(<V2Demo sessions={[another.session]} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Create fresh session" }),
+    );
+    await screen.findByRole("heading", {
+      name: "Independent synthetic target",
+    });
+    fireEvent.change(screen.getByLabelText("Simulated role"), {
+      target: { value: "reviewer" },
+    });
+    fireEvent.change(screen.getByLabelText("Decision / step reason"), {
+      target: { value: "Previous case reason" },
+    });
+    fireEvent.change(
+      screen.getByLabelText("Communication / new evidence reference"),
+      { target: { value: "PREVIOUS-MESSAGE" } },
+    );
+    fireEvent.change(screen.getByLabelText("Resume a saved session"), {
+      target: { value: another.session.session_id },
+    });
+    await waitFor(() =>
+      expect(screen.getByLabelText("Resume a saved session")).toHaveValue(
+        another.session.session_id,
+      ),
+    );
+    expect(screen.getByLabelText("Simulated role")).toHaveValue("specialist");
+    expect(screen.getByLabelText("Decision / step reason")).toHaveValue("");
+    expect(
+      screen.getByLabelText("Communication / new evidence reference"),
+    ).toHaveValue("");
+  });
 
   it("requires an explicit operator action to create a session and reuses a lost-response key", async () => {
     vi.mocked(createV2Demo).mockResolvedValue({
