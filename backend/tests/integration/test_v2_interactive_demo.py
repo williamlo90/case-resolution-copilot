@@ -120,6 +120,20 @@ def test_verified_demo_rejects_role_escalation_and_closure_without_readback(
     original_gateway = app.state.action_gateway
     with TestClient(app) as client:
         view = approve(client, create(client))
+        changed_record = client.post(
+            f"/api/demo/v2/sessions/{view['session']['session_id']}/commands",
+            headers=ADMIN,
+            json={
+                "command": "execute",
+                "role": "reviewer",
+                "expected_version": view["action"]["action"]["version"],
+                "resource_id": "ACT-FROM-ANOTHER-SNAPSHOT",
+                "command_id": uuid4().hex,
+                "reason": "Check displayed record binding.",
+            },
+        )
+        assert changed_record.status_code == 409
+        assert changed_record.json()["error"]["code"] == "demo_resource_changed"
         view = command(client, view, "execute", status=403)  # Specialist has no execute permission.
         assert view["target"]["effect_count"] == 0
         view = command(client, view, "execute", role="reviewer")
