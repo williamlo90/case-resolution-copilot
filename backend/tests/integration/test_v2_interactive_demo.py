@@ -4,11 +4,11 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 
 from app.integrations.action_gateway import ActionGatewayRequest
 from app.persistence.database import Database
-from app.persistence.models import AuditEventModel, CaseModel
+from app.persistence.models import AuditEventModel, CaseModel, OrganizationModel
 from tests.integration.test_case_action_api import _app
 from tests.integration.test_case_review_api import ADMIN, OTHER_ADMIN, SPECIALIST, _seed_workspace
 
@@ -110,6 +110,51 @@ def test_demo_is_owner_scoped_and_cannot_write_existing_workspace(
             session.scalars(select(CaseModel).where(CaseModel.public_id == "CS-2047"))
         )
         assert len(root_cases) == 1 and root_cases[0].version == 1
+
+
+def test_unmigrated_lifecycle_fails_before_creating_demo_data(
+    database: Database, test_database_url: str
+) -> None:
+    _seed_workspace(database)
+    # Reproduce an older deployed database without dropping or fabricating evidence.
+    with database.session() as session:
+        session.execute(
+            text("ALTER TABLE case_resolution_events RENAME TO case_resolution_events_not_migrated")
+        )
+    try:
+        with TestClient(_app(test_database_url)) as client:
+            response = client.post(
+                "/api/demo/v2/sessions",
+                headers=ADMIN,
+                json={"scenario": "verified_reopen", "command_id": uuid4().hex},
+            )
+            assert response.status_code == 503, response.text
+            assert response.json()["error"]["code"] == "demo_schema_not_ready"
+        with database.session() as session:
+            assert (
+                session.scalar(
+                    select(func.count())
+                    .select_from(OrganizationModel)
+                    .where(OrganizationModel.slug.like("v2-demo-%"))
+                )
+                == 0
+            )
+            assert (
+                session.scalar(
+                    select(func.count())
+                    .select_from(AuditEventModel)
+                    .where(AuditEventModel.event_type == "demo.session_created")
+                )
+                == 0
+            )
+    finally:
+        with database.session() as session:
+            session.execute(
+                text(
+                    "ALTER TABLE case_resolution_events_not_migrated "
+                    "RENAME TO case_resolution_events"
+                )
+            )
 
 
 def test_verified_demo_rejects_role_escalation_and_closure_without_readback(
