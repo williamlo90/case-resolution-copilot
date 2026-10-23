@@ -40,7 +40,6 @@ const primaryNavigation: readonly NavigationItem[] = [
 ];
 
 const administrativeNavigation: readonly NavigationItem[] = [
-  { label: "V2 demo", href: "/demo/v2", activePrefix: "/demo/v2", icon: CheckSquare2, permission: "settings:manage", available: true },
   { label: "Connections", href: "/connections", activePrefix: "/connections", icon: Link2, permission: "connections:manage", available: true },
   { label: "Team", href: "/team", activePrefix: "/team", icon: Users, permission: "team:manage", available: true },
   { label: "Settings", href: "/settings/general", activePrefix: "/settings", icon: Settings, permission: "settings:manage", available: true },
