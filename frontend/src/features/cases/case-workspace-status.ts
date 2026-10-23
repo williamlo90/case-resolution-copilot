@@ -24,7 +24,6 @@ export function resolveCaseWorkspaceStatus(
   draftDelivery: InboxDraftDelivery | null | undefined,
 ): WorkspaceStatusPresentation {
   const caseStatus = caseStatusPresentation[workspace.case.status];
-  if (["completed", "investigating", "information_needed"].includes(workspace.case.status)) return caseStatus;
   if (workspace.proposal?.state !== "approved") return caseStatus;
 
   if (draftDelivery) return approvedDeliveryPresentation[draftDelivery.status];

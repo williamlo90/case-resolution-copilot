@@ -6,7 +6,6 @@ from datetime import UTC, datetime
 from typing import Protocol
 from uuid import uuid4
 
-from app.analysis.sop_rules import validate_rule_scope
 from app.domain.identity import ActorContext, Permission
 from app.domain.policies import (
     GovernedPolicyVersionRecord,
@@ -414,12 +413,6 @@ class PolicyService:
         version = bundle.version
         if version.status is not PolicyVersionStatus.IN_REVIEW:
             raise InvalidPolicyTransition("Only an in-review policy version can be activated.")
-        try:
-            validate_rule_scope(version.source_text, version.case_categories)
-        except ValueError as exc:
-            raise InvalidPolicyTransition(
-                "Executable SOP rules are invalid for this scope."
-            ) from exc
         effective_from = requested_effective_from or version.effective_from or current_time
         if target is PolicyVersionStatus.PUBLISHED and effective_from > current_time:
             raise InvalidPolicyTransition("Use schedule for a future effective date.")
@@ -427,14 +420,6 @@ class PolicyService:
             raise InvalidPolicyTransition("A scheduled policy needs a future effective date.")
         if version.effective_to is not None and version.effective_to <= effective_from:
             raise InvalidPolicyTransition("The effective date is outside the policy window.")
-        if any(
-            item.version.status is PolicyVersionStatus.PUBLISHED
-            and item.version.effective_from is not None
-            and effective_from <= item.version.effective_from
-            for item in workspace.versions
-            if item.version.version != version_number
-        ):
-            raise InvalidPolicyTransition("A replacement must start after the published version.")
 
         conflicts = _find_conflicts(
             version=version,

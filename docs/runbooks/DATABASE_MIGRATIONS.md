@@ -45,6 +45,12 @@ credential from the process environment afterward.
 
 ## Application Migration
 
+The migration head remains `20261013_0025`. The historical `case_resolution_events` table and
+its metadata are retained for compatibility with existing databases; the current workspace
+does not write to it. Do not drop the table or stamp the database back to an older revision
+when deploying the application. Historical operations outside the current product scope
+remain inspectable but cannot be executed or manually marked complete.
+
 For a reviewed target environment:
 
 1. Confirm the database branch, owner, region, and recovery point.

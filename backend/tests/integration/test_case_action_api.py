@@ -153,10 +153,10 @@ def test_approved_action_executes_once_with_durable_receipt(
     assert hidden.status_code == 404
     assert executed.status_code == 200
     executed_detail = executed.json()["data"]
-    assert executed_detail["action"]["status"] == "outcome_unknown"
+    assert executed_detail["action"]["status"] == "completed"
     assert executed_detail["action"]["attempt_count"] == 1
     assert executed_detail["receipt"]["external_reference"]
-    assert executed_detail["attempts"][0]["outcome"] == "unknown"
+    assert executed_detail["attempts"][0]["outcome"] == "succeeded"
     assert duplicate.status_code == 409
     assert duplicate.json()["error"]["details"]["blocker"] == "duplicate"
 
@@ -203,51 +203,3 @@ def test_unknown_outcome_blocks_retry_until_read_only_reconciliation(
     assert reconciled_detail["action"]["status"] == "completed"
     assert reconciled_detail["receipt"]["external_reference"]
     assert reconciled_detail["reconciliations"][-1]["outcome"] == "confirmed_completed"
-
-
-def test_unknown_outcome_survives_app_restart_without_inventing_target_proof(
-    database: Database,
-    test_database_url: str,
-) -> None:
-    _seed_workspace(database)
-    _seed_connections(database)
-    app = _app(test_database_url)
-    app.state.action_gateway = DeterministicActionGateway(
-        behaviors={"issue_refund": GatewayBehavior.OUTCOME_UNKNOWN_ACCEPTED}
-    )
-    with TestClient(app) as client:
-        action_id = _approve_refund_action(client)
-        executed = client.post(
-            f"/api/actions/{action_id}/execute",
-            headers=SUPERVISOR,
-            json={"expected_version": 1},
-        )
-        assert executed.status_code == 200
-        assert executed.json()["data"]["action"]["status"] == "outcome_unknown"
-
-    # A fresh application/gateway has no in-memory target ledger. Durable DB state
-    # must stay uncertain; absence from that new ledger is not proof of no effect.
-    with TestClient(_app(test_database_url)) as restarted:
-        detail = restarted.get(f"/api/actions/{action_id}", headers=SUPERVISOR)
-        assert detail.status_code == 200
-        unknown = detail.json()["data"]
-        assert unknown["action"]["status"] == "outcome_unknown"
-        assert "retry_safe" not in unknown["available_commands"]
-        duplicate = restarted.post(
-            f"/api/actions/{action_id}/execute",
-            headers=SUPERVISOR,
-            json={"expected_version": unknown["action"]["version"]},
-        )
-        assert duplicate.status_code == 409
-        reconciled = restarted.post(
-            f"/api/actions/{action_id}/reconcile",
-            headers=SUPERVISOR,
-            json={"expected_version": unknown["action"]["version"]},
-        )
-        assert reconciled.status_code == 200
-        assert reconciled.json()["data"]["action"]["status"] == "outcome_unknown"
-        assert reconciled.json()["data"]["receipt"] is None
-
-    with database.session() as session:
-        assert session.scalar(select(func.count(CaseActionAttemptModel.id))) == 1
-        assert session.scalar(select(func.count(CaseActionReceiptModel.id))) == 0

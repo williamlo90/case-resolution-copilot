@@ -161,10 +161,6 @@ function mapDetail(
   });
 }
 
-export function parsePolicyDetail(value: unknown) {
-  return mapDetail(policyDetailEnvelopeSchema.shape.data.parse(value));
-}
-
 export const apiPolicyRepository: PolicyRepository = {
   source: "api",
   async listPolicies() {

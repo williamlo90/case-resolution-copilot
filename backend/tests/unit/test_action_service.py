@@ -1,3 +1,5 @@
+import pytest
+
 from app.domain.actions import (
     ActionCommand,
     ActionExecutionBlocker,
@@ -6,6 +8,7 @@ from app.domain.actions import (
     ActionStatus,
 )
 from app.domain.identity import ActorContext
+from app.domain.retired_actions import RETIRED_ACTION_TYPES
 from app.security.authentication import DeterministicAuthProvider
 from app.services.action_service import (
     ActionQueryService,
@@ -76,6 +79,16 @@ def test_supervisor_sees_execute_only_for_a_ready_unblocked_action() -> None:
         actor=_actor("USR-0002"),
         item=detail,
     ) == [ActionCommand.EXECUTE]
+
+
+@pytest.mark.parametrize("action_type", sorted(RETIRED_ACTION_TYPES))
+@pytest.mark.parametrize("status", [ActionStatus.READY, ActionStatus.OUTCOME_UNKNOWN])
+def test_historical_operations_offer_no_execution_or_recovery_commands(
+    action_type: str, status: ActionStatus
+) -> None:
+    item = _item(status=status)
+    item.bundle.action.type = action_type
+    assert available_action_commands(actor=_actor("USR-0003"), item=item) == []
 
 
 def test_safe_failure_and_unknown_outcome_never_share_retry_semantics() -> None:

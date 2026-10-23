@@ -13,11 +13,6 @@ contracts and operating material used to build and evaluate the application.
 
 ## Architecture And Contracts
 
-- [Case Resolution V2 measurement contract and Phase 0 audit](evidence/case-resolution-v2/CONTRACT.md)
-- [V2 Phase 0 learning checkpoint](learning/case-resolution-v2/PHASE-0.md)
-- [V2 Phase 5 learning checkpoint](learning/case-resolution-v2/PHASE-5.md)
-- [V2 Phase 6 learning checkpoint](learning/case-resolution-v2/PHASE-6.md)
-- [V2 Phase 8 learning checkpoint](learning/case-resolution-v2/PHASE-8.md)
 - [Architecture decisions](adr/README.md)
 - [API conventions](api/CONVENTIONS.md)
 - [Generic SaaS backend contract](backend/GENERIC_SAAS_CONTRACT.md)
@@ -59,8 +54,6 @@ contracts and operating material used to build and evaluate the application.
 
 ## Portfolio Evidence
 
-- [V2 release and evidence index](evidence/case-resolution-v2/README.md)
-- [V2 evaluation results](evidence/case-resolution-v2/RESULTS.md)
 - [Engineering case study](portfolio/CASE_STUDY.md)
 - [Application pack for CV, LinkedIn, Upwork, and interviews](portfolio/APPLICATION_PACK.md)
 - [Frozen Governed RAG V2 benchmark](../backend/evaluations/retrieval_v2/README.md)
@@ -73,8 +66,6 @@ contracts and operating material used to build and evaluate the application.
 - [Hosted deterministic workflow acceptance](evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 - [Hosted connected Gmail draft acceptance](evidence/hosted-connected-draft-acceptance/2026-08-23/README.md)
 - [Developer-operated decision readiness benchmark](evidence/developer-workflow-benchmark/README.md)
-- [V2 Phase 5 workflow benchmark reuse](evidence/case-resolution-v2/PHASE5_BENCHMARK_REUSE.md)
-- [V2 Phase 6 controlled demo release](evidence/case-resolution-v2/PHASE6_RELEASE.md)
 
 The screenshot evidence from 2026-08-05 predates the repository reconstruction and records the
 predecessor hosted deployment of the same product. The 2026-08-23 connected-draft record tests the

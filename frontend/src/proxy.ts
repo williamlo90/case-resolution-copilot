@@ -9,6 +9,7 @@ import {
   providerAuthenticationEnabled,
 } from "@/config/authentication";
 import { CLERK_CSP_DIRECTIVES } from "@/config/security-headers";
+import { retiredWorkspaceDestination } from "@/config/retired-workspace-links";
 
 const attachClerkContext = clerkMiddleware({
   contentSecurityPolicy: {
@@ -18,6 +19,8 @@ const attachClerkContext = clerkMiddleware({
 });
 
 export default function proxy(request: NextRequest, event: NextFetchEvent) {
+  const destination = retiredWorkspaceDestination(request.nextUrl);
+  if (destination) return NextResponse.redirect(destination);
   if (!providerAuthenticationEnabled()) {
     return NextResponse.next();
   }

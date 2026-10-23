@@ -1,0 +1,62 @@
+name: Workspace integration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - backend/**
+      - .github/workflows/workspace-integration.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workspace-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: V1 workspace and retained schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: workspace_ci
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: workspace_ci
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U workspace_ci -d workspace_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://workspace_ci:disposable-ci-only@localhost:5432/workspace_ci
+      SUPPORT_COPILOT_ALLOW_DESTRUCTIVE_TEST_DATABASE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --group dev
+      - name: Cases, approvals, receipts, recovery and schema compatibility
+        run: >-
+          uv run --no-env-file pytest -q
+          tests/integration/test_migration.py
+          tests/integration/test_case_api.py
+          tests/integration/test_decision_brief_api.py
+          tests/integration/test_case_review_api.py
+          tests/integration/test_case_action_api.py
+          tests/integration/test_restored_workspace.py
+          --junitxml=../workspace-integration.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workspace-integration-${{ github.sha }}
+          path: workspace-integration.xml
+          retention-days: 14

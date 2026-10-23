@@ -70,7 +70,6 @@ class TransactionScopedPolicyStore:
         query_embedding: list[float],
         embedding_version: str,
         candidate_limit: int,
-        decision_scope: str | None = None,
     ) -> PolicyRetrievalCandidatePage:
         with self._database.session() as session:
             return PolicyRepository(session).search_retrieval_candidates(
@@ -84,7 +83,6 @@ class TransactionScopedPolicyStore:
                 query_embedding=query_embedding,
                 embedding_version=embedding_version,
                 candidate_limit=candidate_limit,
-                decision_scope=decision_scope,
             )
 
     def inspect_hybrid_scope(

@@ -18,7 +18,7 @@ from app.domain.quality import (
 class QualityMetricResponse(ApiSchema):
     key: str = Field(min_length=1, max_length=100)
     label: str = Field(min_length=1, max_length=200)
-    value: int | float | None
+    value: int | float
     unit: str = Field(min_length=1, max_length=32)
     numerator: int | None
     denominator: int | None

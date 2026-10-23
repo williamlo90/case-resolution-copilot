@@ -11,7 +11,7 @@ from .base import Base, utc_now
 
 
 class CaseResolutionEventModel(Base):
-    """Append-only lifecycle evidence. Old completed rows deliberately have no proof."""
+    """Historical table metadata retained for migration compatibility; no active writer."""
 
     __tablename__ = "case_resolution_events"
     __table_args__ = (

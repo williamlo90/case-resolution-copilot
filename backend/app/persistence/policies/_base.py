@@ -34,7 +34,6 @@ from app.persistence.models import (
     PolicyModel,
     utc_now,
 )
-from app.persistence.policy_authority import lock_policy_authority
 from app.retrieval.policy_parser import (
     GOVERNED_CHUNKING_VERSION,
     GOVERNED_INDEX_VERSION,
@@ -188,9 +187,6 @@ class PolicyRepositoryBase:
         return [GovernedPolicyClauseRecord.model_validate(model) for model in models]
 
     def _required_policy(self, organization_public_id: str, policy_public_id: str) -> PolicyModel:
-        organization_id = self._organization_id(organization_public_id)
-        if organization_id is not None:
-            lock_policy_authority(self._session, organization_id)
         model = self._session.scalar(
             select(PolicyModel)
             .join(OrganizationModel, OrganizationModel.id == PolicyModel.organization_id)

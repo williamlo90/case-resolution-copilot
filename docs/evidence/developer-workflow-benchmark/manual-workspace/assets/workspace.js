@@ -85,23 +85,11 @@ function renderBrief(data) {
       : `<textarea name="${name}">${escapeHtml(value)}</textarea>`;
     return `<div class="field ${type === "textarea" ? "full" : ""}"><label for="${name}">${label}</label>${control}</div>`;
   }).join("");
-  const html = `${heading(data, "Decision Brief")}<p class="notice">This worksheet starts blank. Record conclusions with source IDs so another reviewer can trace them.</p><div class="actions brief-actions"><button class="button" type="button" id="save-brief-top">Save</button><span id="save-feedback" class="save-feedback" role="status" aria-live="polite"></span></div><form id="brief-form"><div class="form-grid">${fields}</div><div class="actions"><button class="button" type="button" id="save-brief">Save locally</button><button class="button secondary" type="button" id="export-brief">Export JSON</button><button class="button secondary" type="reset" id="clear-brief">Clear</button></div></form>`;
+  const html = `${heading(data, "Decision Brief")}<p class="notice">This worksheet starts blank. Record conclusions with source IDs so another reviewer can trace them.</p><form id="brief-form"><div class="form-grid">${fields}</div><div class="actions"><button class="button" type="button" id="save-brief">Save locally</button><button class="button secondary" type="button" id="export-brief">Export JSON</button><button class="button secondary" type="reset" id="clear-brief">Clear</button></div></form>`;
   document.querySelector("#content").innerHTML = html;
   const form = document.querySelector("#brief-form");
   const snapshot = () => Object.fromEntries(new FormData(form).entries());
-  const saveFeedback = document.querySelector("#save-feedback");
-  const saveBrief = () => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(snapshot()));
-      saveFeedback.textContent = "Saved locally.";
-    } catch {
-      saveFeedback.textContent = "Could not save locally. Export JSON to keep a copy.";
-    }
-  };
-  document.querySelector("#save-brief-top").addEventListener("click", saveBrief);
-  document.querySelector("#save-brief").addEventListener("click", saveBrief);
-  form.addEventListener("input", () => { saveFeedback.textContent = ""; });
-  form.addEventListener("reset", () => { saveFeedback.textContent = ""; });
+  document.querySelector("#save-brief").addEventListener("click", () => localStorage.setItem(storageKey, JSON.stringify(snapshot())));
   document.querySelector("#export-brief").addEventListener("click", () => {
     const payload = { fixture_id: data.fixture_id, exported_at: new Date().toISOString(), ...snapshot() };
     const link = document.createElement("a");

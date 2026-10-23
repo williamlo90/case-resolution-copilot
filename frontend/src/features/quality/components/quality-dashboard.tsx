@@ -25,8 +25,7 @@ const metricIcons = {
   outcome_checks_pending: AlertTriangle,
 } as const;
 
-function metricValue(value: number | null, unit: string): string {
-  if (value === null) return "N/A";
+function metricValue(value: number, unit: string): string {
   return unit === "percent" ? `${value}%` : String(value);
 }
 

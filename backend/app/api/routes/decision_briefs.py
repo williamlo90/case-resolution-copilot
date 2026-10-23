@@ -45,7 +45,6 @@ from app.services.decision_brief_service import (
     DecisionBriefGenerationPlan,
     DecisionBriefService,
 )
-from app.services.lifecycle_telemetry import stage_span
 from app.services.policy_evidence_service import PolicyEvidenceService
 
 router = APIRouter(prefix="/api/cases/{case_id}/proposals", tags=["decision briefs"])
@@ -215,12 +214,11 @@ def generate_decision_brief(
             )
         if isinstance(prepared, DecisionBriefGenerationPlan):
             try:
-                with stage_span(str(request.state.correlation_id), case_id, "decision"):
-                    analysis = engine.analyze(
-                        workspace=prepared.workspace,
-                        evidence=prepared.evidence,
-                        input_fingerprint=prepared.input_fingerprint,
-                    )
+                analysis = engine.analyze(
+                    workspace=prepared.workspace,
+                    evidence=prepared.evidence,
+                    input_fingerprint=prepared.input_fingerprint,
+                )
                 with database.session() as session:
                     brief = _decision_service(
                         request,

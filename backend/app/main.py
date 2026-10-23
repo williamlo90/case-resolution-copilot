@@ -35,11 +35,9 @@ from app.api.routes.organizations import router as organizations_router
 from app.api.routes.policies import router as policies_router
 from app.api.routes.policy_index_internal import router as policy_index_internal_router
 from app.api.routes.quality import router as quality_router
-from app.api.routes.resolution import router as resolution_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.session import router as session_router
 from app.api.routes.settings import router as settings_router
-from app.api.routes.v2_demo import router as v2_demo_router
 from app.config import Settings, get_settings
 from app.integrations.action_gateway import (
     ActionGateway,
@@ -265,8 +263,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(case_intake_router)
     app.include_router(cases_router)
-    app.include_router(resolution_router)
-    app.include_router(v2_demo_router)
     app.include_router(decision_briefs_router)
     app.include_router(session_router)
     app.include_router(organizations_router)

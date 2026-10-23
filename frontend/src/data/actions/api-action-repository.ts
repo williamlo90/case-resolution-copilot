@@ -183,10 +183,6 @@ function mapDetail(raw: z.infer<typeof apiActionDetailSchema>): ActionDetail {
   });
 }
 
-export function parseActionDetail(value: unknown) {
-  return mapDetail(apiActionDetailSchema.parse(value));
-}
-
 export const apiActionRepository: ActionRepository = {
   source: "api",
   async listActions() {

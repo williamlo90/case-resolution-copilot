@@ -324,7 +324,7 @@ function mapCollectionWindow(
   };
 }
 
-export function mapWorkspace(
+function mapWorkspace(
   raw: z.infer<typeof apiCaseWorkspaceSchema>,
 ): CaseWorkspace {
   return CaseWorkspaceSchema.parse({
@@ -413,10 +413,6 @@ export function mapWorkspace(
     },
     availableCommands: raw.available_commands,
   });
-}
-
-export function parseCaseWorkspace(value: unknown) {
-  return mapWorkspace(apiCaseWorkspaceSchema.parse(value));
 }
 
 export const apiCaseRepository: CaseRepository = {

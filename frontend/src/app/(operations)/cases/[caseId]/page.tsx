@@ -1,10 +1,6 @@
 import { getCaseRepository } from "@/data/cases/case-repository-provider";
 import { getAdministrationRepository } from "@/data/administration/administration-repository-provider";
-import { ApiClientError, apiRequest } from "@/data/api/api-client";
-import { resolutionSchema } from "@/features/resolution/contract";
-import { updateCaseResolution } from "../../_actions/resolution";
-import { practiceId, type PageSearch } from "@/features/practice/data";
-import { PracticeWorkspacePage } from "@/features/practice/workspace-page";
+import { ApiClientError } from "@/data/api/api-client";
 import { apiInboxDraftRepository } from "@/data/connections/api-inbox-draft-repository";
 import type { InboxDraftDelivery } from "@/domain/connections/connected-inbox";
 import type { WorkflowControl } from "@/features/cases/components/case-decision-rail";
@@ -32,15 +28,10 @@ import {
 
 export default async function CaseWorkspacePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ caseId: string }>;
-  searchParams: PageSearch;
 }) {
   const { caseId } = await params;
-  const search = await searchParams;
-  const practice = practiceId(search.practice);
-  if (practice) return <PracticeWorkspacePage sessionId={practice} area="cases" resourceId={caseId} tab={typeof search.tab === "string" ? search.tab : undefined}/>;
   const repository = getCaseRepository();
   const connected = repository.source === "api";
   const [workspace, sessionContext] = await Promise.all([
@@ -52,7 +43,6 @@ export default async function CaseWorkspacePage({
   if (!workspace) notFound();
   const canManageCase =
     sessionContext?.actor.permissions.includes("case:manage") ?? false;
-  const resolution = connected ? await apiRequest(`/api/cases/${encodeURIComponent(caseId)}/resolution`, resolutionSchema) : undefined;
   const inboxCase = workspace.case.sourceId.startsWith("inbox:");
   const savedResponseDraft =
     workspace.responseDraft?.source === "saved"
@@ -96,9 +86,6 @@ export default async function CaseWorkspacePage({
   return (
     <CaseWorkspace
       workspace={workspace}
-      resolution={resolution}
-      resolutionAction={resolution && canManageCase ? updateCaseResolution.bind(null, caseId, resolution.version) : undefined}
-      initialTab={search.tab === "resolution" ? "resolution" : "brief"}
       workflowActions={workflowActions}
       prepareBriefAction={
         connected && workspace.availableCommands.includes("revise_resolution")

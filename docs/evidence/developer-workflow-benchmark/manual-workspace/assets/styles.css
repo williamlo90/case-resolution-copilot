@@ -53,8 +53,6 @@ h2 { margin: 0 0 12px; font-size: 18px; }
 .field input, .field select, .field textarea { width: 100%; padding: 10px; border: 1px solid #aeb8bf; background: #fff; }
 .field textarea { min-height: 96px; resize: vertical; }
 .actions { display: flex; gap: 10px; margin-top: 18px; }
-.brief-actions { align-items: center; flex-wrap: wrap; margin: 0 0 18px; }
-.save-feedback { font-size: 13px; }
 .button { cursor: pointer; padding: 9px 14px; border: 1px solid #17212b; background: #17212b; color: #fff; }
 .button.secondary { background: #fff; color: #17212b; }
 .notice { padding: 11px 13px; border: 1px solid #e1c98d; background: #fff8df; }

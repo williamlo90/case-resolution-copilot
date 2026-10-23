@@ -45,11 +45,3 @@ describe("resolveCaseWorkspaceStatus", () => {
     ).toEqual({ label: "Approved, Gmail draft ready", tone: "success" });
   });
 });
-
-it.each(["completed", "investigating"] as const)("keeps %s visible despite an older approved draft", status => {
-  const workspace = {...primaryCaseWorkspaceFixture,
-    case: {...primaryCaseWorkspaceFixture.case, status},
-    proposal: {...primaryCaseWorkspaceFixture.proposal!, state: "approved" as const},
-  };
-  expect(resolveCaseWorkspaceStatus(workspace, null).label).toBe(status === "completed" ? "Completed" : "Investigating");
-});

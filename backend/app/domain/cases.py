@@ -473,12 +473,7 @@ CASE_TRANSITIONS: dict[CaseStatus, frozenset[CaseStatus]] = {
         {CaseStatus.INVESTIGATING, CaseStatus.INFORMATION_NEEDED}
     ),
     CaseStatus.IN_PROGRESS: frozenset(
-        {
-            CaseStatus.COMPLETED,
-            CaseStatus.INFORMATION_NEEDED,
-            CaseStatus.NEEDS_REVIEW,
-            CaseStatus.INVESTIGATING,
-        }
+        {CaseStatus.COMPLETED, CaseStatus.INFORMATION_NEEDED, CaseStatus.NEEDS_REVIEW}
     ),
     CaseStatus.COMPLETED: frozenset(),
 }

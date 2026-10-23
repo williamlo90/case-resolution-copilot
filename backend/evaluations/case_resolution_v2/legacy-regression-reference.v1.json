@@ -1,9 +1,0 @@
-{
-  "scope": "Historical V1 regression only; excluded from V2 holdout and V2 primary denominators. Files and evaluator remain unchanged.",
-  "root": "../case_resolution_v1",
-  "canonical_sha256": {
-    "inputs.json": "acb11fcfaa6611cd1301fa11f82d1a552b4d0084a576719002bb7b2be5a663a6",
-    "labels.json": "ee294e362137fe4250d4c6f6e9422bca17a83c3382c21c37e1eee096f44e02d7",
-    "manifest.json": "14587a4710c9a93811a0c43edb205c560ff52b71c69197b5f9306b46c14b2229"
-  }
-}
