@@ -5,8 +5,7 @@ on:
     branches: [main]
     paths:
       - backend/**
-      - frontend/src/features/v2-demo/**
-      - frontend/src/app/**/v2-demo.ts
+      - frontend/src/**
       - .github/workflows/v2-interactive-demo.yml
   workflow_dispatch:
 

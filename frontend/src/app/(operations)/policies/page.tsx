@@ -2,11 +2,14 @@ import { getAdministrationRepository } from "@/data/administration/administratio
 import { getPolicyRepository } from "@/data/policies/policy-repository-provider";
 import { PolicyLibrary } from "@/features/policies/components/policy-library";
 import type { Metadata } from "next";
+import { practiceId, openPracticeArea, type PageSearch } from "@/features/practice/data";
 
 export const metadata: Metadata = { title: "Policies" };
 export const dynamic = "force-dynamic";
 
-export default async function PoliciesPage() {
+export default async function PoliciesPage({searchParams}: {searchParams: PageSearch}) {
+  const practice = practiceId((await searchParams).practice);
+  if (practice) return openPracticeArea(practice, "policies");
   const repository = getPolicyRepository();
   const [policies, context] = await Promise.all([
     repository.listPolicies(),

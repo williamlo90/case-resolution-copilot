@@ -34,6 +34,7 @@ def read_resolution(
             case = repository.case(actor, case_id, lock=False)
             events = repository.events(case)
             return {
+                **repository.controls(actor, case, events),
                 "case_id": case.public_id,
                 "version": case.version,
                 "status": case.status,

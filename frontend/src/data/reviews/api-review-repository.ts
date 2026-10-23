@@ -276,6 +276,10 @@ function mapSnapshot(
   });
 }
 
+export function parseReviewSnapshot(value: unknown) {
+  return mapSnapshot(apiReviewSnapshotSchema.parse(value));
+}
+
 export const apiReviewRepository: ReviewRepository = {
   source: "api",
   async listReviews() {

@@ -1,6 +1,6 @@
 # V2 interactive walkthrough
 
-The walkthrough uses the existing authenticated Vercel application and database. Manual work stays in a separate, static local workspace. Three fresh scenarios demonstrate the V2 controls:
+The walkthrough uses the existing authenticated Vercel application and database. Manual work stays in a separate, static local workspace. Open **Cases > Try a practice case**. The walkthrough uses the normal Cases, Reviews, Actions and Policies screens, with the next step and simulated role shown in a compact banner. Three fresh scenarios demonstrate the V2 controls:
 
 1. **Verified resolution:** prepare a cited Decision Brief, submit and approve its frozen snapshot, execute a synthetic refund, independently read back the target, close with a simulated communication reference, then reopen with new evidence.
 2. **SOP revision:** approve against revision 1, publish revision 2, observe the old action being blocked, publish a rollback as revision 3, and confirm that rollback does not revive the old approval.

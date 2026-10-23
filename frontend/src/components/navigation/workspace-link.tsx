@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { usePracticeSession } from "@/features/practice/context";
+import { practiceHref } from "@/features/practice/href";
 import {
   useState,
   type ComponentProps,
@@ -20,6 +22,7 @@ export function WorkspaceLink({
   onTouchStart,
   ...props
 }: WorkspaceLinkProps) {
+  const practice = usePracticeSession();
   const [intentShown, setIntentShown] = useState(false);
 
   function handleFocus(event: FocusEvent<HTMLAnchorElement>) {
@@ -40,6 +43,7 @@ export function WorkspaceLink({
   return (
     <Link
       {...props}
+      href={typeof props.href === "string" ? practiceHref(props.href, practice) : props.href}
       prefetch={intentShown ? null : false}
       onFocus={handleFocus}
       onMouseEnter={handleMouseEnter}

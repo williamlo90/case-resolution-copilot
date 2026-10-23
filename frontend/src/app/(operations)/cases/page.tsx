@@ -1,5 +1,8 @@
 import { getAdministrationRepository } from "@/data/administration/administration-repository-provider";
-import { ApiClientError } from "@/data/api/api-client";
+import { ApiClientError, apiRequest } from "@/data/api/api-client";
+import { PracticeLauncher } from "@/features/practice/launcher";
+import { demoSessionsSchema } from "@/features/v2-demo/contract";
+import { practiceId, openPracticeArea } from "@/features/practice/data";
 import { getCaseRepository } from "@/data/cases/case-repository-provider";
 import { DataLoadFailure } from "@/components/ui/data-load-failure";
 import {
@@ -60,6 +63,8 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
   const repository = getCaseRepository();
   const administrationRepository = getAdministrationRepository();
   const rawSearchParams = await searchParams;
+  const practice = practiceId(rawSearchParams.practice);
+  if (practice) return openPracticeArea(practice, "cases");
   const options = parseOptions(rawSearchParams);
   let page;
   let session;
@@ -96,8 +101,11 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
     }
     throw error;
   }
+  const sessions = repository.source === "api" && session.actor.role === "administrator"
+    ? await apiRequest("/api/demo/v2/sessions", demoSessionsSchema).catch(() => ({items: []}))
+    : null;
   return (
-    <CaseQueue
+    <>{sessions ? <PracticeLauncher sessions={sessions.items}/> : null}<CaseQueue
       page={page}
       filters={options}
       sourceLabel={repository.source === "api" ? "Connected workspace data" : "Sample workspace data"}
@@ -107,6 +115,6 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           ? assignCaseToMe
           : undefined
       }
-    />
+    /></>
   );
 }

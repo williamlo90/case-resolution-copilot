@@ -20,6 +20,10 @@ def create(client: TestClient, scenario: str = "verified_reopen") -> dict[str, A
         json={"scenario": scenario, "command_id": uuid4().hex},
     )
     assert response.status_code == 201, response.text
+    view = response.json()["data"]
+    assert view["workspace"]["case"]["id"] == view["case"]["id"]
+    assert not view["lifecycle"]["closure"]["eligible"]
+    assert "completed" not in view["lifecycle"]["available_commands"]
     return dict(response.json()["data"])
 
 
@@ -182,19 +186,29 @@ def test_verified_demo_rejects_role_escalation_and_closure_without_readback(
         view = command(client, view, "execute", status=403)  # Specialist has no execute permission.
         assert view["target"]["effect_count"] == 0
         view = command(client, view, "execute", role="reviewer")
+        assert not view["lifecycle"]["closure"]["eligible"]
+        assert "completed" not in view["lifecycle"]["available_commands"]
         view = command(
             client, view, "close", role="reviewer", reference="SIM-MESSAGE-01", status=409
         )
         view = command(client, view, "reconcile", role="reviewer")
         assert view["target"]["effect_count"] == 1
         assert any(e["kind"] == "action_verified" for e in view["lifecycle"]["events"])
+        assert view["lifecycle"]["closure"]["eligible"]
+        assert view["lifecycle"]["available_commands"] == ["completed"]
+        assert len(view["lifecycle"]["closure"]["verification_ids"]) == 1
         view = command(client, view, "close", role="reviewer", reference="SIM-MESSAGE-01")
         assert view["case"]["status"] == "completed"
+        assert view["workspace"]["case"]["status"] == "completed"
+        assert view["lifecycle"]["available_commands"] == ["reopened"]
         completion = next(e for e in view["lifecycle"]["events"] if e["kind"] == "completed")
         view = command(client, view, "reopen", reference="NEW-EVIDENCE-01")
         reopened = next(e for e in view["lifecycle"]["events"] if e["kind"] == "reopened")
         assert reopened["previous_event_id"] == completion["id"]
         assert view["case"]["status"] == "investigating"
+        assert view["workspace"]["case"]["status"] == "investigating"
+        assert not view["lifecycle"]["closure"]["eligible"]
+        assert view["lifecycle"]["available_commands"] == []
     assert app.state.action_gateway is original_gateway
 
 

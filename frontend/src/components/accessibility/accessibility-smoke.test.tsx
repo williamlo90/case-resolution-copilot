@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/cases/CS-2048",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("protected workspace accessibility", () => {
