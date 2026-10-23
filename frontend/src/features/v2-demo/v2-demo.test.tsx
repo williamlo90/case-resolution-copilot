@@ -13,7 +13,7 @@ const view: DemoView = {
   case: { id: "CS-DEMO-1", version: 3, status: "in_progress", issue: "Unused course refund", request: "Refund the unused course.", records: [] },
   policy: { policy: { id: "POL-DEMO-1", version: 3, current_version: 1 }, versions: [] },
   brief: null,
-  review: { review: { id: "REV-DEMO-1", version: 3, status: "approved", snapshot_fingerprint: "a".repeat(64), snapshot_freshness: { status: "current", reason: null }, submitted_by: { name: "Simulated specialist" } }, decision_history: [] },
+  review: { review: { id: "REV-DEMO-1", version: 3, status: "approved", snapshot_fingerprint: "a".repeat(64), snapshot_freshness: { status: "current", reason: null }, submitted_by: { name: "Simulated specialist" } }, evidence: [], decision_history: [] },
   action: { action: { id: "ACT-DEMO-1", version: 4, status: "outcome_unknown", attempt_count: 1 }, idempotency_key: "operation-1234567890", typed_parameters: { amount_minor: "24000" }, execution_blocker: "duplicate", observed_outcome: "Unknown", receipt: null },
   target: { objects: { "COURSE-1": { owner: "CUSTOMER-1", credited_minor: "24000" } }, effect_count: 1, operations: [{ operation_id: "operation-1234567890", target: "COURSE-1", changes: { credited_minor: "24000" } }], storage: "database_event_ledger" },
   lifecycle: { version: 3, status: "in_progress", events: [] }, observations: [],
