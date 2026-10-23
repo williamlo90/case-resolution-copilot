@@ -51,6 +51,11 @@ export function V2Demo({
     try {
       const result = await work();
       if (result.data) {
+        if (result.data.session.session_id !== view?.session.session_id) {
+          setRole("specialist");
+          setReason("");
+          setReference("");
+        }
         setView(result.data);
         setSessions((items) => [
           result.data!.session,

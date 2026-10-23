@@ -111,6 +111,14 @@ class V2DemoSessions:
                 code="demo_scenario_invalid", message="Choose a V2 scenario.", status_code=422
             )
         with self.database.session() as session:
+            if not session.scalar(
+                text("SELECT to_regclass('public.case_resolution_events') IS NOT NULL")
+            ):
+                raise AppError(
+                    code="demo_schema_not_ready",
+                    message="Apply the V2 lifecycle migration before creating a demo session.",
+                    status_code=503,
+                )
             root = session.scalar(
                 select(OrganizationModel).where(
                     OrganizationModel.public_id == owner.organization_id
