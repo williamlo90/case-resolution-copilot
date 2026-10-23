@@ -191,7 +191,7 @@ export function V2Demo({
             </select>
           </label>
           <button
-            className={`${button} bg-teal-700 text-white hover:bg-teal-800`}
+            className="rounded-md border border-teal-700 bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={busy}
             onClick={() => void create()}
           >
