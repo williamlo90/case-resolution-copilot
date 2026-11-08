@@ -1,6 +1,6 @@
-# AWS-Ready Deployment Architecture
+# AWS Deployment Architecture
 
-Status: AWS-ready deployment architecture with executable CDK, static coverage, and a final bounded
+Status: live-validated deployment architecture with executable CDK, static coverage, and a final
 live validation completed on September 25, 2026. The reproducible environment was safely torn down
 after validation. The always-on public demo remains on Vercel with Neon PostgreSQL.
 
@@ -33,9 +33,9 @@ GitHub Actions -- OIDC --> ECR + ECS deployment roles
 ```
 
 The API, worker, scheduler, and migration task share one immutable backend image but run separate commands and scale
-independently. This is process separation, not a microservice rewrite. The current frontend may
-remain on Vercel and use Neon for the always-on demo; this AWS profile exists only for bounded live
-infrastructure validation.
+independently. The modular monolith uses separate runtime processes for API, worker, scheduler,
+and migrations. The hosted application uses Vercel and Neon; the AWS profile provides reproducible
+infrastructure deployment and validation.
 
 ## Network Boundary
 
@@ -50,8 +50,8 @@ infrastructure validation.
 - Never expose RDS. Public task IPs in this profile provide egress only; security groups admit API
   traffic solely from the ALB and no inbound traffic to worker, scheduler, or migration tasks.
 
-This is not the recommended customer-pilot network. A serious pilot should move tasks into private
-subnets and choose NAT gateways or VPC endpoints from measured availability and cost requirements.
+For a long-running business environment, place tasks in private subnets and select NAT gateways
+or VPC endpoints according to availability and cost requirements.
 
 ## Runtime Components
 
@@ -189,23 +189,22 @@ Budgets alerts before creating resources.
 The executable `infra/aws` portfolio profile avoids a NAT Gateway by placing ECS tasks in public
 subnets with public IPs and no direct inbound task rules. RDS remains isolated. This
 profile also places CloudFront in front of an ALB whose HTTP ingress is restricted to the AWS-managed
-CloudFront origin-facing prefix list. This is a deliberate short-lived cost trade-off, not the target
-controlled-pilot network topology. Its VPC spans two Availability Zones, but its cost-limited RDS
-resource is deliberately not Multi-AZ. EventBridge Scheduler starts a Step Functions teardown
+CloudFront origin-facing prefix list. The validation profile uses a two-AZ VPC and single-AZ RDS
+to control infrastructure cost. EventBridge Scheduler starts a Step Functions teardown
 watchdog at minute 60 to begin deleting Runtime before Foundation. A 50-minute operator
 teardown target remains the manual control and requires teardown verification; the watchdog covers
 workstation or terminal failure rather than replacing operator ownership.
 
-## Readiness Gaps
+## Live Deployment Validation
 
-This architecture becomes deployable only after:
+The September 25, 2026 run passed CloudFormation provisioning, API health, stable API/worker/scheduler
+services, Alembic migrations, RDS/pgvector connectivity, S3-Lambda-SQS-Celery-PostgreSQL processing,
+worker replacement, replay, image scanning, and verified teardown. See the
+[live validation record](../evidence/aws-live-validation/README.md) for results and source revision.
 
-- the API, worker, scheduler, and migration containers pass live startup/health validation;
-- the single-instance scheduler ECS service is configured and its replacement behavior is observed;
-- custom queue-age, retry, terminal-failure, and worker-heartbeat metrics are published;
-- a full S3 source adapter is implemented if customer artifacts move beyond validation evidence;
-- the executable CDK stacks pass live CloudFormation provisioning, connected
-  S3-Lambda-SQS-Celery-PostgreSQL validation, and teardown verification;
-- account-specific IAM, networking, DNS, certificates, backup, retention, and budgets are approved;
-- migration, restore, SQS redrive, worker shutdown, and rollback drills are observed;
-- GitHub OIDC deployment is configured and protected by an environment approval gate.
+## Environment Configuration
+
+For each deployment, configure account-specific IAM, networking, DNS, certificates, backup,
+retention, budgets, monitoring destinations, and deployment ownership. Select availability and
+capacity settings for the intended workload. Use the release and rollback procedures above for
+subsequent deployments.

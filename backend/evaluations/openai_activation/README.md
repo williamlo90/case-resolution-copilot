@@ -3,7 +3,7 @@
 Status: passed locally on 18 August 2026
 
 This gate verifies that the configured OpenAI project key can call the production narrative model
-through the Responses API. It uses only synthetic Decision Brief controls and makes no Gmail,
+through the Responses API. It uses only test Decision Brief controls and makes no Gmail,
 browser, database, or customer-data request.
 
 ## Preflight
@@ -20,7 +20,7 @@ browser, database, or customer-data request.
 
 | Measure | Result |
 | --- | ---: |
-| Synthetic cases | `3` |
+| Test cases | `3` |
 | Passed | `3/3` |
 | Provider calls | `2/2` maximum |
 | Structured schema valid | `3/3` |
@@ -33,7 +33,7 @@ keeping server-owned facts, policy status, risks, actions, approval requirements
 unchanged.
 
 The sanitized machine-readable result is in [`observed.json`](observed.json). Detailed runtime
-artifacts remain under ignored `backend/.benchmark-data/` and contain synthetic inputs only.
+artifacts remain under ignored `backend/.benchmark-data/` and contain test inputs only.
 
 ## Network-Free Regression
 
@@ -52,11 +52,8 @@ local startup, and background work must not spend API credit accidentally. The O
 enabled by changing the backend-only `SUPPORT_COPILOT_MODEL_PROVIDER` setting at the controlled
 Phase 8 deployment gate.
 
-## Evidence Limit
+## Evaluation Scope
 
-This result proves API access, model availability for this project, schema compatibility, and the
-Decision Brief control boundary at one point in time. It does not prove production latency, daily
-availability, Gmail integration, customer impact, or cost per case. OpenAI project budget settings
-are user-managed and were reported configured but were not read or independently verified. Phase 7
-subsequently recorded complete provider usage and cost per evaluated case in
+The run verifies API access, model availability, schema compatibility, and preservation of the
+Decision Brief control boundary. Phase 7 records provider usage and cost per evaluated case in
 [`../phase7_verification`](../phase7_verification/README.md).

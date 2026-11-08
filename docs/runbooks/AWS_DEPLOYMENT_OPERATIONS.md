@@ -7,8 +7,7 @@ See the [live validation record](../evidence/aws-live-validation/README.md) for 
 ## Portfolio Validation Profile
 
 The executable profile lives in [`infra/aws`](../../infra/aws/README.md). It is a reproducible,
-short-lived validation environment designed to exist for minutes, not an always-on pilot. Its VPC spans two
-Availability Zones, while RDS deliberately lacks Multi-AZ resilience. Its deployment
+short-lived validation environment with a two-AZ VPC and single-AZ RDS. Its deployment
 scripts require explicit cost acknowledgement, keep all ECS services at zero until migration passes,
 and provide a full-stack destroy command. EventBridge Scheduler starts an AWS-side Step Functions
 watchdog at minute 60 to begin deleting Runtime before Foundation. The operator targets
@@ -17,7 +16,7 @@ manual teardown at 50 minutes and then verifies the inventory.
 The manually managed AWS cost budget of USD 5 or lower is a required preflight and an alert, not a
 spending cap. RDS, ALB, public IPv4, CloudFront, Secrets Manager, logs, and Fargate may continue
 charging until their resources are deleted. Do not leave the Foundation stack idle after validation.
-The always-on portfolio demo remains on Vercel and Neon; this runbook does not migrate that environment.
+The hosted application uses Vercel and Neon. This runbook manages the AWS deployment lifecycle.
 
 ## Required Inputs
 
@@ -63,7 +62,7 @@ ARNs but must never contain secret values.
    count, heartbeat, broker connectivity, and no terminal ingestion failures.
 6. Update the API service with circuit breaker rollback enabled. Wait for service stability.
 7. Verify ALB readiness, source revision, authentication, tenant isolation, and one read-only case.
-8. Upload one bounded synthetic evidence object under `validation-input/`. Confirm the same
+8. Upload one bounded test evidence object under `validation-input/`. Confirm the same
    validation identifier reaches Lambda, SQS, Celery, and PostgreSQL; verify the content-addressed
    manifest under `validation-output/`, job status, source retrieval, duplicate rejection, bounded
    retry behavior, and a successful reprocess path.

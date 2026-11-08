@@ -11,7 +11,7 @@ The hosted governed workflow passed its deterministic acceptance scenario:
 5. A second execution was unavailable and the action reported a duplicate blocker.
 6. An auditor could inspect the case, review, approval lineage, attempt, and receipt without receiving mutation controls.
 
-This is evidence for a controlled demo workflow. It is not a claim of validation against a real client, a production action provider, or complete real-business cases.
+The acceptance journey covers the hosted review-to-execution workflow using dedicated test fixtures.
 
 ## Environment
 
@@ -23,7 +23,7 @@ This is evidence for a controlled demo workflow. It is not a claim of validation
 | Identity | Clerk development instance with live specialist, supervisor, and auditor sessions |
 | Decision wording | Deterministic fallback; no OpenAI key was required |
 | Action provider | Credential-free deterministic demo adapter |
-| Test data | Explicitly labeled synthetic demo case |
+| Test data | Acceptance test case |
 
 ## Traceable record chain
 

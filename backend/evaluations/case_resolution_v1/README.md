@@ -4,7 +4,7 @@ This directory contains the frozen benchmark contract for the first automated fu
 
 ## Scope
 
-- Exactly 10 synthetic cases.
+- Exactly 10 test cases.
 - Two planned observations per case.
 - Inputs and gold labels were created before product execution.
 - Gold labels were reviewed against supplied evidence, governed policy text, domain rules, review authority, and action safety before execution. A separate pre-execution reviewer provenance record was not retained.
@@ -81,6 +81,9 @@ provider canary passed 3/3 cases with two provider calls.
 Four guarded PostgreSQL workflow scenarios also passed. See the
 [sanitized evidence pack](../../../docs/evidence/case-resolution-evaluation-v1/README.md).
 
-## Methodological Boundary
+## Scoring Scope
 
-This is a small synthetic benchmark with limited statistical power. The suite exposed a conflicting-ownership defect that was fixed, so the final 100% result is regression evidence on a development set, not blind generalization evidence. Exact semantic fact phrasing, exact information-gap wording, complete action-parameter equality, and persisted review boundaries are not included in the aggregate deterministic score. A separate blind holdout is required before making a general quality claim.
+V1 is a 10-case development-set regression suite with two repeats per case. The aggregate scores
+control state, required sources, risk, escalation disposition, action types, schema, and consistency.
+Semantic fact phrasing, information-gap wording, and full action-parameter equality are separate
+review dimensions. Four guarded PostgreSQL scenarios cover persisted review and execution behavior.

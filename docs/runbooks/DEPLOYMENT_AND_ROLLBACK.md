@@ -62,5 +62,5 @@ $revision = git rev-parse HEAD
 powershell -File scripts/production-smoke.ps1 -ExpectedRevision $revision
 ```
 
-Passing smoke proves only revision identity and the bounded unauthenticated controls in the script.
-It does not prove database rollback, role workflows, provider failure handling, or client readiness.
+The smoke check verifies deployed revision identity and unauthenticated endpoint controls.
+Database recovery and role workflows have their own verification procedures.

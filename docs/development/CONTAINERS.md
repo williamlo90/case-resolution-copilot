@@ -1,7 +1,7 @@
 # Development Containers
 
-The optional development stack contains frontend, API, and PostgreSQL/pgvector. It is a local demo
-environment, not a production deployment design.
+The optional local development stack contains frontend, API, and PostgreSQL/pgvector.
+See the [AWS deployment architecture](../architecture/AWS_READY_DEPLOYMENT.md) for cloud infrastructure.
 
 ## Resource Gate
 

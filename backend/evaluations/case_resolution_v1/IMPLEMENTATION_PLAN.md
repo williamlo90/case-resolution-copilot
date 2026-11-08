@@ -4,7 +4,7 @@ Status: Evaluation V1 complete. Deterministic regression, bounded provider canar
 
 ## Objective
 
-Build a frozen, auditable automated benchmark for the current Case Resolution Copilot without changing prompts, retrieval behavior, orchestration, or production decisions. Evaluation V1 contains exactly 10 synthetic cases and supports two immutable observations per case.
+Build a frozen, auditable automated benchmark for the current Case Resolution Copilot without changing prompts, retrieval behavior, orchestration, or production decisions. Evaluation V1 contains exactly 10 test cases and supports two immutable observations per case.
 
 This benchmark measures automated decision quality and workflow safety. It does not replace or reinterpret the earlier human workflow timing pilot.
 
@@ -158,7 +158,7 @@ The final report will include:
 - run-to-run consistency
 - per-case and per-repeat results
 
-Regression thresholds are provisional and will be labelled as such. They are not statistically validated by a 10-case synthetic suite.
+Regression thresholds are provisional and will be labelled as such. They are not statistically validated by a 10-case test suite.
 
 ## Cost And Safety Gate
 
@@ -211,7 +211,7 @@ The existing Decision Brief, retrieval, public-data, workflow-traceability, and 
 
 ## Known Limitations
 
-- The benchmark is synthetic and contains only 10 cases.
+- The benchmark contains 10 test cases.
 - Two repeats provide only a basic consistency signal and limited evidence about variability.
 - An LLM judge can introduce bias even with a strict rubric.
 - Engine-level evaluation does not by itself prove persisted review/action correctness.

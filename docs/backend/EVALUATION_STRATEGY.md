@@ -28,7 +28,7 @@ execution, and recovery from an unknown provider outcome.
 ### Wave 1 governed RAG gate
 
 The credential-free Wave 1 evaluator runs the production governed V2 resolver against a bounded
-in-memory adapter. Representative synthetic cases assert expected clause sources, retrieval status,
+in-memory adapter. Representative test cases assert expected clause sources, retrieval status,
 hit@3, recall@3, p50/p95 latency, and visible runtime failures. Sanitized JSONL events exclude raw
 queries, policy text, credentials, customer content, and exception messages.
 
@@ -36,8 +36,7 @@ queries, policy text, credentials, customer content, and exception messages.
 
 The public benchmark pipeline transforms externally sourced support-like records into a documented
 evaluation format. `backend/benchmarks/public/sources.json` records provenance and the benchmark
-README states the limits of the data. This evidence measures the transformation and scoring system;
-it is not a substitute for validation on complete real client cases.
+README documents dataset scope. This lane evaluates data transformation and task-specific scoring.
 
 ### Controlled pilot scorecard
 

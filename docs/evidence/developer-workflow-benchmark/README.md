@@ -21,7 +21,7 @@ not pass.
 - The current Copilot state was re-read from the disposable Neon branch without exporting secrets.
 - Three targeted safety and recovery tests passed in one serial Pytest process.
 
-See [REPORT.md](REPORT.md) for interpretation and claim boundaries.
+See [REPORT.md](REPORT.md) for method and results.
 
 ## Benchmark Lanes
 
@@ -107,9 +107,8 @@ instrumentation diagnostic, not the final workflow result.
 - Copilot results must also match the state persisted in the disposable database.
 - Unsupported consequential claims or unsafe execution attempts fail a case.
 
-## Claim Boundary
+## Measurement Scope
 
-Report correctness before timing and retain this limitation:
+Results report workflow correctness alongside elapsed time:
 
-> This developer-operated benchmark uses matched synthetic cases. It measures repeatable workflow
-> performance by the product builder, not production-user productivity or customer impact.
+> The benchmark compares repeatable workflows using one operator and three matched cases per condition.

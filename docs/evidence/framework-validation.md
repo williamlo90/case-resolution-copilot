@@ -1,6 +1,6 @@
 # Framework Validation
 
-- Case: `CS-2047` (synthetic)
+- Case: `CS-2047` (test)
 - Result: `3/3` paths passed
 - Execution: serial and bounded
 - Production runtime: LangGraph with LangChain formatting

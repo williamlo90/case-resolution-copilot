@@ -20,7 +20,7 @@ step without product explanation?
 - Do not use the builder as a participant.
 - Record role and experience band only. Do not record employer, customer, or unnecessary personal
   information.
-- Use synthetic cases and a reversible action simulator only.
+- Use test cases and a reversible action simulator only.
 
 ## Tasks
 

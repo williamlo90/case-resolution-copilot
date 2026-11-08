@@ -273,7 +273,7 @@ export function CaseQueueTable({
         <EmptyState
           icon={CircleAlert}
           title="No cases yet"
-          description="Cases will appear after a source sends one or demo data is added."
+          description="Cases will appear when records are added or imported from a connected source."
         />
       )}
     </div>

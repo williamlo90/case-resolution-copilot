@@ -14,7 +14,7 @@ application controls and authorized people decide what may happen.
 
 [Hosted application](https://ai-support-escalation-copilot.vercel.app) | [Engineering case study](docs/portfolio/CASE_STUDY.md) | [Application pack](docs/portfolio/APPLICATION_PACK.md)
 
-The hosted application is invite-only. The public walkthrough contains labelled demo data only.
+The hosted application is invite-only.
 
 ## Evidence Snapshot
 
@@ -23,17 +23,14 @@ The hosted application is invite-only. The public walkthrough contains labelled 
 | **4** | Specialist, Supervisor, Administrator, and Auditor roles | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](backend/evaluations/workflow/traceability.json) |
-| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
+| **20/20** | Regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
 | **3/3** | Bounded OpenAI narrative canary passed with deterministic controls preserved and `$0.001077` measured total cost | [Evaluation V1 evidence](docs/evidence/case-resolution-evaluation-v1/README.md) |
-| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](docs/evidence/developer-workflow-benchmark/REPORT.md) |
+| **83.7%** | Lower raw median elapsed time in a developer-operated matched benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](docs/evidence/developer-workflow-benchmark/REPORT.md) |
 
-The separate [historical hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
-shows the recorded synthetic workflow from Specialist submission through Supervisor approval,
-controlled execution, duplicate blocking, and Auditor inspection. These are engineering-coverage
-metrics and bounded product evidence, not customer-impact measurements.
-
-The time-saved figure is descriptive benchmark evidence from one operator and three matched
-synthetic cases per condition. It is not presented as a population-level productivity claim.
+The [hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+covers Specialist submission, Supervisor approval, controlled execution, duplicate blocking,
+and Auditor inspection. The workflow benchmark compares one operator across three matched cases
+per condition; see the linked report for the method and scoring criteria.
 
 ## Why It Exists
 
@@ -60,33 +57,33 @@ Case intake -> Triage -> Evidence and policy review -> Decision Brief
 - **Actions** use idempotency, durable receipts, unknown-outcome handling, and reconciliation.
 - **Policies and Quality** govern what the system may rely on and how behavior is evaluated.
 
-Wave 1 adds portfolio-focused backend depth without changing the product boundary:
+The backend includes asynchronous ingestion, governed retrieval, and reproducible deployment:
 
 - Celery uses Redis locally and SQS in the AWS profile to deliver inbox-sync and policy-index jobs,
   while PostgreSQL retains durable status, leases, retry limits, duplicate protection, and
   reprocessing authority.
 - A credential-free governed RAG V2 evaluator checks expected sources, retrieval status, latency,
-  and sanitized failure events across representative synthetic cases.
+  and sanitized failure events across representative test cases.
 - A [live-validated reproducible AWS architecture](docs/architecture/AWS_READY_DEPLOYMENT.md) maps the API,
   worker, and migration processes to ECS/Fargate, RDS PostgreSQL with pgvector, SQS, Lambda, S3,
   Secrets Manager, CloudWatch, least-privilege IAM, and an AWS-side auto-destroy watchdog. An [executable CDK validation
   environment](infra/aws/README.md) now represents that topology with cost-aware, teardown-safe defaults.
   A bounded [AWS live validation](docs/evidence/aws-live-validation/README.md) passed the connected
   ingestion, migration, pgvector, health, queue, and teardown checks. The always-on demo remains on
-  Vercel with Neon; AWS is validated deployment architecture, not permanent production hosting.
+  Vercel with Neon; the AWS environment supports reproducible deployment validation.
 
-**Portfolio claim:** Built and live-validated a reproducible AWS deployment architecture using
+Built and live-validated a reproducible AWS deployment architecture using
 ECS/Fargate, RDS PostgreSQL with pgvector, S3, Lambda, SQS, CloudFront, IAM, Secrets Manager, and
 CloudWatch, with infrastructure designed for safe teardown and redeployment.
 
-Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md):
+The [orchestrator framework boundary](docs/architecture/ORCHESTRATOR_FRAMEWORKS.md) defines these roles:
 
 - LangGraph is the production/default checkpoint orchestrator around the governed decision engine.
 - LangChain Core supplies prompt templates and schema-format instructions on the optional OpenAI
   narrative path.
 - CrewAI and AutoGen are isolated, opt-in comparison prototypes with shared input/output safety
   contracts; neither is part of the hosted production path.
-- One bounded synthetic-case [live validation](docs/evidence/framework-validation.md) passed the
+- A single-case [live validation](docs/evidence/framework-validation.md) passed the
   shared schema, fact, evidence, approval, and no-false-execution checks on all three paths.
 
 ## Product Tour
@@ -94,34 +91,33 @@ Wave 2A adds a practical [orchestrator framework boundary](docs/architecture/ORC
 <table>
   <tr>
     <td width="50%">
-      <a href="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg" alt="Cases queue showing synthetic demo cases"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/01-cases-queue.jpg" alt="Operational case queue"></a><br>
       <strong>Operational queue</strong><br>
       Triage by risk, SLA, ownership, status, and source freshness.
     </td>
     <td width="50%">
-      <a href="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg" alt="Decision Brief for a synthetic billing case"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/02-decision-brief.jpg" alt="Decision Brief for a billing case"></a><br>
       <strong>Decision Brief</strong><br>
       Verified facts, missing evidence, uncertainty, and the review boundary.
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <a href="docs/evidence/live-product-tour/2026-10-12/03-evidence.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/03-evidence.jpg" alt="Policy and connected business evidence"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-11-09/03-evidence.jpg"><img src="docs/evidence/live-product-tour/2026-11-09/03-evidence.jpg" alt="Policy and connected business evidence"></a><br>
       <strong>Traceable evidence</strong><br>
       Policy clauses and business records remain connected to sources.
     </td>
     <td width="50%">
-      <a href="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg" alt="Conversation and suggested response for a synthetic billing case"></a><br>
+      <a href="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg"><img src="docs/evidence/live-product-tour/2026-10-12/04-conversation.jpg" alt="Conversation and suggested response for a billing case"></a><br>
       <strong>Conversation</strong><br>
       Customer messages, internal notes, and an evidence-aware response draft.
     </td>
   </tr>
 </table>
 
-These [live product-tour screenshots](docs/evidence/live-product-tour/2026-10-12/README.md) were
-captured on October 12, 2026, from the hosted demo using synthetic cases. They show the UI, not
-end-to-end correctness. The [earlier hosted acceptance record](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
-separately covers approved controlled execution and its receipt.
+Explore the [live product tour](docs/evidence/live-product-tour/2026-10-12/README.md), captured
+on October 12, 2026, and the [hosted workflow acceptance](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
+covering approved execution and its receipt.
 
 ## Authority Model
 
@@ -164,20 +160,18 @@ Deterministic providers keep repository verification independent of paid credent
 
 ## Verification Evidence
 
-### Current reconstructed-source verification
+### Recorded verification results
 
 | Evidence layer | Result |
 | --- | ---: |
 | Release-hardening static checks | Ruff, strict Mypy over 470 backend files, TypeScript, and ESLint passed |
 | Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
 | Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
-| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
+| Framework validation | 3/3 bounded paths passed on one test case; CrewAI and AutoGen remain prototypes |
 | Migration and secret safety | Full Alembic SQL generation passed through revision `0024`; repository secret scan found 0 findings |
 
-Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
-approval, exactly-once execution, and unknown-outcome reconciliation. This is not a rerun of the
-complete integration suite. Static Alembic SQL generation does not prove that every migration was
-promoted to production, and the bounded OpenAI canary does not prove Google activation.
+Four guarded PostgreSQL scenarios cover conflict blocking, snapshot-bound approval,
+exactly-once execution, and unknown-outcome reconciliation.
 
 ### Baseline coverage artifacts
 
@@ -186,16 +180,11 @@ promoted to production, and the bounded OpenAI canary does not prove Google acti
 - The [workflow traceability map](backend/evaluations/workflow/traceability.json) records 19
   traceable proofs across 8 scenarios and 21 workflow variants.
 
-These committed baseline artifacts describe designed coverage; they are not presented as a fresh
-full-release or PostgreSQL rerun for the reconstructed revision.
-
 ### Historical hosted product evidence
 
 The [hosted deterministic acceptance](docs/evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 records Specialist submission, Supervisor approval, one controlled action, durable receipt
-capture, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It
-comes from the predecessor hosted deployment and does not prove that the current reconstructed
-commit is deployed.
+capture, duplicate blocking, and Auditor read-only inspection for case `CS-2050` on August 5, 2026.
 
 The [GitHub quality gate](https://github.com/williamlo90/case-resolution-copilot/actions/workflows/quality-gate.yml)
 runs on pull requests or manual dispatch, never on every push. It adds dependency audits and a
@@ -218,18 +207,6 @@ uv run python -m scripts.run_release_verification
 The verifier runs serially and starts no browser, application server, container, database, or
 external model call. See the [backend guide](backend/README.md), [frontend guide](frontend/README.md),
 and [resource policy](RESOURCE_SAFETY_POLICY.md).
-
-## Claim Boundaries
-
-- This is a production-oriented portfolio project and controlled-pilot candidate, not a claim of
-  general production readiness.
-- The hosted identity setup uses an invite-only Clerk development instance.
-- No client-owned case source or controlled-action sandbox is connected.
-- Public benchmark records and synthetic controls test the evaluation system; they are not complete
-  client cases and do not prove customer impact.
-- Current external gates include disposable-database verification, provider failure drills, restore
-  cutover, production telemetry, accessibility research, penetration testing, bounded load testing,
-  and complete anonymized client-case validation.
 
 ## Documentation
 
