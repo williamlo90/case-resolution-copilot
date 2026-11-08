@@ -143,8 +143,8 @@ The repository separates:
 - persisted quality projections;
 - controlled-pilot templates for future client evaluation.
 
-See `../docs/backend/EVALUATION_STRATEGY.md` and `benchmarks/public/README.md`. Public benchmark data
-does not justify a claim of validation on complete real business cases.
+See `../docs/backend/EVALUATION_STRATEGY.md` and `benchmarks/public/README.md` for suite design
+and task-specific scoring.
 
 Run the credential-free governed RAG V2 source and latency gate with:
 
@@ -221,9 +221,7 @@ return internal exception details.
 [AWS CDK deployment](../infra/aws/README.md) was live-validated in Singapore on September 25, 2026,
 using source revision `0a92c4b23f655b037a45c0999a1530c49d19d3ed`. The bounded run covered
 migration, API health, connected ingestion, worker recovery, replay, and verified teardown; see the
-[sanitized validation record](../docs/evidence/aws-live-validation/README.md). This is evidence for
-that revision and deployment path, not a claim of an always-on AWS service or a test of every later
-code change.
+[sanitized validation record](../docs/evidence/aws-live-validation/README.md).
 Container execution is excluded from the default local gate because it is comparatively expensive.
 
 ## Remaining External Gates

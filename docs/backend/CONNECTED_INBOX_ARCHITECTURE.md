@@ -517,7 +517,7 @@ Before Gmail-derived content can reach OpenAI:
 6. Responses requests must keep `store=False`;
 7. provider retention, contractual, and Google Limited Use requirements must be accepted for the
    intended data class;
-8. synthetic or deliberately non-sensitive test email is required until that activation gate passes.
+8. test or deliberately non-sensitive test email is required until that activation gate passes.
 
 OpenAI documents that API data is not used to train models by default, but default abuse-monitoring
 logs may retain customer content for up to 30 days. Therefore `store=False` must not be described as

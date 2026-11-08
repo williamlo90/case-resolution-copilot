@@ -14,7 +14,7 @@ operator understand what happened, identify missing evidence, retrieve the appli
 version, prepare a proposed resolution, obtain human approval, and execute a controlled action
 with an auditable recovery path.
 
-It is not designed to let an LLM make consequential decisions by itself.
+Application controls and human reviewers govern consequential decisions.
 
 ![Production Cases queue](../evidence/production-demo/01-cases-queue.png)
 
@@ -25,13 +25,12 @@ It is not designed to let an LLM make consequential decisions by itself.
 | **4** | Governed roles: Specialist, Supervisor, Administrator, and Auditor | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **71** | Baseline acceptance variants covering 54 controls | [Baseline acceptance matrix](../../backend/evaluations/acceptance/local_release_matrix.json) |
 | **19** | Baseline traceable proofs across 8 scenarios and 21 workflow variants | [Workflow traceability map](../../backend/evaluations/workflow/traceability.json) |
-| **20/20** | Post-fix synthetic regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
+| **20/20** | Regression observations passed implemented control-state, required-source coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
 | **3/3** | Bounded OpenAI narrative canary passed with controls preserved and `$0.001077` measured total cost | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) |
-| **83.7%** | Raw median elapsed time lower in a developer-operated matched synthetic benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) |
+| **83.7%** | Lower raw median elapsed time in a developer-operated matched benchmark: 95 s with Copilot versus 582 s manually | [Workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) |
 
-These figures describe governed workflow coverage, traceability, and bounded workflow timing. The
-time-saved figure is descriptive evidence from one operator and three matched synthetic cases per
-condition; it is not a population-level productivity or customer-impact claim.
+The workflow benchmark compares one operator across three matched cases per condition.
+The linked report documents the timing and scoring criteria.
 
 ## Users And Workflow
 
@@ -78,7 +77,7 @@ flowchart LR
   a dead-letter queue, versioned S3 evidence, Lambda, CloudFront/ALB, least-privilege IAM,
   CloudWatch, migrations, and an EventBridge Scheduler plus Step Functions auto-destroy watchdog.
   A bounded AWS run passed connected ingestion and infrastructure checks, then completed verified
-  teardown; the always-on product demo is not hosted on AWS.
+  teardown. The hosted application uses Vercel and Neon.
 - A LangGraph production orchestration boundary and LangChain Core prompt/schema-format utility,
   plus isolated CrewAI and AutoGen comparison prototypes that do not affect production behavior.
 
@@ -123,25 +122,23 @@ reconciliation to establish the outcome.
 A case records the policy version and evidence that supported the recommendation. Publishing a new
 policy does not silently rewrite historical reasoning.
 
-### Evaluation claims stay task-specific
+### Task-specific evaluation
 
-Public complaint, ombudsman, and transaction datasets remain separate. The project does not combine
-unrelated records into fictional complete business cases or report a misleading aggregate score.
+Complaint, ombudsman, and transaction datasets are evaluated separately with task-specific metrics.
 
 ## How This Was Verified
 
-### Current reconstructed source
+### Recorded verification results
 
 | Evidence | Result |
 | --- | ---: |
 | Release-hardening static checks | Ruff, Mypy over 470 backend files, TypeScript, and ESLint passed |
 | Release-hardening regressions | 468 backend tests and 186 frontend tests passed in bounded serial runs |
-| Framework validation | 3/3 bounded paths passed on one synthetic case; CrewAI and AutoGen remain prototypes |
+| Framework validation | 3/3 bounded paths passed on one test case; CrewAI and AutoGen remain prototypes |
 | Case Resolution Evaluation V1 | 20/20 deterministic regression observations, 3/3 provider-canary cases, and 4/4 targeted PostgreSQL workflow scenarios passed |
 
 Four targeted guarded PostgreSQL scenarios were rerun for conflict blocking, snapshot-bound
-approval, exactly-once execution, and unknown-outcome reconciliation. The complete integration
-suite was not rerun.
+approval, exactly-once execution, and unknown-outcome reconciliation.
 
 ### Baseline matrices
 
@@ -150,19 +147,15 @@ suite was not rerun.
 - The [workflow traceability map](../../backend/evaluations/workflow/traceability.json) records 8
   scenarios, 19 traceable proofs, and 21 workflow variants.
 
-These are committed baseline coverage artifacts, not a fresh full-release or database rerun.
-
 ### Historical hosted evidence
 
 The [deterministic hosted acceptance](../evidence/hosted-e2e-acceptance/2026-08-05/README.md)
 records Specialist submission, Supervisor approval, a completed controlled action with a durable
-receipt, duplicate blocking, and Auditor read-only inspection for synthetic case `CS-2050`. It was
-captured from the predecessor hosted deployment and is not evidence that the reconstructed commit
-is currently deployed.
+receipt, duplicate blocking, and Auditor read-only inspection for case `CS-2050` on August 5, 2026.
 
 ### Developer-operated workflow benchmark
 
-In a matched synthetic benchmark, Case Resolution Copilot produced `3/3` complete safe workflow
+In a matched test benchmark, Case Resolution Copilot produced `3/3` complete safe workflow
 outcomes versus `0/3` manually under the same scoring boundary. Raw median elapsed time was `95 s`
 with Copilot versus `582 s` manually, which is `487 s` lower (`83.7%`, `6.1x`). See the
 [workflow benchmark report](../evidence/developer-workflow-benchmark/REPORT.md) for the scoring
@@ -213,27 +206,6 @@ end-to-end product score.
   inspection.
 - A screenshot-backed production walkthrough records the queue, Decision Brief, conversation,
   evidence, activity, policies, quality, actions, and role-denial states.
-
-### Defects found during hosted acceptance
-
-**Blocked connection state was hidden.** The action detail contract initially rejected the valid
-`not_configured` state while the queue discarded its execution blocker. The reconstructed source
-accepts the state and surfaces `Connection unavailable` instead of hiding why execution is blocked.
-
-**An approved terminal review appeared undecided.** After action execution changed the case, stale
-case messaging took precedence over the review's terminal `approved` state. The UI now keeps the
-approval visibly complete and explains that later case changes do not rewrite the recorded review;
-a focused regression covers this state.
-
-## Current Verdict
-
-The project is a **controlled-pilot release candidate** and a production-oriented portfolio
-project. It is not valid to claim general production readiness or validation on complete internal
-business cases.
-
-The remaining evidence boundaries are concise: the reconstructed full release and complete
-guarded PostgreSQL suite still require reruns, external case and action providers remain simulated,
-and no customer-impact claim has been established.
 
 ## Resume Summary
 

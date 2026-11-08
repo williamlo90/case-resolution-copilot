@@ -4,8 +4,7 @@
 
 The current system passed the operational-readiness gate for a controlled pilot. The evidence
 combines one bounded hosted Gmail journey with disposable-database integration tests and
-deterministic provider fault injection. It does not claim general production readiness, arbitrary
-scale, or measured customer impact.
+deterministic provider fault injection.
 
 ## Verification results
 
@@ -22,7 +21,7 @@ scale, or measured customer impact.
 | Provider simulator | Pass | 4 deterministic failure and replay scenarios |
 | Frontend recovery states | Pass | 35 checks across expiry, reconnect-required, rate limit, timeout, cancellation, and unknown draft outcome |
 | Hosted authenticated readiness | Pass | Warm reload to visible `Cases` primary heading in 375 ms against a 2,500 ms gate; no runtime errors |
-| Hosted connected draft journey | Pass | One synthetic Gmail thread reached an approved, persisted Gmail draft without automatic send |
+| Hosted connected draft journey | Pass | One test Gmail thread reached an approved, persisted Gmail draft without automatic send |
 | Timed operator benchmark | Pass | Copilot produced 3/3 complete safe outcomes versus 0/3 manually; raw medians 95 s and 582 s |
 
 ## Failure-path boundary

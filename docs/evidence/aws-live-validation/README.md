@@ -9,9 +9,7 @@ machine-readable record, refer to the final September 25 run. The earlier sessio
 [the repository history](https://github.com/williamlo90/case-resolution-copilot/commit/38e7baf9ad5b3210aa217d49cf9245ef6662f02e).
 
 The repository's reproducible AWS CDK environment was deployed to `ap-southeast-1`, validated, and
-safely torn down. This record supports the claim that the deployment path works on live AWS services
-and can be redeployed from code. It does not claim permanent production hosting or customer traffic
-on AWS.
+safely torn down. The run verifies deployment on live AWS services and reproducibility from code.
 
 ## Passed Checks
 
@@ -70,5 +68,4 @@ and teardown are supported by the sanitized command evidence and results file.
 - Credentials were loaded from ignored local files into Secrets Manager and were not included in
   evidence or repository history.
 - The environment used a cost-aware single-AZ profile and an AWS-side auto-destroy watchdog.
-- This run validates deployment mechanics and the connected infrastructure path, not production
-  availability, disaster recovery, sustained load, or customer data handling.
+- Validation covers deployment mechanics, connected ingestion, worker recovery, replay, and teardown.

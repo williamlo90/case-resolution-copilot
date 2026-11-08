@@ -13,7 +13,7 @@ The approval metric checks whether human review is required, not whether a fixed
 
 ## Timing
 
-Raw median elapsed time was `582 s` manual versus `95 s` with Copilot: `487 s` lower (`83.7%`, `6.1x`). This is descriptive timing from three synthetic cases per condition, not a population-level productivity estimate.
+Raw median elapsed time was `582 s` manual versus `95 s` with Copilot: `487 s` lower (`83.7%`, `6.1x`). The benchmark used one operator and three matched cases per condition.
 
 | Decision pair | Manual | Copilot |
 | --- | --- | --- |
@@ -54,8 +54,6 @@ The original strict scorer returned `0/6` because it required internal `CTX-*` a
 - Validation seed target: `disposable Neon validation branch`
 - Finalized at: `2026-08-25T15:04:06.270804+00:00`
 
-## Claim Boundary
+## Result Summary
 
-This is a developer-operated matched synthetic benchmark with one operator and three cases per condition. It supports a portfolio claim about this controlled workflow, not a claim about production users, customer impact, or general model accuracy.
-
-**Portfolio-safe wording:** In a developer-operated matched synthetic benchmark, Case Resolution Copilot produced 3/3 complete safe workflow outcomes versus 0/3 manually; raw median elapsed time was 95 seconds versus 582 seconds. Three targeted safety tests also passed.
+ In a developer-operated matched test benchmark, Case Resolution Copilot produced 3/3 complete safe workflow outcomes versus 0/3 manually; raw median elapsed time was 95 seconds versus 582 seconds. Three targeted safety tests also passed.

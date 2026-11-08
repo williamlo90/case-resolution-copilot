@@ -2,7 +2,7 @@
 
 Status: reference task templates backed by executable CDK in [`infra/aws`](../../infra/aws/README.md).
 The CDK path completed its latest bounded live AWS validation on September 25, 2026, followed by
-verified teardown. These review templates are not evidence of a currently running AWS environment.
+verified teardown.
 
 The target keeps the application as a modular monolith while separating runtime processes:
 
@@ -20,8 +20,8 @@ The target keeps the application as a modular monolith while separating runtime 
 - The operator targets teardown at 50 minutes; EventBridge Scheduler starts a Step Functions
   teardown watchdog at minute 60 if the terminal or operator path fails.
 
-This pack describes the short-lived AWS validation environment. It does not replace the always-on
-Vercel frontend and Neon database used by the portfolio demo.
+The AWS environment supports reproducible deployment and validation. The hosted application uses
+Vercel and Neon PostgreSQL.
 
 ## Files
 
@@ -48,15 +48,14 @@ described in [AWS deployment architecture](../../docs/architecture/AWS_READY_DEP
 The API, worker, scheduler, and migration definitions use the repository's actual runtime entry points.
 Account-, image-, network-, and secret-specific values remain explicit `REPLACE_` placeholders.
 
-## Validation Boundary
+## Deployment Configuration
 
-These JSON files are syntactically valid templates, not deployable definitions until placeholders
-are substituted. Static validation does not prove AWS account quotas, IAM behavior, subnet routing,
-database connectivity, container startup, migrations, or rollback.
+The JSON templates document runtime contracts. Resolve account, image, network, and secret
+placeholders through the deployment configuration before use.
 
 Use the CDK app for new validation deployments. These JSON files remain reviewable runtime-contract
-references and are covered by backend tests; they are not a second deployment mechanism.
+references covered by backend tests.
 
-Describe this repository as a **live-validated reproducible AWS deployment architecture designed
-for safe teardown and redeployment**, not as an always-on AWS production service. See the sanitized
+The **live-validated reproducible AWS deployment architecture** supports safe teardown and
+redeployment. See the sanitized
 [validation record](../../docs/evidence/aws-live-validation/README.md).

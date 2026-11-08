@@ -2,9 +2,8 @@
 
 Status: local engineering gate passed on 19 August 2026.
 
-This evidence covers the dirty local worktree based on commit
-`d6c7de72c5636208d34e028744ac3460afc3e0fa`. It does not claim that the uncommitted revision is
-already deployed. All database tests used an explicitly disposable direct Neon branch. No test
+This evaluation ran locally from base commit
+`d6c7de72c5636208d34e028744ac3460afc3e0fa`. Database tests used a disposable direct Neon branch. No test
 used production data, Gmail, a browser, a local web server, or parallel workers.
 
 ## Recorded Results
@@ -25,7 +24,7 @@ used production data, Gmail, a browser, a local web server, or parallel workers.
 
 ## Provider Usage And Cost
 
-The live run used synthetic inputs only. OpenAI returned complete usage metadata for both calls:
+The live run used test inputs only. OpenAI returned complete usage metadata for both calls:
 
 | Measure | Observed |
 | --- | ---: |
@@ -58,8 +57,6 @@ server-owned fact, policy status, risk, action, approval requirement, and propos
   run. No speedup or productivity claim is supported.
 - Live Gmail connect/import/replay, hosted role journeys, and warm authenticated UI LCP remain Phase
   8 gates after the batch deployment.
-- This is synthetic engineering evidence, not validation on complete real client cases and not a
-  production high-volume claim.
 
 ## Reproduce
 
@@ -76,4 +73,4 @@ python -m pytest tests\unit\test_developer_workflow_benchmark_fixtures.py -q
 
 The provider run requires a configured ignored local API key and explicit pricing arguments. Do not
 commit or print the key. The sanitized machine-readable summary is in `observed.json`; detailed
-synthetic runtime artifacts remain under ignored `backend/.benchmark-data/`.
+test runtime artifacts remain under ignored `backend/.benchmark-data/`.

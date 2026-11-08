@@ -90,8 +90,7 @@ verified in the post-credential phase.
   impact for every returned projection.
 
 `scripts/seed_quality.py` adds three labelled deterministic demo projections covering decision
-quality, safety, and reliability. These rows demonstrate the contract; they are not a production
-quality benchmark or a claim about a real model.
+quality, safety, and reliability to demonstrate the projection contract.
 
 ## Audit Export
 

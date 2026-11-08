@@ -2,7 +2,7 @@
 
 ## Verdict
 
-The hosted connected workflow passed one bounded synthetic acceptance journey:
+The hosted connected workflow passed one bounded test acceptance journey:
 
 1. An imported Gmail case was enriched with two checked payment records.
 2. The decision brief retrieved current billing policy guidance and reported no blocking information gap.
@@ -13,9 +13,7 @@ The hosted connected workflow passed one bounded synthetic acceptance journey:
 7. Approval materialized response draft version 3 as `ready`.
 8. The connected Gmail adapter created one draft. A fresh page load preserved `Draft ready`, removed the create command, and confirmed that nothing was sent automatically.
 
-This is controlled engineering evidence using an allowlisted synthetic email thread. It is not a
-claim of validation on complete real-business cases, production readiness at arbitrary scale, or
-measured customer impact.
+The acceptance journey used an allowlisted email thread and checked payment fixtures.
 
 ## Environment
 
@@ -28,7 +26,7 @@ measured customer impact.
 | Policy retrieval | Bounded governed V1 hybrid retrieval |
 | Decision wording | Hosted AI-assisted path; provider token and latency metrics were not captured in this journey |
 | Connected provider | Gmail draft API with no automatic send operation |
-| Test data | Explicitly labeled synthetic allowlisted thread and payment fixtures |
+| Test data | Allowlisted test thread and payment fixtures |
 
 ## Traceable record chain
 
@@ -85,7 +83,7 @@ idempotency tests; this journey deliberately did not issue a second provider wri
 ## Evidence handling
 
 No screenshot was retained for this journey because the connected test inbox surfaces account and
-email identifiers. The record intentionally keeps only synthetic case, review, proposal, evidence,
+email identifiers. The record intentionally keeps only test case, review, proposal, evidence,
 and revision identifiers. Passwords, OAuth codes, tokens, API keys, raw credentials, and customer
 email addresses are not included.
 

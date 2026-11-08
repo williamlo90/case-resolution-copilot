@@ -325,12 +325,12 @@ Activation order:
 
 1. deterministic profile and fake gateway tests;
 2. deterministic 512-dimensional index build;
-3. one bounded live embedding smoke using synthetic policy and query text;
+3. one bounded live embedding smoke using test policy and query text;
 4. complete policy reindex in the disposable environment;
 5. failure-isolated shadow retrieval comparison that always preserves the V1 result and records
    status/count metadata without policy text;
 6. explicit active-profile switch after evaluation;
-7. narrative provider activation using synthetic connected cases;
+7. narrative provider activation using test connected cases;
 8. Gmail-derived inputs only after the connected-workflow AI data gate passes.
 
 OpenAI states that API data is not used to train models by default unless the customer opts in, while
@@ -346,7 +346,7 @@ Create a frozen, answer-separated retrieval set with:
 - expected policy public ID, version, and relevant clause IDs;
 - explicitly irrelevant near-match clauses;
 - stale, inapplicable, conflicting, missing, and cross-tenant negatives;
-- source type identifying synthetic, public, or approved client data.
+- source type identifying test, public, or approved client data.
 
 Primary metrics:
 
@@ -470,7 +470,7 @@ claims; hosted activation still requires the frozen retrieval benchmark describe
 readiness is checked against the current tenant and matching policy scope, so an unfinished index in
 another tenant cannot block a complete local scope.
 
-The frozen answer-separated evaluator now covers 15 synthetic cases: eight relevant queries over all
+The frozen answer-separated evaluator now covers 15 test cases: eight relevant queries over all
 eight governed clauses, two release-corpus negatives, and five explicit guard-contract negatives.
 On 2026-08-15, V1 deterministic, V2 deterministic, and V2 OpenAI each recorded `Recall@3 = 1.0`,
 MRR `1.0`, status accuracy `1.0`, zero wrong versions, zero unsupported citations, and zero

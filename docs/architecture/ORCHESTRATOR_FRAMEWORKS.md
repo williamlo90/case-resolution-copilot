@@ -9,8 +9,8 @@ The production workflow remains deterministic around authority, policy, risk, an
 | --- | --- | --- | --- |
 | LangGraph | Runs and verifies the governed decision checkpoint chain | Production default | Unit and contract tested in the normal backend suite |
 | LangChain Core | Builds the bounded OpenAI narrative prompt and schema-format instructions | Production utility on the optional OpenAI path | Unit tested without a paid model call |
-| CrewAI | Compares an analyst/reviewer role split | Isolated optional prototype | Adapter contract and one bounded live synthetic case validated |
-| AutoGen | Compares a bounded structured conversational agent | Isolated optional prototype | Adapter contract and one bounded live synthetic case validated |
+| CrewAI | Compares an analyst/reviewer role split | Isolated optional prototype | Adapter contract and one bounded live test case validated |
+| AutoGen | Compares a bounded structured conversational agent | Isolated optional prototype | Adapter contract and one bounded live test case validated |
 
 Only LangGraph is wired by `app.main`. CrewAI and AutoGen cannot be selected through application
 settings and do not receive raw case workspaces. Their adapters accept the same minimized control
@@ -56,18 +56,13 @@ uv run --with-requirements examples/orchestrator_prototypes/requirements.txt `
 ```
 
 These commands incur provider usage. Their output reports contract validity and elapsed time; it
-does not print the generated customer narrative or claim production equivalence.
+keeps the generated customer narrative private.
 
 The combined serial validation command and sanitized result are documented in
 [`framework-validation.md`](../evidence/framework-validation.md). The recorded run covers one
-synthetic case and is evidence of contract compatibility, not a framework-quality ranking.
+test case to verify contract compatibility.
 
-## Claim Boundary
+## Framework Roles
 
-Accurate wording is: "Implemented a LangGraph production orchestration boundary, used LangChain
-Core for prompt and schema-formatting utilities, and built isolated CrewAI and AutoGen comparison
-prototypes."
-
-Do not claim that the production application is a four-framework multi-agent system, that CrewAI
-or AutoGen have hosted production traffic, or that one bounded validation establishes framework
-superiority.
+LangGraph coordinates the default decision path. LangChain Core supplies prompt templates and
+schema-formatting utilities. CrewAI and AutoGen provide isolated comparison prototypes.

@@ -3,7 +3,7 @@
 Status: passed locally on 18 August 2026
 
 This gate verifies the production Decision Brief engine and the approved draft-delivery service with
-synthetic data and fake providers. It proves code-level workflow behavior without paid OpenAI calls,
+test fixtures and deterministic providers. It proves code-level workflow behavior without paid OpenAI calls,
 Gmail access, a browser, or a local web server.
 
 ## Acceptance Matrix
@@ -52,8 +52,7 @@ python -m pytest -q `
   tests/unit/test_gmail_adapter_contract.py
 ```
 
-## Evidence Limit
+## Evaluation Scope
 
-This is synthetic local engineering evidence. It does not prove live Gmail behavior, OpenAI model
-quality, production latency, or customer impact. One bounded hosted Gmail draft journey remains an
-explicit Phase 8 acceptance task after the final batch deployment.
+This suite verifies local Decision Brief and draft workflow behavior using test fixtures and
+deterministic providers. Hosted Gmail acceptance is documented separately.

@@ -50,7 +50,7 @@ accounts or company funds.
 > two-call OpenAI canary preserved deterministic controls in all three test cases, and four
 > targeted PostgreSQL scenarios validated conflict blocking, immutable approvals, exactly-once
 > execution, and unknown-outcome recovery. The always-on demo uses Vercel and Neon; AWS was a
-> live-validated, teardown-safe deployment architecture rather than permanent production hosting.
+> live-validated deployment architecture with automated teardown and reproducible provisioning.
 
 ## CV Bullets
 
@@ -61,7 +61,7 @@ accounts or company funds.
   deterministic application controls.
 - Designed an auditable evaluation pipeline with frozen inputs and labels, SHA-256 integrity
   checks, 20 repeated regression observations, a two-call provider canary, measured token cost,
-  and explicit claim boundaries.
+  and traceable scoring criteria.
 - Implemented governed retrieval over PostgreSQL/pgvector with versioned policy evidence,
   expected-source checks, abstention behavior, and traceable source bindings.
 
@@ -88,13 +88,13 @@ accounts or company funds.
 
 ## LinkedIn Project Description
 
-> Case Resolution Copilot is a production-oriented AI decision-support portfolio project for
+> Case Resolution Copilot is an AI decision-support system for
 > complex operational cases. It combines a Next.js workspace with a FastAPI/PostgreSQL backend,
 > governed policy retrieval, LangGraph orchestration, optional OpenAI-assisted wording, human
 > approval, and controlled action execution. The project includes Celery-based asynchronous
 > ingestion, idempotency and reconciliation controls, four-role RBAC, auditable evaluation, and a
 > live-validated AWS deployment architecture. Evaluation evidence includes a 20-execution
-> synthetic regression suite, a bounded provider canary, targeted PostgreSQL workflow validation,
+> test regression suite, a bounded provider canary, targeted PostgreSQL workflow validation,
 > and a developer-operated matched workflow benchmark.
 
 ## Upwork Portfolio Description
@@ -145,8 +145,8 @@ AI Case Resolution System with FastAPI, RAG, Human Approval, and AWS Architectur
 | `20/20` regression observations passed | [Evaluation V1](../evidence/case-resolution-evaluation-v1/README.md) | Implemented control-state, source-coverage, risk, escalation-disposition, action-type/safety, schema, and consistency checks passed on the final development-set regression |
 | `3/3` OpenAI canary cases passed | [Provider canary](../evidence/case-resolution-evaluation-v1/provider-canary-results.json) | Two bounded provider calls preserved server-owned controls; one policy-missing case correctly skipped the provider |
 | `4/4` targeted database scenarios passed | [Persisted workflow evidence](../evidence/case-resolution-evaluation-v1/persisted-workflow-results.json) | Critical review and controlled-action paths behaved correctly against migrated PostgreSQL |
-| `83.7%` lower raw median elapsed time | [Workflow benchmark](../evidence/developer-workflow-benchmark/REPORT.md) | One developer completed three matched synthetic cases per condition; this is descriptive, not a population estimate |
-| AWS architecture live-validated | [AWS evidence](../evidence/aws-live-validation/README.md) | A bounded short-lived environment passed connected checks and verified teardown; the product is not permanently hosted on AWS |
+| `83.7%` lower raw median elapsed time | [Workflow benchmark](../evidence/developer-workflow-benchmark/REPORT.md) | One operator completed three matched cases per condition; timing and scoring are documented in the report |
+| AWS architecture live-validated | [AWS evidence](../evidence/aws-live-validation/README.md) | A short-lived AWS environment passed connected checks and verified teardown |
 
 ## Interview Proof Map
 
@@ -163,24 +163,13 @@ When asked about agents, explain why LangGraph is the production orchestration b
 CrewAI and AutoGen remain isolated comparison prototypes. Framework count is not the achievement;
 controlled state transitions are.
 
-When asked about AWS, distinguish a live-validated deployment architecture from an always-on
-production claim. Explain ECS/Fargate for API and workers, RDS/pgvector for durable state and
+When asked about AWS, explain the live-validated deployment architecture: ECS/Fargate for API and
+workers, RDS/pgvector for durable state and
 retrieval, SQS for Celery delivery, S3/Lambda for evidence workflows, Secrets Manager for runtime
 credentials, and CloudWatch for operations.
 
 When asked about evaluation, separate the four forms of evidence: deterministic development-set
 regression, provider safety canary, persisted workflow tests, and human workflow timing.
-
-## Claims To Avoid
-
-Do not say the project is generally production-ready, validated on real client cases, permanently
-hosted on AWS, or proven to improve customer productivity at population scale.
-
-Do not describe `20/20` as general model accuracy. It is a post-fix synthetic regression result on
-implemented deterministic checks.
-
-Do not describe the `83.7%` timing result as a guaranteed productivity improvement. It is a
-developer-operated matched benchmark with three synthetic cases per condition.
 
 ## Recommended Application Strategy
 

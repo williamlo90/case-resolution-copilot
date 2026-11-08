@@ -64,8 +64,7 @@ versions, score, and fingerprint. Repeating the same retrieval is idempotent by
 organization/case/fingerprint. Missing, stale, inapplicable, and conflicting results abstain and
 write no citation.
 
-The deterministic embedding and Markdown parser are local demo adapters. They provide reproducible
-development behavior, not a claim of production semantic-search quality.
+The deterministic embedding and Markdown parser provide reproducible local retrieval behavior.
 
 ## API Surface
 

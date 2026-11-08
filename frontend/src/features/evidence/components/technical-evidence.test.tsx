@@ -21,10 +21,10 @@ describe("TechnicalEvidence", () => {
     expect(screen.queryByText("STATUS = UNCERTAIN")).not.toBeInTheDocument();
   });
 
-  it("renders safeguards and limitations separately", () => {
+  it("renders workflow safeguards and their checks", () => {
     render(<TechnicalEvidence activeView="architecture"/>);
     expect(screen.getByRole("heading", { name: "How It Is Checked" })).toBeInTheDocument();
     expect(screen.getByText(/Covered by frontend schemas and backend contract checks/)).toBeInTheDocument();
-    expect(screen.getByText(/External case-source contract evidence has not been recorded/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Known Limits" })).not.toBeInTheDocument();
   });
 });

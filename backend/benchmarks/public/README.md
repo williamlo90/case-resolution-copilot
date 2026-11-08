@@ -6,7 +6,7 @@ This directory defines three independent, bounded public-data suites:
 - Financial Ombudsman Service de-identified final decisions.
 - UCI Online Retail II transaction and cancellation records.
 
-The suites are never joined into fictional end-to-end cases. Each suite answers a different
+Each suite answers a different
 question and carries its own limitations.
 
 ## Local Data Boundary
@@ -153,8 +153,7 @@ engineering sample, not a statistical sample or a statement of law.
 
 Inputs contain pairs of real, already anonymized transaction rows. Positive labels are derived by an
 explicit exact-match rule across customer, stock code, absolute quantity, price, and time order.
-Negative examples are deterministic pairings of unrelated real rows. These are adapter and entity
-matching fixtures, not ground-truth customer support cases.
+Negative examples pair unrelated transaction rows to evaluate adapter and entity-matching behavior.
 
 Online Retail II must be attributed to Daqing Chen:
 

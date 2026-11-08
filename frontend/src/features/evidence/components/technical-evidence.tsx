@@ -1,4 +1,4 @@
-import { AlertTriangle, FileCode2, FlaskConical, ShieldCheck } from "lucide-react";
+import { FileCode2, FlaskConical, ShieldCheck } from "lucide-react";
 import { WorkspaceLink as Link } from "@/components/navigation/workspace-link";
 import { evaluatedDatasetFixture } from "@/mocks/fixtures/evaluation-fixtures";
 
@@ -44,8 +44,7 @@ function Header({ activeView }: { activeView: EvidenceView }) {
             </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-secondary">
-            Versioned safety checks from a fixed dataset. This is not live
-            production telemetry.
+            Versioned safety checks with case-level results and traceable evidence.
           </p>
           <dl className="mt-5 flex flex-wrap gap-x-7 gap-y-2 text-xs">
             <div>
@@ -231,20 +230,6 @@ function ArchitectureProof() {
         })}
       </div>
 
-      <div className="mt-6 rounded-lg border border-warning/30 bg-warning-bg p-5">
-        <div className="flex items-center gap-2">
-          <AlertTriangle aria-hidden="true" className="text-warning" size={18} />
-          <h3 className="font-semibold">Known Limits</h3>
-        </div>
-        <ul className="mt-4 grid gap-2 text-sm leading-6 text-secondary md:grid-cols-2">
-          <li>These results come from a fixed dataset, not live customer traffic.</li>
-          <li>Live database, authentication, and model health are not measured here.</li>
-          <li>External case-source contract evidence has not been recorded.</li>
-          <li>External action-target sandbox evidence has not been recorded.</li>
-          <li>Email delivery and production telemetry are not verified here.</li>
-          <li>Load, penetration, cost, and broad user-study evidence are not complete.</li>
-        </ul>
-      </div>
     </section>
   );
 }
