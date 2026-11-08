@@ -25,6 +25,6 @@ describe("TechnicalEvidence", () => {
     render(<TechnicalEvidence activeView="architecture"/>);
     expect(screen.getByRole("heading", { name: "How It Is Checked" })).toBeInTheDocument();
     expect(screen.getByText(/Covered by frontend schemas and backend contract checks/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Known Limits" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Known Limits" })).not.toBeInTheDocument();
   });
 });
