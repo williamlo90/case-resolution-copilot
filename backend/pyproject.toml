@@ -92,5 +92,5 @@ ignore_missing_imports = true
 
 [tool.uv]
 constraint-dependencies = [
-    "dnspython>=2.9.0",
+    "dnspython>=2.9.2",
 ]
